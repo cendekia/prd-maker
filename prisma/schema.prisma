@@ -23,10 +23,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts          Account[]
-  sessions          Session[]
-  workspaceMembers  WorkspaceMember[]
-  invitesCreated    WorkspaceInvite[] @relation("InviteCreatedBy")
+  accounts         Account[]
+  sessions         Session[]
+  workspaceMembers WorkspaceMember[]
+  invitesCreated   WorkspaceInvite[] @relation("InviteCreatedBy")
+  pagesCreated     Page[]            @relation("PageCreatedBy")
+  pageVersions     PageVersion[]
+  comments         Comment[]
+  pagePermissions  PagePermission[]
 }
 
 model Account {
@@ -83,8 +87,10 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members WorkspaceMember[]
-  invites WorkspaceInvite[]
+  members   WorkspaceMember[]
+  invites   WorkspaceInvite[]
+  pages     Page[]
+  templates Template[]
 }
 
 model WorkspaceMember {
@@ -117,4 +123,115 @@ model WorkspaceInvite {
 
   @@index([workspaceId])
   @@index([email])
+}
+
+// ---------- Pages, versions, comments, templates ----------
+
+model Page {
+  id          String    @id @default(cuid())
+  workspaceId String
+  parentId    String?
+  title       String    @default("Untitled")
+  /// Fractional ordering — see src/lib/positions.ts.
+  position    Float     @default(0)
+  /// Authoritative TipTap/Yjs content as JSON. Yjs binary state lives in
+  /// `yDocState` once Hocuspocus ships (Step 12).
+  contentJson Json?
+  /// Plain-text projection of contentJson — kept in sync on every write so
+  /// search (Step 22) can index without parsing JSON.
+  contentText String    @default("")
+  /// Yjs CRDT snapshot. Persisted by Hocuspocus on idle/disconnect (Step 12).
+  yDocState   Bytes?
+  isPublished Boolean   @default(false)
+  publicSlug  String?   @unique
+  createdById String
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent      Page?            @relation("PageChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Page[]           @relation("PageChildren")
+  createdBy   User             @relation("PageCreatedBy", fields: [createdById], references: [id])
+  versions    PageVersion[]
+  comments    Comment[]
+  permissions PagePermission[]
+
+  @@index([workspaceId, parentId])
+  @@index([workspaceId, archivedAt])
+  @@index([parentId, position])
+}
+
+enum VersionKind {
+  AUTO
+  MANUAL
+  PRE_AI
+}
+
+model PageVersion {
+  id           String      @id @default(cuid())
+  pageId       String
+  /// JSON projection of the editor doc — used for diff rendering (Step 16).
+  snapshotJson Json
+  /// Optional Yjs binary state for exact restore.
+  yDocState    Bytes?
+  kind         VersionKind @default(AUTO)
+  createdById  String
+  createdAt    DateTime    @default(now())
+
+  page      Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([pageId, createdAt])
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  pageId     String
+  parentId   String?
+  authorId   String
+  body       String
+  /// Anchor in the editor doc — `{from: number, to: number}` from
+  /// ProseMirror, or null for page-level comments.
+  anchor     Json?
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  page    Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  author  User      @relation(fields: [authorId], references: [id])
+
+  @@index([pageId])
+  @@index([parentId])
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  /// Null means a system template seeded for every workspace.
+  workspaceId String?
+  name        String
+  description String?
+  contentJson Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model PagePermission {
+  id     String @id @default(cuid())
+  pageId String
+  userId String
+  role   Role
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, userId])
+  @@index([pageId])
+  @@index([userId])
 }

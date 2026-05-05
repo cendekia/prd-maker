@@ -114,7 +114,7 @@ Total: ~38 steps across 11 sections.
 
 ## Page Model & Tree
 
-- [ ] Step 7: Database schema for pages, versions, comments, templates
+- [x] Step 7: Database schema for pages, versions, comments, templates
   - **Task**: Add Prisma models: `Page` (id, workspaceId, parentId, title, slug, position, isPublished, publicSlug, yDocState bytea, createdById, archivedAt), `PageVersion` (id, pageId, snapshotJson, createdById, createdAt, kind enum AUTO/MANUAL/PRE_AI), `Comment` (id, pageId, anchor jsonb, body, parentId, resolvedAt, authorId), `Template` (id, workspaceId nullable for system templates, name, contentJson), `PagePermission` (id, pageId, userId, role) for Business-tier per-page ACLs.
   - **Files**:
     - `prisma/schema.prisma`: append the new models + enums
@@ -122,7 +122,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 3
   - **User Instructions**: Run `npx prisma migrate dev --name pages_and_friends`.
 
-- [ ] Step 8: Page CRUD server actions and API
+- [x] Step 8: Page CRUD server actions and API
   - **Task**: Implement server actions and `/api/workspaces/[id]/pages` routes for: create page (under optional parentId, copies a template if provided), rename, archive, delete (soft → hard after 30 days), reparent + reorder (compute fractional `position` to avoid full re-sorts). Enforce role-based access via `requireRole`. Trigger search-index update on every write (placeholder, wired in Step 22).
   - **Files**:
     - `src/app/api/workspaces/[workspaceId]/pages/route.ts`: POST create, GET tree
@@ -133,7 +133,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 7
   - **User Instructions**: none
 
-- [ ] Step 9: Three-pane app shell + page tree sidebar with drag-and-drop
+- [x] Step 9: Three-pane app shell + page tree sidebar with drag-and-drop
   - **Task**: Build the main authed layout: left tree (collapsible, drag-and-drop reparent via `dnd-kit`), center editor placeholder, right collapsible AI panel placeholder. Top bar with breadcrumb, presence avatars placeholder, share/publish button placeholder, workspace switcher. Tree shows hierarchy, supports right-click context menu (rename, duplicate, archive, delete), and search-as-you-type filter.
   - **Files**:
     - `src/app/(authed)/[workspaceSlug]/layout.tsx`: three-pane shell
