@@ -34,7 +34,7 @@ Total: ~38 steps across 11 sections.
 
 ## Foundation & Project Setup
 
-- [ ] Step 1: Bootstrap Next.js 15 project with TypeScript, Tailwind, and shadcn/ui
+- [x] Step 1: Bootstrap Next.js 15 project with TypeScript, Tailwind, and shadcn/ui
   - **Task**: Initialize a Next.js 15 App Router project with TypeScript, Tailwind v4, ESLint, and the `src/` directory layout. Install and configure shadcn/ui with neutral palette and Inter font. Set up `next-themes` for system/light/dark toggle. Create base `app/layout.tsx` with theme provider, font loading, and a placeholder root page.
   - **Files**:
     - `package.json`: Next.js 15, React 19, TS, Tailwind v4, shadcn/ui deps, next-themes
@@ -52,7 +52,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: none
   - **User Instructions**: After install, run `npm run dev` to confirm the placeholder page renders. Copy `.env.example` to `.env.local`.
 
-- [ ] Step 2: Configure environment, secrets, and runtime config module
+- [x] Step 2: Configure environment, secrets, and runtime config module
   - **Task**: Create a typed env loader with Zod that validates every env var at boot and crashes fast if any are missing. Cover DB URL, Auth.js secret, Resend key, Google OAuth client/secret, Stripe keys, Anthropic encryption master key, Hocuspocus URL/secret, public app URL.
   - **Files**:
     - `src/env.ts`: Zod schema + `process.env` parser, exports typed `env`
@@ -62,7 +62,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 1
   - **User Instructions**: Generate a 32-byte master key for AI-key encryption: `openssl rand -hex 32`. Put it in `.env.local` as `ENCRYPTION_KEY`.
 
-- [ ] Step 3: Set up PostgreSQL, Prisma, and core schema (users, sessions, workspaces, members)
+- [x] Step 3: Set up PostgreSQL, Prisma, and core schema (users, sessions, workspaces, members)
   - **Task**: Add Prisma, define initial schema for `User`, `Account`, `Session`, `VerificationToken` (Auth.js shape), `Workspace`, `WorkspaceMember` (with `role` enum OWNER/EDITOR/VIEWER), and `WorkspaceInvite`. Generate the Prisma client wrapper with a singleton pattern for Next.js dev.
   - **Files**:
     - `prisma/schema.prisma`: User, Account, Session, VerificationToken, Workspace, WorkspaceMember, WorkspaceInvite + Role enum
@@ -74,7 +74,7 @@ Total: ~38 steps across 11 sections.
 
 ## Authentication & Workspaces
 
-- [ ] Step 4: Authentication — magic link + Google OAuth via Auth.js v5
+- [x] Step 4: Authentication — magic link + Google OAuth via Auth.js v5
   - **Task**: Configure Auth.js v5 with the Prisma adapter, Resend magic-link provider, and Google OAuth provider. Implement sign-in / sign-out / verify pages with shadcn forms. Add `auth()` server helper and middleware to gate authenticated routes (`/app/*`).
   - **Files**:
     - `src/auth.ts`: NextAuth config (providers, adapter, callbacks)
@@ -88,7 +88,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 3
   - **User Instructions**: Create a Google OAuth client (Google Cloud Console → APIs & Services → Credentials), add `http://localhost:3000/api/auth/callback/google` as redirect URI. Create a Resend account, verify a sending domain, paste API key into `.env.local`.
 
-- [ ] Step 5: First-run workspace creation flow
+- [x] Step 5: First-run workspace creation flow
   - **Task**: After a user's first sign-in, force them through `/app/onboarding` to either create a new workspace (name + slug) or accept a pending invite. Implement the workspace creation server action that creates a `Workspace` and an `OWNER` `WorkspaceMember` for the current user. Workspace slug becomes `/app/[workspaceSlug]/...` for all in-app routes.
   - **Files**:
     - `src/app/(authed)/onboarding/page.tsx`: create-or-join UI
@@ -98,7 +98,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 4
   - **User Instructions**: none
 
-- [ ] Step 6: Workspace settings, members, invites, roles
+- [x] Step 6: Workspace settings, members, invites, roles
   - **Task**: Build `/app/[workspaceSlug]/settings` with tabs for General (rename, slug, delete), Members (list + role picker + remove), and Invites (generate email invites with role, copy link, revoke). Server actions for each. Email invites via Resend with a tokenized accept link `/invite/[token]`.
   - **Files**:
     - `src/app/(authed)/[workspaceSlug]/settings/layout.tsx`
