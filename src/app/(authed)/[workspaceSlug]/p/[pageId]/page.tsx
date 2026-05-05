@@ -1,51 +1,46 @@
 import { notFound } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { Role } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { requireWorkspace } from "@/lib/workspace";
+import { getPageAccess } from "@/lib/permissions";
+import { requireUser, requireWorkspace } from "@/lib/workspace";
+
+import { PageEditor } from "./page-editor";
 
 interface PageProps {
   params: Promise<{ workspaceSlug: string; pageId: string }>;
 }
 
-export default async function PageEditorPage({ params }: PageProps) {
+export default async function PageEditorRoute({ params }: PageProps) {
   const { workspaceSlug, pageId } = await params;
   const { workspace } = await requireWorkspace(workspaceSlug);
+  const user = await requireUser();
+
+  const access = await getPageAccess(pageId, user.id);
+  if (!access || access.workspaceId !== workspace.id) {
+    notFound();
+  }
 
   const page = await db.page.findUnique({
     where: { id: pageId },
     select: {
       id: true,
       title: true,
-      workspaceId: true,
-      archivedAt: true,
-      createdAt: true,
+      contentJson: true,
       updatedAt: true,
+      archivedAt: true,
     },
   });
-  if (!page || page.workspaceId !== workspace.id || page.archivedAt) {
-    notFound();
-  }
+  if (!page || page.archivedAt) notFound();
+
+  const editable = access.role !== Role.VIEWER;
 
   return (
-    <div className="mx-auto w-full max-w-[var(--content-max-width)] px-6 py-12">
-      <span className="t-label">Page</span>
-      <h1 className="t-h1 mt-3">{page.title}</h1>
-      <p className="mt-2 text-[12px] text-fg-3">
-        Created {new Date(page.createdAt).toLocaleDateString()} · Updated{" "}
-        {new Date(page.updatedAt).toLocaleDateString()}
-      </p>
-      <div className="mt-12 rounded-[var(--radius-lg)] border border-dashed bg-bg-subtle p-6">
-        <div className="flex items-center gap-2 text-[13px] font-medium text-fg-1">
-          <Sparkles className="size-4 text-brand-500" />
-          Editor coming in step 10
-        </div>
-        <p className="mt-2 text-[13px] leading-[18px] text-fg-2">
-          The TipTap editor with slash commands, inline comments, and live
-          collaboration arrives in steps 10 through 14. Until then the page is
-          a placeholder — you can rename and archive it from the sidebar.
-        </p>
-      </div>
-    </div>
+    <PageEditor
+      pageId={page.id}
+      title={page.title}
+      initialContent={(page.contentJson as object | null) ?? null}
+      editable={editable}
+    />
   );
 }

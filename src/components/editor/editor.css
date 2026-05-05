@@ -1,0 +1,189 @@
+/* TipTap editor — prose styles + interaction polish.
+ * The container uses .editor-host; ProseMirror-rendered content lives at
+ * .editor-host .ProseMirror. We avoid Tailwind utilities here so the style
+ * can be reused for read-only public-published pages later (Step 23).
+ */
+
+.editor-host {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--fg-1);
+}
+
+.editor-host .ProseMirror {
+  outline: none;
+  min-height: 60vh;
+}
+
+.editor-host .ProseMirror > * + * {
+  margin-top: var(--space-3);
+}
+
+.editor-host .ProseMirror p {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--fg-1);
+  text-wrap: pretty;
+}
+
+.editor-host .ProseMirror h1 {
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-3xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.02em;
+  margin-top: var(--space-8);
+  color: var(--fg-1);
+}
+.editor-host .ProseMirror h2 {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-2xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-top: var(--space-6);
+  color: var(--fg-1);
+}
+.editor-host .ProseMirror h3 {
+  font-size: var(--fs-xl);
+  line-height: var(--lh-xl);
+  font-weight: var(--fw-semibold);
+  margin-top: var(--space-5);
+  color: var(--fg-1);
+}
+
+.editor-host .ProseMirror ul,
+.editor-host .ProseMirror ol {
+  padding-left: var(--space-6);
+}
+.editor-host .ProseMirror ul { list-style: disc; }
+.editor-host .ProseMirror ol { list-style: decimal; }
+.editor-host .ProseMirror li > p { margin: 0; }
+.editor-host .ProseMirror li + li { margin-top: var(--space-1); }
+
+.editor-host .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.editor-host .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.editor-host .ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.editor-host .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.editor-host .ProseMirror blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: var(--space-4);
+  color: var(--fg-2);
+}
+
+.editor-host .ProseMirror code {
+  background: var(--bg-muted);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  color: var(--fg-1);
+}
+
+.editor-host .ProseMirror pre {
+  background: var(--bg-muted);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--fg-1);
+}
+.editor-host .ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.editor-host .ProseMirror hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--space-8) 0;
+}
+
+.editor-host .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.editor-host .ProseMirror a.tiptap-link {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.editor-host .ProseMirror table.tiptap-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: var(--space-3) 0;
+  overflow: hidden;
+}
+.editor-host .ProseMirror table.tiptap-table td,
+.editor-host .ProseMirror table.tiptap-table th {
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  vertical-align: top;
+  position: relative;
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+}
+.editor-host .ProseMirror table.tiptap-table th {
+  background: var(--bg-subtle);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+}
+
+/* Placeholder shown for empty paragraphs (configured via Placeholder ext). */
+.editor-host .ProseMirror p.is-editor-empty:first-child::before,
+.editor-host .ProseMirror h1.is-empty::before,
+.editor-host .ProseMirror h2.is-empty::before,
+.editor-host .ProseMirror h3.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--fg-4);
+}
+
+/* Tippy popovers (slash menu, bubble menu) inherit our z-index + radius. */
+.tippy-box {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Lowlight / highlight.js theme (hljs class names, neutral palette). */
+.editor-host .hljs-comment,
+.editor-host .hljs-quote { color: var(--fg-3); font-style: italic; }
+.editor-host .hljs-keyword,
+.editor-host .hljs-selector-tag,
+.editor-host .hljs-literal,
+.editor-host .hljs-doctag { color: var(--accent-600); }
+.editor-host .hljs-string,
+.editor-host .hljs-attr { color: var(--success-500); }
+.editor-host .hljs-number,
+.editor-host .hljs-symbol { color: var(--warning-500); }
+.editor-host .hljs-title,
+.editor-host .hljs-section,
+.editor-host .hljs-name { color: var(--info-500); }
+.editor-host .hljs-deletion,
+.editor-host .hljs-tag { color: var(--danger-500); }
+.editor-host .hljs-meta { color: var(--fg-3); }

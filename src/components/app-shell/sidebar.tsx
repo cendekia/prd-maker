@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Plus, Search, Settings } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { usePageTree } from "@/hooks/use-page-tree";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
 
@@ -102,6 +103,9 @@ export function Sidebar({
           >
             Sign out
           </Link>
+        </div>
+        <div className="mt-2 px-2">
+          <ThemeToggle className="w-full justify-between" />
         </div>
       </div>
     </aside>

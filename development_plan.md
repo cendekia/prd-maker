@@ -150,7 +150,7 @@ Total: ~38 steps across 11 sections.
 
 ## Editor & Real-Time Collaboration
 
-- [ ] Step 10: TipTap editor with core marks, blocks, and slash command menu
+- [x] Step 10: TipTap editor with core marks, blocks, and slash command menu
   - **Task**: Set up TipTap v2 in the center pane with: paragraph, headings 1–3, lists, task list, blockquote, code block (lowlight syntax highlighting), tables, horizontal rule, image upload (S3-compatible signed URL flow stubbed for now to data-URL), link with paste handler, and a slash-command menu (`/heading`, `/table`, etc.) using `@tiptap/suggestion`. Persist content as JSON to `Page.contentJson` (serial, not yet collaborative).
   - **Files**:
     - `src/components/editor/editor.tsx`: TipTap root

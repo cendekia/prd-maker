@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { getSession, listUserWorkspaces } from "@/lib/workspace";
 
@@ -19,7 +20,8 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       <header className="flex h-14 items-center justify-between px-6">
         <Logo variant="wordmark" size={26} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Button asChild variant="ghost" size="sm">
             <Link href="/sign-in">Sign in</Link>
           </Button>

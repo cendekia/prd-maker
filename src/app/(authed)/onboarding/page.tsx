@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, presenceColorFor } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,10 @@ export default async function OnboardingPage() {
   const invites = await listPendingInvitesForEmail(user.email);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-bg-subtle px-4 py-12">
+    <div className="relative flex min-h-screen flex-col items-center bg-bg-subtle px-4 py-12">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <Link href="/" className="mb-8" aria-label="PRD Maker">
         <Logo variant="wordmark" size={28} />
       </Link>
