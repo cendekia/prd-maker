@@ -46,14 +46,16 @@ export function OnboardingForm() {
           placeholder="Acme Co."
         />
         {errors.name ? (
-          <p className="text-xs text-destructive">{errors.name}</p>
+          <p className="text-[12px] text-destructive">{errors.name}</p>
         ) : null}
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="slug">URL slug</Label>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">prdmaker.app/</span>
-          <Input
+        <div className="flex items-stretch overflow-hidden rounded-[var(--radius-md)] border bg-background shadow-[var(--shadow-xs)] focus-within:border-ring focus-within:shadow-[var(--shadow-focus)]">
+          <span className="flex items-center bg-bg-subtle px-3 text-[12px] text-fg-3 border-r">
+            prdmaker.app/
+          </span>
+          <input
             id="slug"
             name="slug"
             value={slug}
@@ -65,10 +67,11 @@ export function OnboardingForm() {
             pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?"
             maxLength={40}
             placeholder="acme"
+            className="h-9 w-full bg-transparent px-3 text-[13px] text-fg-1 placeholder:text-fg-4 focus:outline-none"
           />
         </div>
         {errors.slug ? (
-          <p className="text-xs text-destructive">{errors.slug}</p>
+          <p className="text-[12px] text-destructive">{errors.slug}</p>
         ) : null}
       </div>
       <Button type="submit" disabled={pending} className="w-full">

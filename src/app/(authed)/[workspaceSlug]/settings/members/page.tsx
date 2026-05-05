@@ -25,10 +25,12 @@ export default async function MembersPage({ params }: PageProps) {
   });
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">
-        {members.length} member{members.length === 1 ? "" : "s"}
-      </p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="t-label">
+          {members.length} member{members.length === 1 ? "" : "s"}
+        </span>
+      </div>
       <div className="space-y-2">
         {members.map((m) => (
           <MemberRow

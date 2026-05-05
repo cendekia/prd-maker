@@ -110,19 +110,22 @@ export function GeneralForm({ workspaceSlug, initialName, initialSlug, isOwner }
               });
             }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">prdmaker.app/</span>
-              <Input
+            <div className="flex items-stretch overflow-hidden rounded-[var(--radius-md)] border bg-background shadow-[var(--shadow-xs)] focus-within:border-ring focus-within:shadow-[var(--shadow-focus)]">
+              <span className="flex items-center bg-bg-subtle px-3 text-[12px] text-fg-3 border-r">
+                prdmaker.app/
+              </span>
+              <input
                 id="ws-slug"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase())}
                 disabled={!isOwner}
                 maxLength={40}
                 pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?"
+                className="h-9 w-full bg-transparent px-3 text-[13px] text-fg-1 placeholder:text-fg-4 focus:outline-none disabled:opacity-50"
               />
             </div>
             {slugError ? (
-              <p className="text-xs text-destructive">{slugError}</p>
+              <p className="text-[12px] text-destructive">{slugError}</p>
             ) : null}
           </form>
         </CardContent>

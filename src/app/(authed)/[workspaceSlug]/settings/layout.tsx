@@ -14,9 +14,10 @@ export default async function SettingsLayout({ children, params }: LayoutProps) 
   const base = `/${workspaceSlug}/settings`;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+    <div className="mx-auto max-w-3xl px-6 py-10">
+      <span className="t-label">Settings</span>
+      <h1 className="t-h2 mt-2">Workspace</h1>
+      <p className="mt-1 text-[13px] text-fg-3">
         Manage your workspace, members, and pending invites.
       </p>
       <div className="mt-6">

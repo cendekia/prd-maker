@@ -10,7 +10,6 @@ import { env } from "@/env";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
-  session: { strategy: "database" },
   secret: env.AUTH_SECRET,
   trustHost: true,
   providers: [
@@ -28,9 +27,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    session({ session, user }) {
-      // Database sessions: `user` is the DB User row.
-      session.user.id = user.id;
+    // JWT sessions: persist the DB user id on the token, then mirror it onto
+    // session.user so server code can read `session.user.id`.
+    jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      if (token.id && session.user) {
+        session.user.id = token.id as string;
+      }
       return session;
     },
   },

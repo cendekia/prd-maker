@@ -11,6 +11,11 @@ const googleConfigured = !!(
  * Edge-safe Auth.js config — no Prisma adapter, no email provider.
  * Imported by middleware (which runs on the edge runtime) and extended in
  * `src/auth.ts` with the adapter + email provider for the full Node.js config.
+ *
+ * We use JWT sessions because the Prisma adapter can't run on the edge:
+ * with database sessions the middleware would receive an opaque session-id
+ * cookie it couldn't decode (-> JWEInvalid), so the session itself is signed
+ * as a JWT. Email verification tokens still go through the adapter.
  */
 export default {
   providers: googleConfigured
@@ -21,6 +26,7 @@ export default {
         }),
       ]
     : [],
+  session: { strategy: "jwt" },
   pages: {
     signIn: "/sign-in",
     verifyRequest: "/verify-request",

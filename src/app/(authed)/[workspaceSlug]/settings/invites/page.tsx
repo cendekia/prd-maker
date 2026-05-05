@@ -25,22 +25,26 @@ export default async function InvitesPage({ params }: PageProps) {
   const isOwner = member.role === Role.OWNER;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {isOwner ? (
-        <section className="space-y-2">
-          <h2 className="text-sm font-medium">Invite a teammate</h2>
+        <section className="space-y-3">
+          <span className="t-label">Invite a teammate</span>
           <InviteForm workspaceSlug={workspace.slug} />
         </section>
       ) : (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-fg-3">
           Only owners can send invites.
         </p>
       )}
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium">Pending invites</h2>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="t-label">Pending invites</span>
+        </div>
         {invites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pending invites.</p>
+          <p className="text-[13px] text-fg-3">
+            No pending invites — invite someone above.
+          </p>
         ) : (
           <div className="space-y-2">
             {invites.map((invite) => (
