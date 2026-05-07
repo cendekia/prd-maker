@@ -13,18 +13,22 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { common, createLowlight } from "lowlight";
 
+import { PageLink } from "./extensions/page-link";
+import { PageLinkSuggestionExtension } from "./extensions/page-link-suggestion";
 import { SlashCommandsExtension } from "./slash-command";
 
 const lowlight = createLowlight(common);
 
-export function buildExtensions() {
+export interface BuildExtensionsOptions {
+  workspaceId: string;
+  workspaceSlug: string;
+}
+
+export function buildExtensions(opts: BuildExtensionsOptions) {
   return [
     StarterKit.configure({
-      // Use code-block-lowlight for syntax highlighting instead.
       codeBlock: false,
       heading: { levels: [1, 2, 3] },
-      // Built-in horizontalRule, blockquote, lists are kept (default).
-      // Cmd-Z / Cmd-Shift-Z work via History (StarterKit default).
     }),
     CodeBlockLowlight.configure({ lowlight }),
     Placeholder.configure({
@@ -46,10 +50,31 @@ export function buildExtensions() {
     Image.configure({ inline: false, allowBase64: true }),
     TaskList,
     TaskItem.configure({ nested: true }),
-    Table.configure({ resizable: true, HTMLAttributes: { class: "tiptap-table" } }),
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: { class: "tiptap-table" },
+    }),
     TableRow,
     TableHeader,
     TableCell,
+    PageLink.configure({ workspaceSlug: opts.workspaceSlug }),
+    PageLinkSuggestionExtension.configure({
+      workspaceId: opts.workspaceId,
+      fetchResults: async (query: string) => {
+        const url = new URL(
+          `/api/workspaces/${opts.workspaceId}/pages/search`,
+          window.location.origin,
+        );
+        if (query) url.searchParams.set("q", query);
+        url.searchParams.set("limit", "8");
+        const res = await fetch(url.toString());
+        if (!res.ok) return [];
+        const data = (await res.json()) as {
+          results: { id: string; title: string }[];
+        };
+        return data.results;
+      },
+    }),
     SlashCommandsExtension,
   ];
 }

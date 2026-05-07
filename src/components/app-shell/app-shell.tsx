@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { PanelLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { CommandPaletteProvider } from "@/components/command-palette";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
 
 import { AIPanel } from "./ai-panel";
@@ -34,6 +35,10 @@ export function AppShell({
   const section = sectionLabelFor(pathname, workspace.slug);
 
   return (
+    <CommandPaletteProvider
+      workspaceId={workspace.id}
+      workspaceSlug={workspace.slug}
+    >
     <div className="flex h-screen w-screen overflow-hidden bg-background text-fg-1">
       {sidebarOpen ? (
         <Sidebar
@@ -72,6 +77,7 @@ export function AppShell({
 
       {aiPanelOpen ? <AIPanel onClose={() => setAiPanelOpen(false)} /> : null}
     </div>
+    </CommandPaletteProvider>
   );
 }
 

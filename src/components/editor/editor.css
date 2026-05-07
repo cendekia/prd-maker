@@ -130,26 +130,143 @@
   cursor: pointer;
 }
 
-.editor-host .ProseMirror table.tiptap-table {
-  border-collapse: collapse;
+/* [[Page name]] inline chip — see preview/page-link-chip.html */
+.editor-host .ProseMirror .page-link-chip-wrapper {
+  display: inline;
+}
+.editor-host .ProseMirror .page-link-chip,
+.public-prose .page-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-50);
+  color: var(--accent-700);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+.editor-host .ProseMirror .page-link-chip:hover,
+.public-prose .page-link-chip:hover {
+  background: var(--accent-100);
+  text-decoration: none;
+}
+/* Selection state when the atom node is selected */
+.editor-host .ProseMirror .page-link-chip-wrapper.ProseMirror-selectednode .page-link-chip,
+.editor-host .ProseMirror .ProseMirror-selectednode > .page-link-chip {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 1px;
+}
+
+/* TipTap auto-wraps every table in <div class="tableWrapper"> for horizontal
+ * scroll. The outer frame (border + radius + clip) lives on the wrapper so
+ * cell corners follow the rounded edge cleanly. */
+.editor-host .ProseMirror .tableWrapper {
+  margin: var(--space-5) 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+}
+
+.editor-host .ProseMirror .tableWrapper > table {
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
   width: 100%;
-  margin: var(--space-3) 0;
-  overflow: hidden;
-}
-.editor-host .ProseMirror table.tiptap-table td,
-.editor-host .ProseMirror table.tiptap-table th {
-  border: 1px solid var(--border);
-  padding: var(--space-2) var(--space-3);
-  vertical-align: top;
-  position: relative;
   font-size: var(--fs-base);
   line-height: var(--lh-base);
+  color: var(--fg-1);
 }
-.editor-host .ProseMirror table.tiptap-table th {
-  background: var(--bg-subtle);
-  font-weight: var(--fw-semibold);
+
+.editor-host .ProseMirror .tableWrapper > table th,
+.editor-host .ProseMirror .tableWrapper > table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--fg-1);
+  vertical-align: top;
+  position: relative;
+  min-width: 120px;
   text-align: left;
+}
+
+/* TipTap wraps cell content in <p>; collapse its margin so cells sit tight. */
+.editor-host .ProseMirror .tableWrapper > table th > p,
+.editor-host .ProseMirror .tableWrapper > table td > p {
+  margin: 0;
+}
+.editor-host .ProseMirror .tableWrapper > table th > * + *,
+.editor-host .ProseMirror .tableWrapper > table td > * + * {
+  margin-top: var(--space-2);
+}
+
+.editor-host .ProseMirror .tableWrapper > table th {
+  background: var(--bg-subtle);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+/* Round the outer corners against the wrapper's border-radius. */
+.editor-host .ProseMirror .tableWrapper > table tr:first-child > th:first-child,
+.editor-host .ProseMirror .tableWrapper > table tr:first-child > td:first-child {
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+}
+.editor-host .ProseMirror .tableWrapper > table tr:first-child > th:last-child,
+.editor-host .ProseMirror .tableWrapper > table tr:first-child > td:last-child {
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
+}
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > td:first-child,
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > th:first-child {
+  border-bottom-left-radius: calc(var(--radius-lg) - 1px);
+}
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > td:last-child,
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > th:last-child {
+  border-bottom-right-radius: calc(var(--radius-lg) - 1px);
+}
+
+/* Vertical column dividers (no double border at the outer edges). */
+.editor-host .ProseMirror .tableWrapper > table th + th,
+.editor-host .ProseMirror .tableWrapper > table td + td {
+  border-left: 1px solid var(--border-strong);
+}
+
+/* Last row drops its bottom border so the wrapper's radius shows through. */
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > td,
+.editor-host .ProseMirror .tableWrapper > table tr:last-child > th {
+  border-bottom: none;
+}
+
+/* Selected-cell highlight when the user clicks/drags across cells. */
+.editor-host .ProseMirror .tableWrapper > table .selectedCell {
+  background: oklch(0.55 0.20 270 / 0.10);
+  box-shadow: inset 0 0 0 1px oklch(0.55 0.20 270 / 0.45);
+}
+
+/* Column resize handle at the right edge of each <th>/<td>.
+ * Subtle by default; reveals on hover so it doesn't compete with content. */
+.editor-host .ProseMirror .tableWrapper > table .column-resize-handle {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent-500);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.editor-host .ProseMirror .tableWrapper > table th:hover .column-resize-handle,
+.editor-host .ProseMirror .tableWrapper > table td:hover .column-resize-handle {
+  opacity: 0.5;
+}
+.editor-host .ProseMirror.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
 }
 
 /* Placeholder shown for empty paragraphs (configured via Placeholder ext). */

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   DndContext,
@@ -13,9 +14,11 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { ChevronRight, FileText } from "lucide-react";
 
 import type { PageTreeNode } from "@/lib/types";
 import { usePageTree } from "@/hooks/use-page-tree";
+import { cn } from "@/lib/utils";
 
 import { PageTreeNode as TreeNode, type FlatTreeRow } from "./page-tree-node";
 
@@ -37,6 +40,12 @@ export function PageTree({ workspaceId, workspaceSlug, initialTree, filter }: Pr
     workspaceId,
     initialTree,
   );
+
+  // dnd-kit auto-generates aria-describedby IDs from a module-level counter,
+  // which mismatches between server and client. Render a static SSR-safe
+  // version on first paint, then swap to the draggable tree after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -110,6 +119,21 @@ export function PageTree({ workspaceId, workspaceSlug, initialTree, filter }: Pr
     );
   }
 
+  if (!mounted) {
+    return (
+      <div className="flex flex-col gap-px">
+        {flat.map((row) => (
+          <StaticTreeRow
+            key={row.id}
+            workspaceSlug={workspaceSlug}
+            row={row}
+            isActive={activePageId === row.id}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <SortableContext
@@ -132,6 +156,50 @@ export function PageTree({ workspaceId, workspaceSlug, initialTree, filter }: Pr
         </div>
       </SortableContext>
     </DndContext>
+  );
+}
+
+/**
+ * Non-interactive row for SSR. Same visual as PageTreeNode but without
+ * `useSortable` (which generates SSR-mismatched aria IDs). Replaced by the
+ * full draggable version after the client mounts.
+ */
+function StaticTreeRow({
+  workspaceSlug,
+  row,
+  isActive,
+}: {
+  workspaceSlug: string;
+  row: FlatTreeRow;
+  isActive: boolean;
+}) {
+  return (
+    <div
+      style={{ paddingLeft: 8 + row.depth * 14 }}
+      className={cn(
+        "flex h-7 items-center gap-1 rounded-[var(--radius-sm)] pr-1 text-[13px]",
+        isActive ? "bg-bg-active text-fg-1" : "text-fg-2",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center text-fg-4",
+          row.isExpanded && "rotate-90",
+          !row.hasChildren && "invisible",
+        )}
+      >
+        <ChevronRight className="size-3" />
+      </span>
+      <span className="flex size-4 shrink-0 items-center justify-center text-fg-3">
+        <FileText className="size-3.5" />
+      </span>
+      <Link
+        href={`/${workspaceSlug}/p/${row.id}`}
+        className="min-w-0 flex-1 truncate"
+      >
+        {row.title || "Untitled"}
+      </Link>
+    </div>
   );
 }
 

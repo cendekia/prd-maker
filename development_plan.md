@@ -165,7 +165,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 9
   - **User Instructions**: none
 
-- [ ] Step 11: Internal page links `[[Page name]]` and Cmd-K palette
+- [x] Step 11: Internal page links `[[Page name]]` and Cmd-K palette
   - **Task**: Add a `PageLink` TipTap extension that renders `[[Title]]` markup as a styled chip linking to the target page within the workspace. Implement the global Cmd-K (Ctrl-K on Windows) command palette using `cmdk`: search across pages by title, jump to page, or insert a `[[Page]]` link into the current editor selection.
   - **Files**:
     - `src/components/editor/extensions/page-link.ts`

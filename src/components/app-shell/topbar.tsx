@@ -1,8 +1,9 @@
 "use client";
 
-import { Globe, MoreHorizontal, PanelLeft, PanelRight, Sparkles } from "lucide-react";
+import { Globe, MoreHorizontal, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useCommandPalette } from "@/hooks/use-command-palette";
 
 interface Props {
   workspaceName: string;
@@ -23,6 +24,9 @@ export function TopBar({
   sidebarOpen,
   aiPanelOpen,
 }: Props) {
+  const palette = useCommandPalette();
+  const isMac =
+    typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
   return (
     <header
       className="flex shrink-0 items-center gap-3 border-b bg-background px-3"
@@ -55,6 +59,19 @@ export function TopBar({
       </div>
 
       <div className="ml-auto flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 text-fg-3"
+          onClick={() => palette.setOpen(true)}
+          aria-label="Open command palette"
+        >
+          <Search />
+          <span className="hidden sm:inline">Search</span>
+          <kbd className="hidden rounded-[var(--radius-xs)] border bg-bg-subtle px-1 py-0 text-[10px] font-medium text-fg-2 t-mono sm:inline-block">
+            {isMac ? "⌘K" : "Ctrl K"}
+          </kbd>
+        </Button>
         <Button variant="outline" size="sm">
           <Globe />
           Share

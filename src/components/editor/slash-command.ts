@@ -1,6 +1,7 @@
 "use client";
 
 import { Editor, Extension, Range } from "@tiptap/core";
+import { PluginKey } from "@tiptap/pm/state";
 import Suggestion, {
   type SuggestionOptions,
   type SuggestionProps,
@@ -10,6 +11,8 @@ import tippy, { type Instance, type Props as TippyProps } from "tippy.js";
 
 import { SlashCommandList } from "./slash-command-list";
 import { defaultSlashItems, type SlashCommandItem } from "./slash-items";
+
+const SlashCommandPluginKey = new PluginKey("slashCommand");
 
 export interface SlashCommandsExtensionOptions {
   suggestion: Omit<
@@ -36,6 +39,7 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsExtensionOpt
       return [
         Suggestion<SlashCommandItem>({
           editor: this.editor,
+          pluginKey: SlashCommandPluginKey,
           ...this.options.suggestion,
           items: ({ query }: { query: string }) => {
             const q = query.toLowerCase().trim();

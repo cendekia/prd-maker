@@ -1,0 +1,31 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - radiogroup "Theme" [ref=e4]:
+      - radio "System" [checked] [ref=e5]:
+        - img [ref=e6]
+      - radio "Light" [ref=e8]:
+        - img [ref=e9]
+      - radio "Dark" [ref=e15]:
+        - img [ref=e16]
+    - link "PRD Maker" [ref=e18] [cursor=pointer]:
+      - /url: /
+      - img "PRD Maker" [ref=e19]
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: Sign in
+        - paragraph [ref=e24]: Use your email or Google account to continue.
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - text: Email
+          - textbox "Email" [ref=e29]:
+            - /placeholder: you@company.com
+        - button "Send magic link" [ref=e30]
+    - paragraph [ref=e31]:
+      - text: By continuing you agree to the
+      - link "Terms" [ref=e32] [cursor=pointer]:
+        - /url: /terms
+      - text: and
+      - link "Privacy Policy" [ref=e33] [cursor=pointer]:
+        - /url: /privacy
+      - text: .
+  - alert [ref=e34]

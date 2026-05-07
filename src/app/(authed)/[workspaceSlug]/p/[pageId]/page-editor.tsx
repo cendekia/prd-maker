@@ -12,9 +12,18 @@ interface Props {
   title: string;
   initialContent: object | null;
   editable: boolean;
+  workspaceId: string;
+  workspaceSlug: string;
 }
 
-export function PageEditor({ pageId, title, initialContent, editable }: Props) {
+export function PageEditor({
+  pageId,
+  title,
+  initialContent,
+  editable,
+  workspaceId,
+  workspaceSlug,
+}: Props) {
   const [titleDraft, setTitleDraft] = useState(title);
   const [renaming, setRenaming] = useState(false);
 
@@ -82,6 +91,8 @@ export function PageEditor({ pageId, title, initialContent, editable }: Props) {
         initialContent={initialContent as JSONContent | null}
         editable={editable}
         onChange={handleChange}
+        workspaceId={workspaceId}
+        workspaceSlug={workspaceSlug}
       />
     </div>
   );

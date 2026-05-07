@@ -1,0 +1,26 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - img "PRD Maker" [ref=e4]
+    - generic [ref=e5]:
+      - radiogroup "Theme" [ref=e6]:
+        - radio "System" [ref=e7]:
+          - img [ref=e8]
+        - radio "Light" [ref=e10]:
+          - img [ref=e11]
+        - radio "Dark" [ref=e17]:
+          - img [ref=e18]
+      - link "Sign in" [ref=e20] [cursor=pointer]:
+        - /url: /sign-in
+      - link "Get started" [ref=e21] [cursor=pointer]:
+        - /url: /sign-in
+  - main [ref=e22]:
+    - generic [ref=e23]: PRD Maker
+    - heading "Where product teams write PRDs together — with an AI that knows the spec." [level=1] [ref=e24]
+    - paragraph [ref=e25]: A Confluence-style editor for Product Requirements Documents. Real-time multiplayer, version history, and an integrated AI panel that drafts, critiques, and answers questions — using your own API key.
+    - generic [ref=e26]:
+      - link "Get started" [ref=e27] [cursor=pointer]:
+        - /url: /sign-in
+      - link "See pricing" [ref=e28] [cursor=pointer]:
+        - /url: /pricing
+  - contentinfo [ref=e29]:
+    - paragraph [ref=e30]: © 2026 PRD Maker

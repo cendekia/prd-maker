@@ -41,6 +41,8 @@ export default async function PageEditorRoute({ params }: PageProps) {
       title={page.title}
       initialContent={(page.contentJson as object | null) ?? null}
       editable={editable}
+      workspaceId={workspace.id}
+      workspaceSlug={workspace.slug}
     />
   );
 }

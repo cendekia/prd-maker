@@ -18,6 +18,9 @@ interface Props {
   editable?: boolean;
   /** Called on every doc change (debounce upstream). */
   onChange?: (json: JSONContent) => void;
+  /** Workspace context for [[Page]] suggestions and chip hrefs. */
+  workspaceId: string;
+  workspaceSlug: string;
   className?: string;
 }
 
@@ -30,6 +33,8 @@ export function Editor({
   initialContent,
   editable = true,
   onChange,
+  workspaceId,
+  workspaceSlug,
   className,
 }: Props) {
   const onChangeRef = useRef(onChange);
@@ -39,7 +44,7 @@ export function Editor({
 
   const editor = useEditor(
     {
-      extensions: buildExtensions(),
+      extensions: buildExtensions({ workspaceId, workspaceSlug }),
       content: initialContent ?? EMPTY_DOC,
       editable,
       // Avoid hydration warning: TipTap renders client-side after mount.
