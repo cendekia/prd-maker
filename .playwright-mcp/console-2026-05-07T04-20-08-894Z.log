@@ -10,3 +10,663 @@
 [  209353ms] [LOG] [Fast Refresh] done in 112ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
 [  270577ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
 [  270782ms] [LOG] [Fast Refresh] done in 306ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  558945ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  560704ms] [LOG] [Fast Refresh] done in 1860ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  560811ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  560841ms] [LOG] [Fast Refresh] done in 131ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  561405ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  561445ms] [LOG] [Fast Refresh] done in 141ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  565562ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  566031ms] [LOG] [Fast Refresh] done in 570ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  566634ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  566757ms] [LOG] [Fast Refresh] done in 224ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  568697ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  569096ms] [LOG] [Fast Refresh] done in 500ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  569200ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  569217ms] [LOG] [Fast Refresh] done in 118ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  569812ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  569977ms] [LOG] [Fast Refresh] done in 267ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  574258ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  574289ms] [LOG] [Fast Refresh] done in 133ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  630974ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  631880ms] [LOG] [Fast Refresh] done in 1008ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  633283ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  633299ms] [LOG] [Fast Refresh] done in 17ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  634183ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  634281ms] [LOG] [Fast Refresh] done in 198ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  635052ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[  636197ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14537
+[  636851ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  637106ms] [LOG] [Fast Refresh] done in 357ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  637555ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  637560ms] [LOG] [Fast Refresh] done in 106ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  644588ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  644625ms] [LOG] [Fast Refresh] done in 139ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  647149ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  647220ms] [LOG] [Fast Refresh] done in 171ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  647760ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  647840ms] [LOG] [Fast Refresh] done in 180ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  649079ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[  655978ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  658099ms] [LOG] [Fast Refresh] done in 1195ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  662783ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[  697023ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  697438ms] [LOG] [Fast Refresh] done in 516ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  699889ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  700073ms] [LOG] [Fast Refresh] done in 285ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  737885ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  739132ms] [ERROR] ./src/components/editor/editor.tsx:7:1
+Module not found: Can't resolve '@hocuspocus/provider'
+   5 | import Collaboration from "@tiptap/extension-collaboration";
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+>  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import * as Y from "yjs";
+   9 |
+  10 | import { cn } from "@/lib/utils";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  739133ms] [ERROR] ./src/components/editor/editor.tsx:5:1
+Module not found: Can't resolve '@tiptap/extension-collaboration'
+  3 | import { useEffect, useMemo, useRef, useState } from "react";
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+> 5 | import Collaboration from "@tiptap/extension-collaboration";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  739133ms] [ERROR] ./src/components/editor/editor.tsx:6:1
+Module not found: Can't resolve '@tiptap/extension-collaboration-cursor'
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+  5 | import Collaboration from "@tiptap/extension-collaboration";
+> 6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+  9 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  739133ms] [ERROR] ./src/components/editor/editor.tsx:8:1
+Module not found: Can't resolve 'yjs'
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+   7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+>  8 | import * as Y from "yjs";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | import { cn } from "@/lib/utils";
+  11 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  739170ms] [LOG] {file: Object} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_a9cb0712.js:16058
+[  742282ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[  748985ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  750670ms] [ERROR] ./src/components/editor/editor.tsx:7:1
+Module not found: Can't resolve '@hocuspocus/provider'
+   5 | import Collaboration from "@tiptap/extension-collaboration";
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+>  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import * as Y from "yjs";
+   9 |
+  10 | import { cn } from "@/lib/utils";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  750672ms] [ERROR] ./src/components/editor/editor.tsx:5:1
+Module not found: Can't resolve '@tiptap/extension-collaboration'
+  3 | import { useEffect, useMemo, useRef, useState } from "react";
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+> 5 | import Collaboration from "@tiptap/extension-collaboration";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  750673ms] [ERROR] ./src/components/editor/editor.tsx:6:1
+Module not found: Can't resolve '@tiptap/extension-collaboration-cursor'
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+  5 | import Collaboration from "@tiptap/extension-collaboration";
+> 6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+  9 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  750673ms] [ERROR] ./src/components/editor/editor.tsx:8:1
+Module not found: Can't resolve 'yjs'
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+   7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+>  8 | import * as Y from "yjs";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | import { cn } from "@/lib/utils";
+  11 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  774500ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  775353ms] [ERROR] ./src/components/editor/editor.tsx:7:1
+Module not found: Can't resolve '@hocuspocus/provider'
+   5 | import Collaboration from "@tiptap/extension-collaboration";
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+>  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import * as Y from "yjs";
+   9 |
+  10 | import { cn } from "@/lib/utils";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  775355ms] [ERROR] ./src/components/editor/editor.tsx:5:1
+Module not found: Can't resolve '@tiptap/extension-collaboration'
+  3 | import { useEffect, useMemo, useRef, useState } from "react";
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+> 5 | import Collaboration from "@tiptap/extension-collaboration";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  775355ms] [ERROR] ./src/components/editor/editor.tsx:6:1
+Module not found: Can't resolve '@tiptap/extension-collaboration-cursor'
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+  5 | import Collaboration from "@tiptap/extension-collaboration";
+> 6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+  9 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  775355ms] [ERROR] ./src/lib/collab-token.ts:3:1
+Module not found: Can't resolve 'jsonwebtoken'
+  1 | import "server-only";
+  2 |
+> 3 | import jwt from "jsonwebtoken";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Role } from "@prisma/client";
+  5 |
+  6 | import { requireEnv } from "@/env";
+
+Import trace:
+  Server Component:
+    ./src/lib/collab-token.ts
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  775356ms] [ERROR] ./src/components/editor/editor.tsx:8:1
+Module not found: Can't resolve 'yjs'
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+   7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+>  8 | import * as Y from "yjs";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | import { cn } from "@/lib/utils";
+  11 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  813499ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  814169ms] [ERROR] ./src/components/editor/editor.tsx:7:1
+Module not found: Can't resolve '@hocuspocus/provider'
+   5 | import Collaboration from "@tiptap/extension-collaboration";
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+>  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import * as Y from "yjs";
+   9 |
+  10 | import { cn } from "@/lib/utils";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  814170ms] [ERROR] ./src/components/editor/editor.tsx:5:1
+Module not found: Can't resolve '@tiptap/extension-collaboration'
+  3 | import { useEffect, useMemo, useRef, useState } from "react";
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+> 5 | import Collaboration from "@tiptap/extension-collaboration";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  814170ms] [ERROR] ./src/components/editor/editor.tsx:6:1
+Module not found: Can't resolve '@tiptap/extension-collaboration-cursor'
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+  5 | import Collaboration from "@tiptap/extension-collaboration";
+> 6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+  9 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  814170ms] [ERROR] ./src/lib/collab-token.ts:3:1
+Module not found: Can't resolve 'jsonwebtoken'
+  1 | import "server-only";
+  2 |
+> 3 | import jwt from "jsonwebtoken";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Role } from "@prisma/client";
+  5 |
+  6 | import { requireEnv } from "@/env";
+
+Import trace:
+  Server Component:
+    ./src/lib/collab-token.ts
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  814170ms] [ERROR] ./src/components/editor/editor.tsx:8:1
+Module not found: Can't resolve 'yjs'
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+   7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+>  8 | import * as Y from "yjs";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | import { cn } from "@/lib/utils";
+  11 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  832695ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  833073ms] [ERROR] ./src/components/editor/editor.tsx:7:1
+Module not found: Can't resolve '@hocuspocus/provider'
+   5 | import Collaboration from "@tiptap/extension-collaboration";
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+>  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import * as Y from "yjs";
+   9 |
+  10 | import { cn } from "@/lib/utils";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  833074ms] [ERROR] ./src/components/editor/editor.tsx:5:1
+Module not found: Can't resolve '@tiptap/extension-collaboration'
+  3 | import { useEffect, useMemo, useRef, useState } from "react";
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+> 5 | import Collaboration from "@tiptap/extension-collaboration";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  833074ms] [ERROR] ./src/components/editor/editor.tsx:6:1
+Module not found: Can't resolve '@tiptap/extension-collaboration-cursor'
+  4 | import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+  5 | import Collaboration from "@tiptap/extension-collaboration";
+> 6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+  8 | import * as Y from "yjs";
+  9 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  833075ms] [ERROR] ./src/lib/collab-token.ts:3:1
+Module not found: Can't resolve 'jsonwebtoken'
+  1 | import "server-only";
+  2 |
+> 3 | import jwt from "jsonwebtoken";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Role } from "@prisma/client";
+  5 |
+  6 | import { requireEnv } from "@/env";
+
+Import trace:
+  Server Component:
+    ./src/lib/collab-token.ts
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  833075ms] [ERROR] ./src/components/editor/editor.tsx:8:1
+Module not found: Can't resolve 'yjs'
+   6 | import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+   7 | import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+>  8 | import * as Y from "yjs";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | import { cn } from "@/lib/utils";
+  11 |
+
+Import traces:
+  Client Component Browser:
+    ./src/components/editor/editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component Browser]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/editor/editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Client Component SSR]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx [Server Component]
+    ./src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_b0daae9a._.js:2359
+[  844310ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  847570ms] [LOG] [Fast Refresh] done in 3087ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[  852622ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[  931647ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[  931909ms] [LOG] [Fast Refresh] done in 364ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1193082ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1196941ms] [LOG] [Fast Refresh] done in 3946ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1197108ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1197490ms] [LOG] [Fast Refresh] done in 483ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1200934ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1200935ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1201964ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1201974ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1203251ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1203726ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1203752ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0
+[ 1205150ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1205571ms] [LOG] [Fast Refresh] done in 521ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1205739ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1206145ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1211897ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1211962ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1215359ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1215648ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1220145ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1236608ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1250123ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1260618ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1268303ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1288272ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1296210ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1307946ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1321393ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1338226ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1346077ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1348759ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1349321ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1349726ms] [LOG] [Fast Refresh] done in 505ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1388950ms] [WARNING] [HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again. @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1666
+[ 1470373ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1470476ms] [LOG] [Fast Refresh] done in 204ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1471558ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1471625ms] [LOG] [Fast Refresh] done in 169ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1475084ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1475533ms] [LOG] [Fast Refresh] done in 552ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1507936ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1508427ms] [LOG] [Fast Refresh] done in 592ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1513813ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1513822ms] [LOG] [Fast Refresh] done in 110ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1515803ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
+[ 1515833ms] [LOG] [Fast Refresh] done in 132ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 1538808ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1539812ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1541347ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1543374ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1549801ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1551454ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1571514ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1578540ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1581932ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1641172ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1642175ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1644157ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1646363ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1648850ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1651811ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1672462ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1809369ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1810371ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1811933ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1813434ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1814481ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1825438ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1915316ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed:  @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1916219ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1917249ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1918417ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1921745ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1925137ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 1939905ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
+[ 6472382ms] [WARNING] [HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again. @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1666

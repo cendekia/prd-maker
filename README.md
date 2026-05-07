@@ -1,1 +1,249 @@
-# prd-maker
+# PRDMaker
+
+A multi-tenant SaaS for collaborative PRD authoring — Notion-class TipTap editor, Yjs multiplayer, BYO-key AI panel, Stripe billing, magic-link/Google/SAML auth.
+
+This README covers everything needed to run **Steps 1–12** of `development_plan.md` locally:
+
+- Steps 1–3: Project bootstrap, env config, Postgres + Prisma
+- Step 4: Auth (magic link + Google OAuth)
+- Steps 5–6: Workspace creation, members, invites
+- Steps 7–9: Page model + tree sidebar with drag-and-drop
+- Steps 10–11: TipTap editor with slash commands + `[[Page]]` links + Cmd-K
+- Step 12: Hocuspocus collab server + Yjs real-time editing
+
+---
+
+## Prerequisites
+
+- **Node.js** 20+ (22 recommended — matches the collab server's Dockerfile)
+- **npm** 10+
+- A **PostgreSQL** database. Easiest options:
+  - Local Postgres (`brew install postgresql@16 && brew services start postgresql@16`)
+  - Hosted free tier on [Neon](https://neon.tech) or [Supabase](https://supabase.com)
+- **OpenSSL** for generating secrets (preinstalled on macOS/Linux)
+- Optional: a [Resend](https://resend.com) account for real magic-link emails (dev mode prints them to the console if `RESEND_API_KEY` is unset)
+- Optional: a Google Cloud project for OAuth sign-in
+
+---
+
+## 1. Clone and install
+
+```bash
+git clone <repo-url> prdmaker
+cd prdmaker
+npm install
+```
+
+Then install the collab server dependencies:
+
+```bash
+cd apps/collab
+npm install
+cd ../..
+```
+
+---
+
+## 2. Environment variables
+
+Copy the template:
+
+```bash
+cp .env.example .env.local
+```
+
+Generate the secrets the app requires:
+
+```bash
+# Auth.js session secret
+openssl rand -base64 32
+
+# AI key encryption master key (Step 19, but the env validator already expects it)
+openssl rand -hex 32
+
+# Hocuspocus collab JWT secret (Step 12)
+openssl rand -hex 32
+```
+
+Paste the outputs into `.env.local` as `AUTH_SECRET`, `ENCRYPTION_KEY`, and `COLLAB_SECRET` respectively.
+
+Minimum keys you must fill in for the app to boot:
+
+| Key | Notes |
+| --- | --- |
+| `DATABASE_URL` | Postgres connection string (see Step 3 below) |
+| `AUTH_SECRET` | Auth.js secret, base64 32 bytes |
+| `ENCRYPTION_KEY` | 64 hex chars |
+| `COLLAB_SECRET` | 64 hex chars — must match `apps/collab/.env` |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` |
+| `NEXT_PUBLIC_COLLAB_URL` | `ws://localhost:1234` |
+
+Optional but useful:
+
+| Key | When you need it |
+| --- | --- |
+| `RESEND_API_KEY` | To deliver real magic-link emails. Without it, links print to the dev server console. |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | To enable Google sign-in. Add `http://localhost:3000/api/auth/callback/google` as an authorised redirect URI in Google Cloud Console. |
+
+Then create the matching env for the collab server:
+
+```bash
+cp apps/collab/.env.example apps/collab/.env
+```
+
+In `apps/collab/.env`, set:
+
+- `DATABASE_URL` — the **same** value as in `.env.local`
+- `COLLAB_SECRET` — the **same** value as in `.env.local`
+- `PORT` — defaults to `1234`
+
+The Next.js app and the collab server must share `DATABASE_URL` (they both touch the `Page.yDocState` column) and `COLLAB_SECRET` (the JWT issued by Next.js is verified by the collab server).
+
+---
+
+## 3. Database
+
+Provision Postgres, then run the migrations:
+
+```bash
+npm run db:migrate         # runs prisma migrate dev — applies all migrations
+npm run db:generate        # regenerate the typed Prisma client
+```
+
+Useful commands:
+
+```bash
+npm run db:studio          # GUI for inspecting the DB (Prisma Studio)
+npm run db:deploy          # apply pending migrations without prompting (for CI/prod)
+```
+
+---
+
+## 4. Run the app in development
+
+### Quick start — both services in one terminal
+
+```bash
+npm run dev:all
+```
+
+This wraps `scripts/dev.sh`, which checks `.env.local` + `apps/collab/.env` exist, installs missing dependencies, and runs both services with prefixed log streams (`[next]` / `[collab]`). Ctrl-C stops everything cleanly.
+
+### Manual — one terminal per service
+
+If you'd rather watch each log stream in isolation:
+
+**Terminal 1 — Next.js app:**
+
+```bash
+npm run dev
+```
+
+The app boots on `http://localhost:3000`.
+
+**Terminal 2 — Hocuspocus collab server:**
+
+```bash
+cd apps/collab
+npm run dev
+```
+
+The WebSocket listens on `ws://localhost:1234`. You should see:
+
+```text
+Hocuspocus v2.x.x running at:
+  > HTTP: http://0.0.0.0:1234
+  > WebSocket: ws://0.0.0.0:1234
+[collab] hocuspocus listening on :1234
+```
+
+If you skip the collab server, the app falls back to solo mode (no real-time, JSON saves on every change). The page editor decides which path to use based on whether `COLLAB_SECRET` is set in the Next.js env.
+
+---
+
+## 5. First-run flow
+
+1. Open `http://localhost:3000`.
+2. Sign in with magic link (or Google if configured). With `RESEND_API_KEY` unset, the magic link prints to the Next.js dev server console — copy it from there.
+3. You'll land on `/onboarding` — create a workspace (name + slug).
+4. After onboarding you're at `/<workspaceSlug>` with the three-pane shell.
+5. Create a page from the sidebar's "+ New page" button.
+6. Open the page — the editor loads. Type `/` for the slash menu, type `[[` to insert an internal page link, press `Cmd-K` for the global palette.
+7. To test multiplayer: open the same page URL in a second browser (or an incognito window signed in as a second user). You should see live cursors with name chips and edits propagate instantly.
+
+---
+
+## 6. Useful scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev:all` | Start Next.js + collab server together with prefixed logs |
+| `npm run dev` | Next.js dev server with Turbopack only |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | ESLint |
+| `npm run db:migrate` | Apply pending migrations (dev) |
+| `npm run db:generate` | Regenerate Prisma client |
+| `npm run db:studio` | Prisma Studio GUI |
+| `cd apps/collab && npm run dev` | Hocuspocus collab server (watch mode) |
+| `cd apps/collab && npm run build` | TypeScript build of the collab server |
+| `cd apps/collab && npm run start` | Run the built collab server |
+| `cd apps/collab && npm run typecheck` | Type-check only |
+
+---
+
+## 7. Troubleshooting
+
+**"Invalid environment variables" on boot.** The Zod env validator (`src/env.ts`) reports the missing/invalid keys with names. Fill them in in `.env.local`.
+
+**Magic link never arrives.** Without `RESEND_API_KEY`, the dev fallback in `src/lib/email.ts` prints the link to the dev server console. Copy and paste it into the browser.
+
+**Editor stays in solo mode despite the collab server running.** Confirm the Next.js process picked up `COLLAB_SECRET` from `.env.local` (restart `npm run dev` after editing). The page loader at `src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx` only mints a collab token when `env.COLLAB_SECRET` is truthy.
+
+**Collab server fails to authenticate.** Almost always `COLLAB_SECRET` mismatch between `.env.local` and `apps/collab/.env`. Re-paste the same value in both.
+
+**Cursors don't appear in the second browser.** Hocuspocus uses awareness — make sure both browsers are signed in (different users) and connected to the same `pageId`. Check the collab server logs for connection events.
+
+**Existing pages show empty after collab is on.** If a page has `contentJson` but no `yDocState` yet, the editor seeds the Yjs doc from JSON on first sync. If the seed didn't run (e.g. you opened the page before the WS connected), refresh once.
+
+---
+
+## 8. Project layout (high level)
+
+```text
+src/
+  app/
+    (authed)/                    # All routes that require sign-in
+      [workspaceSlug]/
+        layout.tsx               # Three-pane shell (Step 9)
+        p/[pageId]/page.tsx      # Page editor host (Step 10)
+        settings/                # Workspace settings (Step 6)
+      onboarding/                # First-run workspace creation (Step 5)
+    (auth)/                      # sign-in / verify-request / error
+    api/
+      auth/[...nextauth]/        # Auth.js handler
+      collab/token/              # Mint Hocuspocus JWT (Step 12)
+      pages/[pageId]/...         # Page CRUD (Step 8)
+      workspaces/[workspaceId]/  # Workspace + page tree + search APIs
+  components/
+    app-shell/                   # Sidebar, page tree, topbar (Step 9)
+    editor/                      # TipTap editor + extensions (Steps 10–12)
+  lib/
+    db.ts                        # Prisma singleton
+    workspace.ts                 # requireUser, requireWorkspace, requireRole
+    permissions.ts               # getPageAccess, requirePageAccess
+    collab-token.ts              # Issue collab JWT (Step 12)
+prisma/
+  schema.prisma                  # All models (Steps 3, 7)
+apps/
+  collab/                        # Hocuspocus server (Step 12)
+    src/server.ts
+    src/auth.ts
+    src/persistence.ts
+```
+
+---
+
+## 9. What's next
+
+`development_plan.md` enumerates Steps 13–38: presence avatars, comments, version history, templates, AI panel, search, public publishing, billing, SSO, audit log, GDPR, exports, embeds, mobile, polish, marketing, tests, deployment, observability.

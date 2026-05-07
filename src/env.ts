@@ -46,6 +46,15 @@ const clientSchema = z.object({
     .string()
     .url()
     .default("http://localhost:3000"),
+  /**
+   * WebSocket URL the browser uses to connect to the Hocuspocus collab server.
+   * Distinct from the server-side COLLAB_URL because secrets/internal hostnames
+   * may differ from what the browser can reach.
+   */
+  NEXT_PUBLIC_COLLAB_URL: z
+    .string()
+    .min(1)
+    .default("ws://localhost:1234"),
   NEXT_PUBLIC_SENTRY_DSN: z.string().min(1).optional(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z
@@ -80,6 +89,7 @@ const rawEnv = {
   JACKSON_API_KEY: process.env.JACKSON_API_KEY,
   SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_COLLAB_URL: process.env.NEXT_PUBLIC_COLLAB_URL,
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
   NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

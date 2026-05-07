@@ -3,9 +3,16 @@
 import { useCallback, useState } from "react";
 import type { JSONContent } from "@tiptap/react";
 
-import { Editor } from "@/components/editor/editor";
+import { Editor, type CollabSyncState } from "@/components/editor/editor";
 import { usePageContent } from "@/hooks/use-page-content";
 import { cn } from "@/lib/utils";
+
+interface CollabPayload {
+  url: string;
+  token: string;
+  expiresAt: number;
+  presence: { name: string; color: string; userId: string };
+}
 
 interface Props {
   pageId: string;
@@ -14,6 +21,7 @@ interface Props {
   editable: boolean;
   workspaceId: string;
   workspaceSlug: string;
+  collab: CollabPayload | null;
 }
 
 export function PageEditor({
@@ -23,13 +31,17 @@ export function PageEditor({
   editable,
   workspaceId,
   workspaceSlug,
+  collab,
 }: Props) {
   const [titleDraft, setTitleDraft] = useState(title);
   const [renaming, setRenaming] = useState(false);
+  const [syncState, setSyncState] = useState<CollabSyncState>("connecting");
 
+  // Solo (non-collab) save path. When collab is on, the Yjs CRDT + Hocuspocus
+  // server own persistence — we don't double-write contentJson here.
   const { save, saveState, lastSavedAt } = usePageContent(pageId);
 
-  const handleChange = useCallback(
+  const handleSoloChange = useCallback(
     (json: JSONContent) => {
       save(json);
     },
@@ -41,8 +53,6 @@ export function PageEditor({
     if (next === title) return;
     setRenaming(true);
     try {
-      // Use the page-level PATCH endpoint that doesn't need workspaceId, by
-      // reading the workspace via the tree mutation key.
       const res = await fetch(`/api/pages/${pageId}/title`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -63,7 +73,15 @@ export function PageEditor({
   return (
     <div className="mx-auto w-full max-w-[var(--content-max-width)] px-6 py-12">
       <div className="mb-2 flex items-center gap-3 text-[12px] text-fg-3">
-        <SaveIndicator state={saveState} lastSavedAt={lastSavedAt} editable={editable} />
+        {collab ? (
+          <CollabStatusIndicator state={syncState} editable={editable} />
+        ) : (
+          <SoloSaveIndicator
+            state={saveState}
+            lastSavedAt={lastSavedAt}
+            editable={editable}
+          />
+        )}
         {!editable ? (
           <span className="rounded-full bg-bg-muted px-2 py-0.5 text-fg-2">
             Read-only
@@ -90,15 +108,26 @@ export function PageEditor({
       <Editor
         initialContent={initialContent as JSONContent | null}
         editable={editable}
-        onChange={handleChange}
+        onChange={collab ? undefined : handleSoloChange}
         workspaceId={workspaceId}
         workspaceSlug={workspaceSlug}
+        collab={
+          collab
+            ? {
+                url: collab.url,
+                token: collab.token,
+                pageId,
+                user: { name: collab.presence.name, color: collab.presence.color },
+              }
+            : null
+        }
+        onSyncStateChange={collab ? setSyncState : undefined}
       />
     </div>
   );
 }
 
-function SaveIndicator({
+function SoloSaveIndicator({
   state,
   lastSavedAt,
   editable,
@@ -130,4 +159,24 @@ function SaveIndicator({
   return (
     <span className={cn(state === "error" && "text-destructive")}>{label}</span>
   );
+}
+
+function CollabStatusIndicator({
+  state,
+  editable,
+}: {
+  state: CollabSyncState;
+  editable: boolean;
+}) {
+  if (!editable) return null;
+  switch (state) {
+    case "connected":
+      return <span>Synced</span>;
+    case "connecting":
+      return <span>Connecting…</span>;
+    case "disconnected":
+      return (
+        <span className="text-destructive">Disconnected — reconnecting</span>
+      );
+  }
 }

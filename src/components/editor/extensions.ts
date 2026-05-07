@@ -22,13 +22,21 @@ const lowlight = createLowlight(common);
 export interface BuildExtensionsOptions {
   workspaceId: string;
   workspaceSlug: string;
+  /**
+   * Set to `false` when the editor binds to a Yjs Collaboration extension —
+   * the Yjs CRDT replaces TipTap's local history stack, and keeping both
+   * causes undo/redo conflicts.
+   */
+  withHistory?: boolean;
 }
 
 export function buildExtensions(opts: BuildExtensionsOptions) {
+  const withHistory = opts.withHistory ?? true;
   return [
     StarterKit.configure({
       codeBlock: false,
       heading: { levels: [1, 2, 3] },
+      ...(withHistory ? {} : { history: false }),
     }),
     CodeBlockLowlight.configure({ lowlight }),
     Placeholder.configure({

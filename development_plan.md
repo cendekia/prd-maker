@@ -178,7 +178,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 10
   - **User Instructions**: none
 
-- [ ] Step 12: Hocuspocus collaboration server + Yjs binding
+- [x] Step 12: Hocuspocus collaboration server + Yjs binding
   - **Task**: Stand up a separate Node service `apps/collab` running Hocuspocus. Authenticate connections by short-lived JWT issued from the Next.js app (signed with `COLLAB_SECRET`), authorize on `pageId` + `workspaceMember.role`. Persist Yjs state to Postgres `Page.yDocState` on idle and on disconnect. Wire `y-prosemirror` + `y-websocket` provider into the TipTap editor with awareness (cursors / presence colors).
   - **Files**:
     - `apps/collab/package.json`

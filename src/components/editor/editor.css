@@ -287,6 +287,34 @@
   box-shadow: none !important;
 }
 
+/* Yjs CollaborationCursor — remote user carets and name labels. The
+ * extension sets `--user-color` from awareness state per-cursor; we just
+ * paint the caret line and the floating name chip. */
+.editor-host .ProseMirror .collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid var(--user-color, var(--accent-500));
+  border-right: 1px solid var(--user-color, var(--accent-500));
+  word-break: normal;
+  pointer-events: none;
+}
+.editor-host .ProseMirror .collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  color: var(--neutral-0);
+  background: var(--user-color, var(--accent-500));
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
 /* Lowlight / highlight.js theme (hljs class names, neutral palette). */
 .editor-host .hljs-comment,
 .editor-host .hljs-quote { color: var(--fg-3); font-style: italic; }
