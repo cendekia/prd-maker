@@ -28,6 +28,18 @@ require_file() {
 require_file ".env.local" "Copy .env.example -> .env.local and set production values."
 require_file "apps/collab/.env" "Copy apps/collab/.env.example -> apps/collab/.env and set production values."
 
+load_env_file() {
+  local path="$1"
+  # Export all variables defined in the env file so child commands
+  # (Prisma/Next.js) can resolve DATABASE_URL and other required keys.
+  set -a
+  # shellcheck disable=SC1090
+  . "$path"
+  set +a
+}
+
+load_env_file ".env.local"
+
 # Ensure browser-facing URLs match public IP + Nginx WS route.
 if ! grep -Eq '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
   echo "Expected NEXT_PUBLIC_APP_URL=\"http://${PUBLIC_IP}\" in .env.local"
