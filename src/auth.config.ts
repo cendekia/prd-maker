@@ -66,6 +66,7 @@ export const PUBLIC_PATHS: string[] = [
   "/p/*", // public published pages (Step 23)
   "/invite/*", // invite-acceptance flow (Step 6)
   "/api/auth/*", // Auth.js internals
+  "/api/cron/*", // Vercel cron — endpoints enforce CRON_SECRET themselves (Step 15+)
 ];
 
 /** Auth-flow pages — public, but signed-in users get redirected away. */

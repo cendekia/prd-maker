@@ -29,6 +29,14 @@ const serverSchema = z.object({
   COLLAB_URL: z.string().min(1).optional(),
   COLLAB_SECRET: z.string().min(1).optional(),
 
+  /**
+   * Shared secret authenticating Vercel cron requests (Step 15+). Vercel
+   * sends `Authorization: Bearer $CRON_SECRET` automatically when set on
+   * the project. We treat absence as "cron disabled" so local dev doesn't
+   * accidentally accept unauthenticated requests at the cron endpoints.
+   */
+  CRON_SECRET: z.string().min(1).optional(),
+
   STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
   STRIPE_PRICE_PRO_MONTHLY: z.string().min(1).optional(),
@@ -80,6 +88,7 @@ const rawEnv = {
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   COLLAB_URL: process.env.COLLAB_URL,
   COLLAB_SECRET: process.env.COLLAB_SECRET,
+  CRON_SECRET: process.env.CRON_SECRET,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY,

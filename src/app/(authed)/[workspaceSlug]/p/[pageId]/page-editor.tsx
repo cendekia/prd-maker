@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Editor as TipTapEditor } from "@tiptap/core";
 import type { JSONContent } from "@tiptap/react";
 import { MessageSquare } from "lucide-react";
 
 import { CommentsRail, type PendingAnchor } from "@/components/comments/comments-rail";
 import { Editor, type CollabSyncState } from "@/components/editor/editor";
 import { Button } from "@/components/ui/button";
+import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
 import { usePageContent } from "@/hooks/use-page-content";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +64,28 @@ export function PageEditor({
     document.addEventListener("prdmaker:comment-start", onStart);
     return () => document.removeEventListener("prdmaker:comment-start", onStart);
   }, []);
+
+  // Snapshot orchestration. We hold a ref to the live editor so the periodic
+  // auto-snapshot can read the freshest JSON (works in both solo + collab
+  // modes — `onEditor` fires once the editor mounts in either path).
+  const editorRef = useRef<TipTapEditor | null>(null);
+  const { markDirty } = useAutoSnapshot({
+    pageId,
+    enabled: editable,
+    getContentJson: () => editorRef.current?.getJSON() ?? null,
+  });
+
+  const handleEditorInstance = useCallback(
+    (editor: TipTapEditor | null) => {
+      editorRef.current = editor;
+      if (!editor) return;
+      const onUpdate = () => markDirty();
+      editor.on("update", onUpdate);
+      // Cleanup is handled by the editor instance itself when it's destroyed —
+      // calling `.off` here would race with React's strict-mode double-effect.
+    },
+    [markDirty],
+  );
 
   // Solo (non-collab) save path. When collab is on, the Yjs CRDT + Hocuspocus
   // server own persistence — we don't double-write contentJson here.
@@ -169,6 +193,7 @@ export function PageEditor({
                 : null
             }
             onSyncStateChange={collab ? setSyncState : undefined}
+            onEditor={handleEditorInstance}
           />
         </div>
       </div>

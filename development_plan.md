@@ -221,7 +221,7 @@ Total: ~38 steps across 11 sections.
 
 ## Version History
 
-- [ ] Step 15: Auto-snapshots, manual snapshots, and pre-AI snapshots
+- [x] Step 15: Auto-snapshots, manual snapshots, and pre-AI snapshots
   - **Task**: Add a debounced client-side trigger that POSTs `Page.contentJson` to `/api/pages/:id/snapshot` every N minutes of activity, and a server cron (Vercel cron or Hocuspocus extension) that snapshots all dirty pages every 30 minutes. Define snapshot kinds: `AUTO`, `MANUAL`, `PRE_AI`. Each snapshot stores the canonical Yjs state plus a JSON projection for cheap diff rendering.
   - **Files**:
     - `src/app/api/pages/[pageId]/snapshot/route.ts`: POST

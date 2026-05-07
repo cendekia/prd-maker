@@ -115,6 +115,12 @@ interface Props {
   collab?: CollabConfig | null;
   /** Notified as the WebSocket connection state changes. */
   onSyncStateChange?: (state: CollabSyncState) => void;
+  /**
+   * Receives the live TipTap editor instance after mount, and `null` on
+   * unmount. Used by the page host to drive snapshots, programmatic
+   * commands, etc. without re-creating the editor.
+   */
+  onEditor?: (editor: TipTapEditor | null) => void;
 }
 
 const EMPTY_DOC: JSONContent = {
@@ -141,6 +147,7 @@ function SoloEditor({
   workspaceId,
   workspaceSlug,
   className,
+  onEditor,
 }: Props) {
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -166,6 +173,11 @@ function SoloEditor({
   );
 
   useCommentEditorEvents(editor);
+
+  useEffect(() => {
+    onEditor?.(editor ?? null);
+    return () => onEditor?.(null);
+  }, [editor, onEditor]);
 
   if (!editor) {
     return (
@@ -198,6 +210,7 @@ function CollabEditor({
   className,
   collab,
   onSyncStateChange,
+  onEditor,
 }: Props & { collab: CollabConfig }) {
   // One Y.Doc + provider per page. The outer <Editor> remounts via key=pageId
   // when navigating between pages, so we don't need to handle pageId changes
@@ -305,6 +318,11 @@ function CollabEditor({
   }, [editor, synced, initialContent]);
 
   useCommentEditorEvents(editor);
+
+  useEffect(() => {
+    onEditor?.(editor ?? null);
+    return () => onEditor?.(null);
+  }, [editor, onEditor]);
 
   if (!editor) {
     return (
