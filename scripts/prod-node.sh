@@ -39,6 +39,8 @@ load_env_file() {
 }
 
 load_env_file ".env.local"
+# Never trust NODE_ENV from local templates for production deploy.
+export NODE_ENV=production
 
 # Ensure browser-facing URLs match public IP + Nginx WS route.
 if ! grep -Eq '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
