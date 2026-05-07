@@ -1,7 +1,7 @@
 "use client";
 
 import { BubbleMenu, type Editor } from "@tiptap/react";
-import { Bold, Code, Italic, Link as LinkIcon, Strikethrough } from "lucide-react";
+import { Bold, Code, Italic, Link as LinkIcon, MessageSquarePlus, Strikethrough } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -66,6 +66,23 @@ export function EditorBubbleMenu({ editor }: Props) {
         label="Link"
       >
         <LinkIcon className="size-3.5" />
+      </ToolButton>
+      <span className="mx-0.5 h-4 w-px bg-border" />
+      <ToolButton
+        active={editor.isActive("comment")}
+        onClick={() => {
+          const { from, to } = editor.state.selection;
+          if (from === to) return;
+          // Hand off to the page-editor: it opens the rail and shows a
+          // composer pinned to this range. On submit the rail dispatches
+          // `prdmaker:comment-applied` so the editor can mark the text.
+          document.dispatchEvent(
+            new CustomEvent("prdmaker:comment-start", { detail: { from, to } }),
+          );
+        }}
+        label="Comment on selection"
+      >
+        <MessageSquarePlus className="size-3.5" />
       </ToolButton>
     </BubbleMenu>
   );

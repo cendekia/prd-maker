@@ -205,7 +205,7 @@ Total: ~38 steps across 11 sections.
 
 ## Comments
 
-- [ ] Step 14: Inline + page-level comments with anchors and @mentions
+- [x] Step 14: Inline + page-level comments with anchors and @mentions
   - **Task**: Add a `Comment` TipTap mark that wraps the anchored text range and stores `commentId`. Implement a comments side-rail (collapsible drawer right-of-editor) listing threads in document order with reply, resolve, reopen actions. Add `@user` mention extension that surfaces members of the workspace; mentioning creates a `Notification` row (delivery wired in Step 18).
   - **Files**:
     - `src/components/editor/extensions/comment-mark.ts`

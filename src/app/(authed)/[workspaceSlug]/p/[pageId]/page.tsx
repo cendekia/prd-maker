@@ -61,6 +61,8 @@ export default async function PageEditorRoute({ params }: PageProps) {
       editable={editable}
       workspaceId={workspace.id}
       workspaceSlug={workspace.slug}
+      currentUserId={user.id}
+      isOwner={access.role === Role.OWNER}
       collab={collab}
     />
   );

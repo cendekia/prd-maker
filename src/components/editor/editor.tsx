@@ -13,8 +13,71 @@ import { cn } from "@/lib/utils";
 import { EditorBubbleMenu } from "./bubble-menu";
 import { buildExtensions } from "./extensions";
 import { EditorFloatingMenu } from "./floating-menu";
+import type { Editor as TipTapEditor } from "@tiptap/core";
 
 import "./editor.css";
+
+/**
+ * Wire up the page-level comment events the bubble menu + rail dispatch:
+ *   - prdmaker:comment-applied { commentId, from, to } — paint the mark
+ *   - prdmaker:comment-focus   { commentId }           — scroll to mark
+ *   - prdmaker:comment-removed { commentId }           — strip the mark
+ *
+ * Editor-side concerns only — the rail handles its own create/click events.
+ */
+function useCommentEditorEvents(editor: TipTapEditor | null) {
+  useEffect(() => {
+    if (!editor) return;
+    function onApplied(e: Event) {
+      const detail = (e as CustomEvent<{ commentId: string; from: number; to: number }>).detail;
+      if (!detail?.commentId) return;
+      editor!
+        .chain()
+        .setTextSelection({ from: detail.from, to: detail.to })
+        .setComment(detail.commentId)
+        .run();
+    }
+    function onFocus(e: Event) {
+      const detail = (e as CustomEvent<{ commentId: string }>).detail;
+      if (!detail?.commentId) return;
+      const dom = editor!.view.dom.querySelector(
+        `[data-comment-id="${detail.commentId}"]`,
+      ) as HTMLElement | null;
+      dom?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    function onRemoved(e: Event) {
+      const detail = (e as CustomEvent<{ commentId: string }>).detail;
+      if (!detail?.commentId) return;
+      editor!.chain().unsetComment(detail.commentId).run();
+    }
+    document.addEventListener("prdmaker:comment-applied", onApplied);
+    document.addEventListener("prdmaker:comment-focus", onFocus);
+    document.addEventListener("prdmaker:comment-removed", onRemoved);
+    return () => {
+      document.removeEventListener("prdmaker:comment-applied", onApplied);
+      document.removeEventListener("prdmaker:comment-focus", onFocus);
+      document.removeEventListener("prdmaker:comment-removed", onRemoved);
+    };
+  }, [editor]);
+
+  // Click on a comment-marked range -> open thread in the rail.
+  useEffect(() => {
+    if (!editor) return;
+    function onClick(e: Event) {
+      const target = e.target as HTMLElement | null;
+      const span = target?.closest("[data-comment-id]") as HTMLElement | null;
+      if (!span) return;
+      const commentId = span.getAttribute("data-comment-id");
+      if (!commentId) return;
+      document.dispatchEvent(
+        new CustomEvent("prdmaker:comment-click", { detail: { commentId } }),
+      );
+    }
+    const dom = editor.view.dom;
+    dom.addEventListener("click", onClick);
+    return () => dom.removeEventListener("click", onClick);
+  }, [editor]);
+}
 
 export type CollabSyncState = "connecting" | "connected" | "disconnected";
 
@@ -101,6 +164,8 @@ function SoloEditor({
     },
     [],
   );
+
+  useCommentEditorEvents(editor);
 
   if (!editor) {
     return (
@@ -238,6 +303,8 @@ function CollabEditor({
     }
     seededRef.current = true;
   }, [editor, synced, initialContent]);
+
+  useCommentEditorEvents(editor);
 
   if (!editor) {
     return (

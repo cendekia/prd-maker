@@ -13,6 +13,8 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { common, createLowlight } from "lowlight";
 
+import { CommentMark } from "./extensions/comment-mark";
+import { Mention, type MentionMember } from "./extensions/mention";
 import { PageLink } from "./extensions/page-link";
 import { PageLinkSuggestionExtension } from "./extensions/page-link-suggestion";
 import { SlashCommandsExtension } from "./slash-command";
@@ -83,6 +85,22 @@ export function buildExtensions(opts: BuildExtensionsOptions) {
         return data.results;
       },
     }),
+    Mention.configure({
+      workspaceId: opts.workspaceId,
+      fetchMembers: async (query: string) => {
+        const url = new URL(
+          `/api/workspaces/${opts.workspaceId}/members/search`,
+          window.location.origin,
+        );
+        if (query) url.searchParams.set("q", query);
+        url.searchParams.set("limit", "8");
+        const res = await fetch(url.toString());
+        if (!res.ok) return [];
+        const data = (await res.json()) as { results: MentionMember[] };
+        return data.results;
+      },
+    }),
+    CommentMark,
     SlashCommandsExtension,
   ];
 }

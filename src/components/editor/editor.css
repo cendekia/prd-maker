@@ -281,6 +281,41 @@
   color: var(--fg-4);
 }
 
+/* Comment mark — highlights the anchored text range with a soft yellow
+ * underline; clicking dispatches `prdmaker:comment-click` to the rail. */
+.editor-host .ProseMirror .tiptap-comment,
+.public-prose .tiptap-comment {
+  background: oklch(0.96 0.10 90);
+  box-shadow: inset 0 -1.5px 0 0 oklch(0.78 0.16 90);
+  cursor: pointer;
+  border-radius: 1px;
+  transition: background var(--dur-1) var(--ease-out);
+}
+.editor-host .ProseMirror .tiptap-comment:hover {
+  background: oklch(0.92 0.13 90);
+}
+
+/* @user mention chip — both inside the editor and in rendered comment bodies
+ * (see `comment-body.tsx`'s `.mention-chip`). */
+.editor-host .ProseMirror .mention-chip,
+.mention-chip {
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-50);
+  color: var(--accent-700);
+  font-size: 0.95em;
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+.editor-host .ProseMirror .mention-chip:hover,
+.mention-chip:hover {
+  background: var(--accent-100);
+}
+
 /* Tippy popovers (slash menu, bubble menu) inherit our z-index + radius. */
 .tippy-box {
   background: transparent !important;
