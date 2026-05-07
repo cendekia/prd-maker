@@ -29,11 +29,11 @@ require_file ".env.local" "Copy .env.example -> .env.local and set production va
 require_file "apps/collab/.env" "Copy apps/collab/.env.example -> apps/collab/.env and set production values."
 
 # Ensure browser-facing URLs match public IP + Nginx WS route.
-if ! rg -q '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
+if ! grep -Eq '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
   echo "Expected NEXT_PUBLIC_APP_URL=\"http://${PUBLIC_IP}\" in .env.local"
   exit 1
 fi
-if ! rg -q '^NEXT_PUBLIC_COLLAB_URL="ws://24\.199\.106\.227/collab"$' .env.local; then
+if ! grep -Eq '^NEXT_PUBLIC_COLLAB_URL="ws://24\.199\.106\.227/collab"$' .env.local; then
   echo "Expected NEXT_PUBLIC_COLLAB_URL=\"ws://${PUBLIC_IP}/collab\" in .env.local"
   exit 1
 fi

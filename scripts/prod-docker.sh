@@ -22,11 +22,11 @@ require_file "apps/collab/.env" "Copy apps/collab/.env.example -> apps/collab/.e
 require_file "deploy/nginx/prdmaker-ip.conf" "This repo file should exist. Re-pull if missing."
 require_file "docker-compose.prod.yml" "This repo file should exist. Re-pull if missing."
 
-if ! rg -q '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
+if ! grep -Eq '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
   echo "Expected NEXT_PUBLIC_APP_URL=\"http://${PUBLIC_IP}\" in .env.local"
   exit 1
 fi
-if ! rg -q '^NEXT_PUBLIC_COLLAB_URL="ws://24\.199\.106\.227/collab"$' .env.local; then
+if ! grep -Eq '^NEXT_PUBLIC_COLLAB_URL="ws://24\.199\.106\.227/collab"$' .env.local; then
   echo "Expected NEXT_PUBLIC_COLLAB_URL=\"ws://${PUBLIC_IP}/collab\" in .env.local"
   exit 1
 fi
