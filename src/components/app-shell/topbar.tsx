@@ -5,6 +5,8 @@ import { Globe, MoreHorizontal, PanelLeft, PanelRight, Search, Sparkles } from "
 import { Button } from "@/components/ui/button";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 
+import { PresenceAvatars } from "./presence-avatars";
+
 interface Props {
   workspaceName: string;
   pageTitle?: string | null;
@@ -58,7 +60,8 @@ export function TopBar({
         ) : null}
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-2">
+        <PresenceAvatars className="mr-1" />
         <Button
           variant="outline"
           size="sm"

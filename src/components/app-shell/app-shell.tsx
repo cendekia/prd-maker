@@ -6,6 +6,7 @@ import { PanelLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CommandPaletteProvider } from "@/components/command-palette";
+import { PresenceProvider } from "@/hooks/use-presence";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
 
 import { AIPanel } from "./ai-panel";
@@ -39,6 +40,7 @@ export function AppShell({
       workspaceId={workspace.id}
       workspaceSlug={workspace.slug}
     >
+    <PresenceProvider>
     <div className="flex h-screen w-screen overflow-hidden bg-background text-fg-1">
       {sidebarOpen ? (
         <Sidebar
@@ -77,6 +79,7 @@ export function AppShell({
 
       {aiPanelOpen ? <AIPanel onClose={() => setAiPanelOpen(false)} /> : null}
     </div>
+    </PresenceProvider>
     </CommandPaletteProvider>
   );
 }

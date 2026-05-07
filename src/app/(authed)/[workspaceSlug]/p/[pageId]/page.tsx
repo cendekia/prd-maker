@@ -48,6 +48,7 @@ export default async function PageEditorRoute({ params }: PageProps) {
           userId: user.id,
           role: access.role,
           name: user.name ?? user.email ?? "Anonymous",
+          avatarUrl: user.image ?? null,
         }),
       }
     : null;

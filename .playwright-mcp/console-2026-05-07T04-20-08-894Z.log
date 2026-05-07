@@ -670,3 +670,15 @@ https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/
 [ 1925137ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
 [ 1939905ms] [ERROR] WebSocket connection to 'ws://localhost:1234/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1542
 [ 6472382ms] [WARNING] [HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again. @ http://localhost:3000/_next/static/chunks/node_modules_@hocuspocus_bbb5bd47._.js?id=%255Bproject%255D%252Fnode_modules%252F%2540hocuspocus%252Fprovider%252Fdist%252Fhocuspocus-provider.esm.js+%255Bapp-client%255D+%2528ecmascript%2529:1666
+[ 7766516ms] [WARNING] %ctippy.js
+
+%cInteractive tippy element may not be accessible via keyboard navigation because it is not directly after the reference element in the DOM source order. 
+
+Using a wrapper <div> or <span> tag around the reference element solves this by creating a new parentNode context. 
+
+Specifying `appendTo: document.body` silences this warning, but it assumes you are using a focus management solution to handle keyboard navigation. 
+
+See: https://atomiks.github.io/tippyjs/v6/accessibility/#interactivity
+
+%c👷‍ This is a development-only message. It will be removed in production. color: #00C584; font-size: 1.3em; font-weight: bold; line-height: 1.5 color: #a6a095; @ http://localhost:3000/_next/static/chunks/node_modules_ce5607c2._.js:7900
+[ 7771719ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__95642460._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch:0

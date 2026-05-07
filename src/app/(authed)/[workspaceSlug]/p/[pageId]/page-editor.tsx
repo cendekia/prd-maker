@@ -11,7 +11,12 @@ interface CollabPayload {
   url: string;
   token: string;
   expiresAt: number;
-  presence: { name: string; color: string; userId: string };
+  presence: {
+    userId: string;
+    name: string;
+    color: string;
+    avatarUrl: string | null;
+  };
 }
 
 interface Props {
@@ -117,7 +122,12 @@ export function PageEditor({
                 url: collab.url,
                 token: collab.token,
                 pageId,
-                user: { name: collab.presence.name, color: collab.presence.color },
+                user: {
+                  userId: collab.presence.userId,
+                  name: collab.presence.name,
+                  color: collab.presence.color,
+                  avatarUrl: collab.presence.avatarUrl,
+                },
               }
             : null
         }

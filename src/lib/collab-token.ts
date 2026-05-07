@@ -20,7 +20,12 @@ export interface IssuedCollabToken {
   token: string;
   expiresAt: number;
   /** Mirrors the JWT body so the client can use it for awareness without decoding. */
-  presence: { name: string; color: string; userId: string };
+  presence: {
+    userId: string;
+    name: string;
+    color: string;
+    avatarUrl: string | null;
+  };
 }
 
 interface IssueArgs {
@@ -30,6 +35,8 @@ interface IssueArgs {
   name: string;
   /** Optional — if omitted, a deterministic palette color is chosen from userId. */
   color?: string;
+  /** OAuth profile picture (User.image). null when the user has none. */
+  avatarUrl?: string | null;
 }
 
 export function issueCollabToken({
@@ -38,6 +45,7 @@ export function issueCollabToken({
   role,
   name,
   color,
+  avatarUrl = null,
 }: IssueArgs): IssuedCollabToken {
   const secret = requireEnv("COLLAB_SECRET");
   const resolvedColor = color ?? colorFromUserId(userId);
@@ -51,6 +59,7 @@ export function issueCollabToken({
       role,
       name,
       color: resolvedColor,
+      avatarUrl,
       iat: now,
       exp: expiresAt,
     },
@@ -61,7 +70,7 @@ export function issueCollabToken({
   return {
     token,
     expiresAt,
-    presence: { name, color: resolvedColor, userId },
+    presence: { userId, name, color: resolvedColor, avatarUrl },
   };
 }
 

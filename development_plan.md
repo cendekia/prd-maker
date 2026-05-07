@@ -194,7 +194,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 10
   - **User Instructions**: Generate `COLLAB_SECRET` (`openssl rand -hex 32`) and put into both Next.js `.env.local` and `apps/collab/.env`. Run the collab server locally with `cd apps/collab && npm run dev`.
 
-- [ ] Step 13: Presence avatars in top bar
+- [x] Step 13: Presence avatars in top bar
   - **Task**: Use Yjs awareness to show, in the top bar, avatars of every user currently viewing the page. Each user's awareness state contains `userId`, `name`, `avatarUrl`, `color`. Show first 5 avatars + "+N" overflow with a hover popover listing all viewers.
   - **Files**:
     - `src/components/app-shell/presence-avatars.tsx`

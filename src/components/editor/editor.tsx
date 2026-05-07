@@ -7,6 +7,7 @@ import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
 import * as Y from "yjs";
 
+import { usePresenceController } from "@/hooks/use-presence";
 import { cn } from "@/lib/utils";
 
 import { EditorBubbleMenu } from "./bubble-menu";
@@ -24,8 +25,14 @@ export interface CollabConfig {
   token: string;
   /** The page id is also the Hocuspocus document name. */
   pageId: string;
-  /** Local user — broadcast via Yjs awareness for presence cursors. */
-  user: { name: string; color: string };
+  /** Local user — broadcast via Yjs awareness for presence cursors and the
+   * top-bar avatar stack. */
+  user: {
+    userId: string;
+    name: string;
+    color: string;
+    avatarUrl: string | null;
+  };
 }
 
 interface Props {
@@ -132,6 +139,7 @@ function CollabEditor({
   // inside this component.
   const ydoc = useMemo(() => new Y.Doc(), []);
   const [synced, setSynced] = useState(false);
+  const presence = usePresenceController();
 
   const provider = useMemo(() => {
     return new HocuspocusProvider({
@@ -143,6 +151,18 @@ function CollabEditor({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ydoc]);
+
+  // Publish the active provider + local user id to the PresenceProvider so the
+  // top-bar avatar stack can subscribe to the same awareness. Cleared on
+  // unmount BEFORE the provider is destroyed below.
+  useEffect(() => {
+    presence.setSelfUserId(collab.user.userId);
+    presence.setProvider(provider);
+    return () => {
+      presence.setProvider(null);
+      presence.setSelfUserId(null);
+    };
+  }, [presence, provider, collab.user.userId]);
 
   // Forward connection lifecycle to the host so the title bar can show a
   // "Synced" / "Connecting…" indicator.
@@ -182,7 +202,14 @@ function CollabEditor({
         Collaboration.configure({ document: ydoc }),
         CollaborationCursor.configure({
           provider,
-          user: { name: collab.user.name, color: collab.user.color },
+          // Extra fields (userId, avatarUrl) are broadcast via awareness even
+          // though the cursor extension itself only reads {name, color}.
+          user: {
+            userId: collab.user.userId,
+            name: collab.user.name,
+            color: collab.user.color,
+            avatarUrl: collab.user.avatarUrl,
+          },
         }),
       ],
       editable,
