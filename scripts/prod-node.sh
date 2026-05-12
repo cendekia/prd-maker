@@ -8,7 +8,6 @@
 
 set -euo pipefail
 
-PUBLIC_IP="24.199.106.227"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -42,15 +41,39 @@ load_env_file ".env.local"
 # Never trust NODE_ENV from local templates for production deploy.
 export NODE_ENV=production
 
-# Ensure browser-facing URLs match public IP + Nginx WS route.
-if ! grep -Eq '^NEXT_PUBLIC_APP_URL="http://24\.199\.106\.227"$' .env.local; then
-  echo "Expected NEXT_PUBLIC_APP_URL=\"http://${PUBLIC_IP}\" in .env.local"
+# Public host is derived from NEXT_PUBLIC_APP_URL — no hardcoded IP.
+read_env() {
+  awk -F= -v k="$2" '
+    $0 ~ "^"k"=" {
+      sub("^"k"=", "")
+      gsub(/^["\x27]|["\x27]$/, "")
+      print
+      exit
+    }' "$1"
+}
+url_host() {
+  local u="$1"
+  u="${u#http://}"; u="${u#https://}"; u="${u#ws://}"; u="${u#wss://}"
+  printf '%s' "${u%%/*}"
+}
+APP_URL="$(read_env .env.local NEXT_PUBLIC_APP_URL)"
+WS_URL="$(read_env .env.local NEXT_PUBLIC_COLLAB_URL)"
+PUBLIC_HOST="$(url_host "$APP_URL")"
+if [ -z "$PUBLIC_HOST" ]; then
+  echo "Could not parse host from NEXT_PUBLIC_APP_URL='$APP_URL' in .env.local"
   exit 1
 fi
-if ! grep -Eq '^NEXT_PUBLIC_COLLAB_URL="ws://24\.199\.106\.227/collab"$' .env.local; then
-  echo "Expected NEXT_PUBLIC_COLLAB_URL=\"ws://${PUBLIC_IP}/collab\" in .env.local"
+if [ "$(url_host "$WS_URL")" != "$PUBLIC_HOST" ]; then
+  echo "NEXT_PUBLIC_COLLAB_URL host must match NEXT_PUBLIC_APP_URL host. Got WS='$WS_URL', APP='$APP_URL'"
   exit 1
 fi
+case "$WS_URL" in
+  ws://*/collab|wss://*/collab|ws://*/collab/|wss://*/collab/) ;;
+  *)
+    echo "NEXT_PUBLIC_COLLAB_URL must end with /collab. Got: $WS_URL"
+    exit 1
+    ;;
+esac
 
 if [ ! -d "node_modules" ]; then
   echo "Installing root dependencies..."
@@ -72,9 +95,10 @@ npm run db:deploy
 
 NGINX_CONF_CONTENT="$(cat <<'EOF'
 server {
-  listen 80;
-  listen [::]:80;
-  server_name 24.199.106.227;
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  # Catch-all — the host is whatever resolves to this box (IP or domain).
+  server_name _;
 
   client_max_body_size 20m;
 
@@ -147,8 +171,8 @@ nohup npm run start -- --hostname 127.0.0.1 --port 3000 > "${LOG_DIR}/next.log" 
 
 echo
 echo "Production stack is up."
-echo "  App URL:       http://${PUBLIC_IP}"
-echo "  Collab via WS: ws://${PUBLIC_IP}/collab"
+echo "  App URL:       $APP_URL"
+echo "  Collab via WS: $WS_URL"
 echo
 echo "Logs:"
 echo "  tail -f ${LOG_DIR}/next.log"

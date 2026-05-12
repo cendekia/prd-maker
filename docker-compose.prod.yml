@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: prdmaker-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prdmaker
+    volumes:
+      - prdmaker_pgdata:/var/lib/postgresql/data
+    # No host port exposed in prod — only the in-network services connect.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prdmaker"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   next:
     build:
       context: .
@@ -9,6 +26,9 @@ services:
       - .env.local
     environment:
       NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
     expose:
       - "3000"
 
@@ -22,6 +42,9 @@ services:
       - apps/collab/.env
     environment:
       NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
     expose:
       - "1234"
 
@@ -36,3 +59,6 @@ services:
       - "80:80"
     volumes:
       - ./deploy/nginx/prdmaker-ip.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  prdmaker_pgdata:

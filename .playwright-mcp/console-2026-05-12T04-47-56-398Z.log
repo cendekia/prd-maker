@@ -27,3 +27,5 @@
 [  316790ms] [LOG] [Fast Refresh] done in 117ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
 [  346039ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5949
 [  346866ms] [LOG] [Fast Refresh] done in 928ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_cf1d9188._.js:5809
+[ 5273160ms] [WARNING] [HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again. @ http://localhost:3000/_next/static/chunks/node_modules_%40hocuspocus_bbb5bd47._.js:2115
+[ 6876166ms] [WARNING] [HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again. @ http://localhost:3000/_next/static/chunks/node_modules_%40hocuspocus_bbb5bd47._.js:2115
