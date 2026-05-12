@@ -180,6 +180,66 @@ require_file() {
   fi
 }
 
+# ---------- Step 3a: host port preflight ----------
+# Common failure: host nginx (from prod-node.sh or distro defaults) is still
+# bound to :80, so the Docker nginx can't start. We detect any non-Docker
+# listener on the ports we need and surface a clear remediation.
+host_port_in_use() {
+  local port="$1"
+  # Prefer `ss` (iproute2), fall back to `lsof`.
+  if command -v ss >/dev/null 2>&1; then
+    sudo ss -tlnH "( sport = :${port} )" 2>/dev/null | head -n1 | grep -q .
+  elif command -v lsof >/dev/null 2>&1; then
+    sudo lsof -nP -iTCP:"${port}" -sTCP:LISTEN 2>/dev/null | tail -n +2 | head -n1 | grep -q .
+  else
+    return 1
+  fi
+}
+
+# Is the listener on this port one of our own Docker containers? If so we
+# can safely kill it via `docker compose down` later; if not, the user has
+# to free the port themselves.
+docker_owns_port() {
+  local port="$1"
+  if ! command -v ss >/dev/null 2>&1; then return 1; fi
+  local pid
+  pid="$(sudo ss -tlnpH "( sport = :${port} )" 2>/dev/null | grep -oE 'pid=[0-9]+' | head -n1 | cut -d= -f2)"
+  [ -n "${pid:-}" ] || return 1
+  local proc
+  proc="$(ps -p "$pid" -o comm= 2>/dev/null || true)"
+  case "$proc" in docker-proxy|docker|dockerd) return 0 ;; *) return 1 ;; esac
+}
+
+free_port_or_die() {
+  local port="$1" need="$2"   # need="required" or "optional"
+  if ! host_port_in_use "$port"; then
+    return 0
+  fi
+  if docker_owns_port "$port"; then
+    # A previous compose run left containers up — we'll bring them down later.
+    return 0
+  fi
+
+  err "Port ${port} is already in use on the host — Docker nginx can't bind to it."
+  if command -v ss >/dev/null 2>&1; then
+    err "Listener:"
+    sudo ss -tlnpH "( sport = :${port} )" 2>/dev/null | sed 's/^/  /'
+  fi
+
+  # If host nginx exists as a systemd unit, offer it as the most likely culprit.
+  if command -v systemctl >/dev/null 2>&1 && systemctl list-unit-files 2>/dev/null | grep -q '^nginx\.service'; then
+    if systemctl is-active --quiet nginx 2>/dev/null; then
+      err "Host nginx.service is running. Stop it and re-run:"
+      err "  sudo systemctl stop nginx && sudo systemctl disable nginx && sudo systemctl mask nginx"
+    fi
+  fi
+  err "Or identify + stop whatever owns the port:"
+  err "  sudo ss -tlnp '( sport = :${port} )'"
+  err "  sudo lsof -i :${port}"
+  if [ "$need" = "optional" ]; then return 0; fi
+  exit 1
+}
+
 # ---------- Step 3: firewall ----------
 ensure_firewall() {
   local need_https="$1"
@@ -371,6 +431,15 @@ fi
 
 log "Stopping any previous production containers..."
 docker compose -f "$COMPOSE_FILE" down --remove-orphans
+
+# After our own containers are down, verify nothing else holds the host
+# ports we need. Common culprit: host nginx left over from a prior
+# prod-node.sh run.
+log "Checking host port availability..."
+free_port_or_die 80 required
+if [ "$NEED_HTTPS" = "1" ]; then
+  free_port_or_die 443 required
+fi
 
 if [ "${FAST:-0}" = "1" ]; then
   log "Building images (cached)..."
