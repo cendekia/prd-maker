@@ -232,7 +232,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 12
   - **User Instructions**: After deploy, verify the cron is registered in the Vercel dashboard.
 
-- [ ] Step 16: Version history UI — list, diff view, restore
+- [x] Step 16: Version history UI — list, diff view, restore
   - **Task**: Page-level "History" drawer listing all `PageVersion` rows newest-first with author, timestamp, kind badge. Click any version to open a side-by-side diff view (left = selected version, right = current). Diff is computed on the JSON projection by `prosemirror-changeset` rendered as additions/deletions in red/green. Restore button overwrites Yjs doc with the chosen snapshot (broadcasts via Hocuspocus so all viewers update live).
   - **Files**:
     - `src/components/version-history/history-drawer.tsx`

@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Editor as TipTapEditor } from "@tiptap/core";
 import type { JSONContent } from "@tiptap/react";
-import { MessageSquare } from "lucide-react";
+import { History as HistoryIcon, MessageSquare } from "lucide-react";
 
 import { CommentsRail, type PendingAnchor } from "@/components/comments/comments-rail";
 import { Editor, type CollabSyncState } from "@/components/editor/editor";
 import { Button } from "@/components/ui/button";
+import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
 import { usePageContent } from "@/hooks/use-page-content";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ export function PageEditor({
   const [renaming, setRenaming] = useState(false);
   const [syncState, setSyncState] = useState<CollabSyncState>("connecting");
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingAnchor, setPendingAnchor] = useState<PendingAnchor | null>(null);
 
   // Bubble menu Comment button -> open rail with selection-bound composer.
@@ -144,9 +146,29 @@ export function PageEditor({
               size="sm"
               className={cn(
                 "ml-auto gap-1.5",
+                historyOpen && "bg-bg-active text-fg-1",
+              )}
+              onClick={() => {
+                setHistoryOpen((o) => !o);
+                if (!historyOpen) setCommentsOpen(false);
+              }}
+              aria-pressed={historyOpen}
+              aria-label="Toggle version history"
+            >
+              <HistoryIcon className="size-3.5" />
+              History
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "gap-1.5",
                 commentsOpen && "bg-bg-active text-fg-1",
               )}
-              onClick={() => setCommentsOpen((o) => !o)}
+              onClick={() => {
+                setCommentsOpen((o) => !o);
+                if (!commentsOpen) setHistoryOpen(false);
+              }}
               aria-pressed={commentsOpen}
               aria-label="Toggle comments"
             >
@@ -197,6 +219,27 @@ export function PageEditor({
           />
         </div>
       </div>
+      {historyOpen ? (
+        <HistoryDrawer
+          pageId={pageId}
+          getCurrentJson={() => editorRef.current?.getJSON() ?? null}
+          canRestore={editable}
+          onRestored={(snapshotJson) => {
+            const editor = editorRef.current;
+            if (editor && snapshotJson) {
+              // setContent flows through y-prosemirror into the shared Y.Doc
+              // (when collab is on) and broadcasts to all viewers via
+              // Hocuspocus. In solo mode it triggers the normal save path.
+              editor.commands.setContent(
+                snapshotJson as JSONContent,
+                true,
+              );
+            }
+            setHistoryOpen(false);
+          }}
+          onClose={() => setHistoryOpen(false)}
+        />
+      ) : null}
       {commentsOpen ? (
         <CommentsRail
           pageId={pageId}
