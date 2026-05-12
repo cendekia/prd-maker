@@ -41,3 +41,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated at deploy time by scripts/prod-docker.sh
+/deploy/nginx/prdmaker.conf
