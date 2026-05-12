@@ -428,7 +428,7 @@ Total: ~38 steps across 11 sections.
 
 ## Exports, Embeds, Mobile, Polish
 
-- [ ] Step 30: Export to Markdown, HTML, and PDF
+- [x] Step 30: Export to Markdown, HTML, and PDF
   - **Task**: Top-bar "Export" menu with three formats. Markdown via `prosemirror-markdown` serializer with custom rules for embeds and page-links. HTML via the same renderer used for public publishing. PDF server-side via `@react-pdf/renderer` mapping the JSON tree to PDF primitives.
   - **Files**:
     - `src/lib/export-markdown.ts`

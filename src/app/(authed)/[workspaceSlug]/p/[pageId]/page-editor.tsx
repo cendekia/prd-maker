@@ -7,6 +7,7 @@ import { History as HistoryIcon, MessageSquare } from "lucide-react";
 
 import { CommentsRail, type PendingAnchor } from "@/components/comments/comments-rail";
 import { Editor, type CollabSyncState } from "@/components/editor/editor";
+import { ExportMenu } from "@/components/page/export-menu";
 import { Button } from "@/components/ui/button";
 import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
@@ -150,6 +151,10 @@ export function PageEditor({
               </span>
             ) : null}
             <div className="ml-auto flex items-center gap-1.5">
+              <ExportMenu
+                pageId={pageId}
+                getContentJson={() => editorRef.current?.getJSON() ?? null}
+              />
               <PublishPopover
                 pageId={pageId}
                 pageTitle={title}
@@ -157,6 +162,7 @@ export function PageEditor({
                 initialPublicSlug={publicSlug}
                 publicBaseUrl={publicBaseUrl}
                 canPublish={editable}
+                getContentJson={() => editorRef.current?.getJSON() ?? null}
               />
             </div>
             <Button

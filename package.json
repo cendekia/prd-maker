@@ -22,6 +22,7 @@
     "@hocuspocus/provider": "^2.13.7",
     "@prisma/client": "^6.19.3",
     "@radix-ui/react-slot": "^1.1.1",
+    "@react-pdf/renderer": "^4.5.1",
     "@tiptap/extension-code-block-lowlight": "^2.27.2",
     "@tiptap/extension-collaboration": "^2.27.2",
     "@tiptap/extension-collaboration-cursor": "^2.27.2",

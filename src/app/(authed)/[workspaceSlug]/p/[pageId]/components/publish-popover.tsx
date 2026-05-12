@@ -21,6 +21,12 @@ interface Props {
   publicBaseUrl: string;
   /** Whether the current viewer can publish (EDITOR+). */
   canPublish: boolean;
+  /**
+   * Live editor JSON accessor. In collab mode `Page.contentJson` only refreshes
+   * every ~5min via the auto-snapshot, so without this a freshly-pasted image
+   * won't appear on the public page until that timer fires.
+   */
+  getContentJson?: () => unknown;
 }
 
 export function PublishPopover({
@@ -30,6 +36,7 @@ export function PublishPopover({
   initialPublicSlug,
   publicBaseUrl,
   canPublish,
+  getContentJson,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(initialIsPublished);
@@ -74,6 +81,22 @@ export function PublishPopover({
   const handlePublish = useCallback(() => {
     setError(null);
     startTransition(async () => {
+      const live = getContentJson?.();
+      if (live) {
+        // Flush the live editor JSON so the freshly-rendered public page
+        // reflects edits made since the last 5-min auto-snapshot. Best-
+        // effort: a viewer-role 403 or network blip falls back to the last
+        // persisted contentJson rather than blocking publish.
+        try {
+          await fetch(`/api/pages/${pageId}/content`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contentJson: live }),
+          });
+        } catch {
+          // ignore
+        }
+      }
       const result = await publishPageAction({ pageId, slug: slugDraft });
       if (!result.ok) {
         setError(result.error);
@@ -83,7 +106,7 @@ export function PublishPopover({
       setSlug(result.publicSlug);
       setSlugDraft(result.publicSlug);
     });
-  }, [pageId, slugDraft]);
+  }, [pageId, slugDraft, getContentJson]);
 
   const handleUnpublish = useCallback(() => {
     setError(null);
