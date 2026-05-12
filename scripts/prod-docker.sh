@@ -52,10 +52,56 @@ warn() { echo "${C_YLW}WARN${C_OFF} $*"; }
 err()  { echo "${C_RED}ERR${C_OFF} $*" >&2; }
 
 # ---------- Step 1: Docker + Compose ----------
+probe_docker_daemon() {
+  if docker info >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
 ensure_docker() {
   if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     ok "Docker $(docker --version | awk '{print $3}' | tr -d ,) + Compose installed"
-    return
+    if probe_docker_daemon; then
+      ok "Docker daemon reachable"
+      return
+    fi
+
+    # CLI present but daemon unreachable. Walk through the most common causes.
+    warn "Docker daemon not reachable from this shell."
+
+    # 1) Daemon not started?
+    if command -v systemctl >/dev/null 2>&1 && ! systemctl is-active --quiet docker; then
+      log "Starting docker.service..."
+      sudo systemctl enable --now docker || true
+      sleep 1
+      if probe_docker_daemon; then ok "Docker daemon reachable"; return; fi
+    fi
+
+    # 2) Group membership added but current shell hasn't picked it up?
+    if id -nG "$USER" 2>/dev/null | grep -qw docker; then
+      # The user IS in the docker group, but this shell's group list may be
+      # stale (common right after `usermod -aG docker` on the same login).
+      warn "You are in the 'docker' group, but this shell hasn't picked it up yet."
+      warn "Fixes (pick one):"
+      warn "  - Log out and back in (most reliable)"
+      warn "  - Run:  newgrp docker        # then re-run this script"
+      warn "  - Run:  exec sg docker -c './scripts/prod-docker.sh'"
+    else
+      # 3) Not in the group at all — add and instruct.
+      warn "Your user '$USER' is not in the 'docker' group."
+      log "Adding $USER to the docker group..."
+      sudo usermod -aG docker "$USER"
+      warn "Group added. Either log out + back in, or run 'newgrp docker', then re-run this script."
+    fi
+
+    # Last resort hint for custom socket setups (rootless, Colima, Docker Desktop).
+    if [ -n "${DOCKER_HOST:-}" ]; then
+      warn "DOCKER_HOST=$DOCKER_HOST is set — check that this endpoint is reachable."
+    fi
+    err "Aborting until the daemon is reachable."
+    err "Diagnose with:  docker info"
+    exit 1
   fi
 
   log "Docker (or Compose plugin) not found — installing..."
