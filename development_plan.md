@@ -329,7 +329,7 @@ Total: ~38 steps across 11 sections.
 
 ## Public Publishing
 
-- [ ] Step 23: Publish to public read-only URL
+- [x] Step 23: Publish to public read-only URL
   - **Task**: Add `Page.isPublished`, `Page.publicSlug` (unique). "Publish" button in top bar opens a popover with toggle, custom-slug input, and copy-link. On publish, render the current Yjs state to static HTML and store as `PagePublishedHtml` (or render on demand at `/p/[slug]` via SSR — pick SSR for simplicity, with HTTP cache headers + revalidate-on-publish). Public route is unauthenticated, has no chrome — just title, content, "Made with PRDMaker" footer.
   - **Files**:
     - `prisma/schema.prisma`: add fields to Page

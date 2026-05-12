@@ -13,6 +13,8 @@ import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
 import { usePageContent } from "@/hooks/use-page-content";
 import { cn } from "@/lib/utils";
 
+import { PublishPopover } from "./components/publish-popover";
+
 interface CollabPayload {
   url: string;
   token: string;
@@ -35,6 +37,9 @@ interface Props {
   currentUserId: string;
   isOwner: boolean;
   collab: CollabPayload | null;
+  isPublished: boolean;
+  publicSlug: string | null;
+  publicBaseUrl: string;
 }
 
 export function PageEditor({
@@ -47,6 +52,9 @@ export function PageEditor({
   currentUserId,
   isOwner,
   collab,
+  isPublished,
+  publicSlug,
+  publicBaseUrl,
 }: Props) {
   const [titleDraft, setTitleDraft] = useState(title);
   const [renaming, setRenaming] = useState(false);
@@ -141,11 +149,21 @@ export function PageEditor({
                 Read-only
               </span>
             ) : null}
+            <div className="ml-auto flex items-center gap-1.5">
+              <PublishPopover
+                pageId={pageId}
+                pageTitle={title}
+                initialIsPublished={isPublished}
+                initialPublicSlug={publicSlug}
+                publicBaseUrl={publicBaseUrl}
+                canPublish={editable}
+              />
+            </div>
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                "ml-auto gap-1.5",
+                "gap-1.5",
                 historyOpen && "bg-bg-active text-fg-1",
               )}
               onClick={() => {

@@ -1,0 +1,119 @@
+/* Prose styling for the public publish surface. */
+
+.prdmaker-public-prose {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--fg-1);
+}
+
+.prdmaker-public-prose > * + * {
+  margin-top: 1em;
+}
+
+.prdmaker-public-prose h1,
+.prdmaker-public-prose h2,
+.prdmaker-public-prose h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-1);
+  line-height: 1.25;
+}
+
+.prdmaker-public-prose h1 { font-size: 26px; margin-top: 1.6em; }
+.prdmaker-public-prose h2 { font-size: 20px; margin-top: 1.4em; }
+.prdmaker-public-prose h3 { font-size: 16px; margin-top: 1.2em; }
+
+.prdmaker-public-prose p { color: var(--fg-1); }
+
+.prdmaker-public-prose a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prdmaker-public-prose a:hover { color: var(--link-hover); }
+
+.prdmaker-public-prose strong { font-weight: 600; }
+.prdmaker-public-prose em { font-style: italic; }
+
+.prdmaker-public-prose ul,
+.prdmaker-public-prose ol {
+  padding-left: 1.4em;
+}
+.prdmaker-public-prose li + li { margin-top: 0.25em; }
+
+.prdmaker-public-prose ul.task-list {
+  list-style: none;
+  padding-left: 0;
+}
+.prdmaker-public-prose li.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+.prdmaker-public-prose li.task-item input[type="checkbox"] {
+  margin-top: 0.4em;
+}
+
+.prdmaker-public-prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--fg-2);
+  font-style: italic;
+}
+
+.prdmaker-public-prose code {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.92em;
+  background: var(--bg-muted);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-xs);
+}
+
+.prdmaker-public-prose pre {
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.prdmaker-public-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.prdmaker-public-prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+.prdmaker-public-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.prdmaker-public-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.prdmaker-public-prose th,
+.prdmaker-public-prose td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+.prdmaker-public-prose th {
+  background: var(--bg-subtle);
+  font-weight: 600;
+}
+
+.prdmaker-public-prose .mention {
+  background: var(--bg-muted);
+  border-radius: var(--radius-xs);
+  padding: 0.05em 0.3em;
+  font-size: 0.95em;
+}

@@ -31,6 +31,8 @@ export default async function PageEditorRoute({ params }: PageProps) {
       contentJson: true,
       updatedAt: true,
       archivedAt: true,
+      isPublished: true,
+      publicSlug: true,
     },
   });
   if (!page || page.archivedAt) notFound();
@@ -64,6 +66,9 @@ export default async function PageEditorRoute({ params }: PageProps) {
       currentUserId={user.id}
       isOwner={access.role === Role.OWNER}
       collab={collab}
+      isPublished={page.isPublished}
+      publicSlug={page.publicSlug}
+      publicBaseUrl={env.NEXT_PUBLIC_APP_URL}
     />
   );
 }

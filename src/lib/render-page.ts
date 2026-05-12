@@ -1,0 +1,221 @@
+/**
+ * Render a TipTap/ProseMirror JSON document to a static HTML string.
+ *
+ * Used by the public publish surface (Step 23) and by HTML export (Step 30).
+ * We hand-roll the renderer rather than spin up jsdom + @tiptap/html because:
+ *   1. The public route is SSR'd on every request — keeping the renderer
+ *      pure-string keeps cold-start fast.
+ *   2. We need precise control over which marks/nodes appear publicly
+ *      (CommentMark, for example, is stripped — comments are private).
+ *
+ * The output is a fragment of escaped HTML — the caller wraps it in a
+ * styled prose container.
+ */
+
+type Mark = {
+  type: string;
+  attrs?: Record<string, unknown>;
+};
+
+type Node = {
+  type: string;
+  attrs?: Record<string, unknown>;
+  marks?: Mark[];
+  text?: string;
+  content?: Node[];
+};
+
+export function renderPageHtml(doc: unknown): string {
+  if (!doc || typeof doc !== "object") return "";
+  const node = doc as Node;
+  if (node.type === "doc" && Array.isArray(node.content)) {
+    return node.content.map(renderNode).join("");
+  }
+  return renderNode(node);
+}
+
+function renderNode(node: Node): string {
+  if (!node) return "";
+  switch (node.type) {
+    case "text":
+      return wrapMarks(escapeHtml(node.text ?? ""), node.marks);
+
+    case "paragraph":
+      return `<p>${renderChildren(node)}</p>`;
+
+    case "heading": {
+      const level = clampHeading(node.attrs?.level);
+      return `<h${level}>${renderChildren(node)}</h${level}>`;
+    }
+
+    case "blockquote":
+      return `<blockquote>${renderChildren(node)}</blockquote>`;
+
+    case "bulletList":
+      return `<ul>${renderChildren(node)}</ul>`;
+
+    case "orderedList": {
+      const start = node.attrs?.start;
+      const startAttr =
+        typeof start === "number" && start !== 1
+          ? ` start="${escapeAttr(String(start))}"`
+          : "";
+      return `<ol${startAttr}>${renderChildren(node)}</ol>`;
+    }
+
+    case "listItem":
+      return `<li>${renderChildren(node)}</li>`;
+
+    case "taskList":
+      return `<ul class="task-list">${renderChildren(node)}</ul>`;
+
+    case "taskItem": {
+      const checked = node.attrs?.checked === true;
+      return `<li class="task-item" data-checked="${checked}"><input type="checkbox" disabled${
+        checked ? " checked" : ""
+      }> ${renderChildren(node)}</li>`;
+    }
+
+    case "codeBlock": {
+      const lang =
+        typeof node.attrs?.language === "string"
+          ? ` class="language-${escapeAttr(node.attrs.language as string)}"`
+          : "";
+      // Code blocks never wrap marks — only their text content.
+      const text = (node.content ?? [])
+        .map((c) => escapeHtml(c.text ?? ""))
+        .join("");
+      return `<pre><code${lang}>${text}</code></pre>`;
+    }
+
+    case "horizontalRule":
+      return "<hr>";
+
+    case "hardBreak":
+      return "<br>";
+
+    case "image": {
+      const src = sanitizeUrl(node.attrs?.src);
+      if (!src) return "";
+      const alt = escapeAttr(stringAttr(node.attrs?.alt));
+      const title = stringAttr(node.attrs?.title);
+      const titleAttr = title ? ` title="${escapeAttr(title)}"` : "";
+      return `<img src="${escapeAttr(src)}" alt="${alt}"${titleAttr} loading="lazy">`;
+    }
+
+    case "table":
+      return `<table>${renderChildren(node)}</table>`;
+    case "tableRow":
+      return `<tr>${renderChildren(node)}</tr>`;
+    case "tableHeader":
+      return `<th>${renderChildren(node)}</th>`;
+    case "tableCell":
+      return `<td>${renderChildren(node)}</td>`;
+
+    case "pageLink": {
+      // In the authed app this is a chip linking elsewhere in the workspace,
+      // but on the public surface we render the label as plain bold text so
+      // anonymous readers don't see workspace-internal links.
+      const label = stringAttr(node.attrs?.label) || stringAttr(node.attrs?.title);
+      if (!label) return "";
+      return `<strong>${escapeHtml(label)}</strong>`;
+    }
+
+    case "mention": {
+      const label = stringAttr(node.attrs?.label);
+      if (!label) return "";
+      return `<span class="mention">@${escapeHtml(label)}</span>`;
+    }
+
+    default:
+      // Unknown node — render its children so we never silently drop content.
+      return renderChildren(node);
+  }
+}
+
+function renderChildren(node: Node): string {
+  if (!Array.isArray(node.content)) return "";
+  return node.content.map(renderNode).join("");
+}
+
+/**
+ * Wrap inline text in the supplied marks. We intentionally strip:
+ *   - `comment` — private collab metadata
+ *   - any unknown mark — fail closed rather than emit untrusted HTML
+ */
+function wrapMarks(content: string, marks: Mark[] | undefined): string {
+  if (!marks || marks.length === 0) return content;
+  let out = content;
+  for (const mark of marks) {
+    switch (mark.type) {
+      case "bold":
+      case "strong":
+        out = `<strong>${out}</strong>`;
+        break;
+      case "italic":
+      case "em":
+        out = `<em>${out}</em>`;
+        break;
+      case "strike":
+        out = `<s>${out}</s>`;
+        break;
+      case "underline":
+        out = `<u>${out}</u>`;
+        break;
+      case "code":
+        out = `<code>${out}</code>`;
+        break;
+      case "link": {
+        const href = sanitizeUrl(mark.attrs?.href);
+        if (!href) break;
+        const target = stringAttr(mark.attrs?.target) || "_blank";
+        out = `<a href="${escapeAttr(href)}" target="${escapeAttr(
+          target,
+        )}" rel="noopener noreferrer nofollow">${out}</a>`;
+        break;
+      }
+      default:
+        // Unknown marks (e.g. comment) are dropped — content survives.
+        break;
+    }
+  }
+  return out;
+}
+
+function clampHeading(level: unknown): 1 | 2 | 3 {
+  const n = typeof level === "number" ? level : 1;
+  if (n <= 1) return 1;
+  if (n >= 3) return 3;
+  return 2;
+}
+
+function stringAttr(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttr(s: string): string {
+  return escapeHtml(s).replace(/"/g, "&quot;");
+}
+
+/**
+ * Allow only http(s), mailto, and data:image URLs. Anything else (javascript:,
+ * vbscript:, file:, etc.) returns the empty string so the caller drops the
+ * element entirely — defense in depth against malicious editor JSON.
+ */
+function sanitizeUrl(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^mailto:/i.test(trimmed)) return trimmed;
+  if (/^data:image\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("/") || trimmed.startsWith("#")) return trimmed;
+  return "";
+}
