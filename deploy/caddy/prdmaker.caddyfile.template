@@ -2,18 +2,18 @@
 # the hostname from NEXT_PUBLIC_APP_URL and appends this block to the host's
 # Caddyfile between managed markers.
 __HOST__ {
-  # Compress responses.
   encode zstd gzip
 
-  # Bigger uploads — match the previous nginx setting.
   request_body {
     max_size 20MB
   }
 
-  # WebSocket path for the Hocuspocus collab server.
-  # `handle_path` strips the `/collab` prefix before forwarding, so the
-  # upstream sees `/` — matching the old nginx `proxy_pass .../;` semantics.
-  handle_path /collab/* {
+  # Hocuspocus WebSocket endpoint. The provider connects to /collab (no
+  # trailing path) and multiplexes documents in-message, so we have to match
+  # both /collab and /collab/* explicitly — /collab/* alone wouldn't match
+  # the bare URL.
+  @collab path /collab /collab/*
+  handle @collab {
     reverse_proxy 127.0.0.1:1234
   }
 
