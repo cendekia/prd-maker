@@ -480,7 +480,7 @@ Total: ~38 steps across 11 sections.
 
 ## Marketing Surface
 
-- [ ] Step 34: Public marketing pages — landing, pricing, privacy, terms
+- [x] Step 34: Public marketing pages — landing, pricing, privacy, terms
   - **Task**: Build unauthenticated marketing pages: `/` landing (hero, three-pane product screenshot, AI panel demo, feature grid, CTA), `/pricing` (three-tier table matching Step 24), `/privacy`, `/terms`. SEO metadata and OpenGraph images.
   - **Files**:
     - `src/app/(marketing)/layout.tsx`
