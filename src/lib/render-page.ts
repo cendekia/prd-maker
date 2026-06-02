@@ -12,6 +12,8 @@
  * styled prose container.
  */
 
+import { isAllowedEmbedHost } from "@/lib/embeds/match";
+
 type Mark = {
   type: string;
   attrs?: Record<string, unknown>;
@@ -127,6 +129,9 @@ function renderNode(node: Node): string {
       return `<span class="mention">@${escapeHtml(label)}</span>`;
     }
 
+    case "embed":
+      return renderEmbed(node);
+
     default:
       // Unknown node — render its children so we never silently drop content.
       return renderChildren(node);
@@ -136,6 +141,76 @@ function renderNode(node: Node): string {
 function renderChildren(node: Node): string {
   if (!Array.isArray(node.content)) return "";
   return node.content.map(renderNode).join("");
+}
+
+const EMBED_IFRAME_ALLOW =
+  "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+const EMBED_IFRAME_SANDBOX =
+  "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation";
+
+/**
+ * Render an embed node. `embedUrl` is re-validated against the iframe host
+ * allowlist here too — never trust stored `contentJson` on the public surface —
+ * so a tampered embed degrades to a plain link card instead of an arbitrary
+ * iframe.
+ */
+function renderEmbed(node: Node): string {
+  const url = sanitizeUrl(node.attrs?.url);
+  const embedUrl = stringAttr(node.attrs?.embedUrl);
+  const kind = stringAttr(node.attrs?.kind);
+  const title = stringAttr(node.attrs?.title) || hostnameOf(url) || "Embed";
+  const providerLabel =
+    stringAttr(node.attrs?.providerLabel) || hostnameOf(url) || "Link";
+
+  if (kind !== "link" && isAllowedEmbedHost(embedUrl)) {
+    const fixedHeight = numAttr(node.attrs?.fixedHeight);
+    const ratio = numAttr(node.attrs?.aspectRatio) || 16 / 9;
+    const style =
+      fixedHeight && fixedHeight > 0
+        ? `height:${fixedHeight}px`
+        : `aspect-ratio:${ratio}`;
+    const openLink = url
+      ? `<a class="embed-bar-link" href="${escapeAttr(
+          url,
+        )}" target="_blank" rel="noopener noreferrer nofollow">Open ↗</a>`
+      : "";
+    return (
+      `<div class="embed embed--frame">` +
+      `<div class="embed-bar"><span class="embed-bar-label">${escapeHtml(
+        providerLabel,
+      )}</span>${openLink}</div>` +
+      `<div class="embed-frame-body" style="${style}">` +
+      `<iframe src="${escapeAttr(
+        embedUrl,
+      )}" title="${escapeAttr(title)}" loading="lazy" allow="${EMBED_IFRAME_ALLOW}" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" sandbox="${EMBED_IFRAME_SANDBOX}"></iframe>` +
+      `</div></div>`
+    );
+  }
+
+  // Link card — needs a safe http(s) target or we drop it.
+  if (!url) return "";
+  return (
+    `<a class="embed embed--card" href="${escapeAttr(
+      url,
+    )}" target="_blank" rel="noopener noreferrer nofollow">` +
+    `<span class="embed-card-text"><span class="embed-card-title">${escapeHtml(
+      title,
+    )}</span><span class="embed-card-url">${escapeHtml(url)}</span></span>` +
+    `<span class="embed-card-badge">${escapeHtml(providerLabel)}</span>` +
+    `</a>`
+  );
+}
+
+function numAttr(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+function hostnameOf(value: string): string {
+  try {
+    return new URL(value).host.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 }
 
 /**

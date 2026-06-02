@@ -102,4 +102,29 @@ body {
 .prdmaker-doc th { background: var(--muted); font-weight: 600; }
 .prdmaker-doc ul.task-list { list-style: none; padding-left: 0; }
 .prdmaker-doc li.task-item { display: flex; gap: 0.5em; }
+.prdmaker-doc .embed { display: block; margin: 1.4em 0; }
+.prdmaker-doc .embed--frame { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.prdmaker-doc .embed-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.5em; padding: 0.45em 0.7em; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.prdmaker-doc .embed-bar-label { font-weight: 600; color: var(--fg-2); }
+.prdmaker-doc .embed-bar-link { color: var(--fg-2); text-decoration: none; font-size: 12px; }
+.prdmaker-doc .embed-frame-body { position: relative; width: 100%; background: var(--muted); }
+.prdmaker-doc .embed-frame-body iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block;
+}
+.prdmaker-doc .embed--card {
+  display: flex; align-items: center; gap: 0.75em; padding: 0.6em 0.8em;
+  border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: inherit;
+}
+.prdmaker-doc .embed-card-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 0; }
+.prdmaker-doc .embed-card-title { font-weight: 600; color: var(--fg); }
+.prdmaker-doc .embed-card-url {
+  font-size: 13px; color: var(--fg-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.prdmaker-doc .embed-card-badge {
+  flex-shrink: 0; font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.03em; color: var(--fg-2); padding: 0.1em 0.5em; border-radius: 4px; background: var(--muted);
+}
 `;

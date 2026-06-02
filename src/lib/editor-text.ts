@@ -8,6 +8,7 @@
 type Node = {
   type?: string;
   text?: string;
+  attrs?: Record<string, unknown>;
   content?: Node[];
 };
 
@@ -40,6 +41,16 @@ function walk(node: Node, out: string[]) {
   if (!node) return;
   if (typeof node.text === "string") {
     out.push(node.text);
+    return;
+  }
+  if (node.type === "embed") {
+    // Atom node with no text children — surface its title + url so embedded
+    // content is still discoverable via search / AI page context.
+    const title = typeof node.attrs?.title === "string" ? node.attrs.title : "";
+    const url = typeof node.attrs?.url === "string" ? node.attrs.url : "";
+    const text = [title, url].filter(Boolean).join(" ");
+    if (text) out.push(text);
+    out.push("\n");
     return;
   }
   if (Array.isArray(node.content)) {

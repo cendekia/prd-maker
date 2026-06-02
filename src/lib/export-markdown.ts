@@ -101,6 +101,17 @@ function renderBlock(node: Node, ctx: Ctx): string {
     case "table":
       return renderTable(node);
 
+    case "embed": {
+      // No iframes in Markdown — emit a labelled link to the source.
+      const url = sanitizeUrl(node.attrs?.url);
+      if (!url) return "";
+      const title =
+        stringAttr(node.attrs?.title) ||
+        stringAttr(node.attrs?.providerLabel) ||
+        url;
+      return `[${escapeText(title)}](${url})`;
+    }
+
     default:
       // Fallback: stringify any inline content we recognise.
       return renderInline(node);

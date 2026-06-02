@@ -316,6 +316,208 @@
   background: var(--accent-100);
 }
 
+/* Embed node (Step 31) — a sandboxed iframe frame or a link card, plus the
+ * URL-input / loading / error states rendered by EmbedView. */
+.editor-host .ProseMirror .embed-node {
+  margin: var(--space-5) 0;
+}
+.editor-host .ProseMirror .embed-node[data-selected] .embed-frame,
+.editor-host .ProseMirror .embed-node[data-selected] .embed-card {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
+}
+
+.editor-host .ProseMirror .embed-frame {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-subtle);
+}
+.editor-host .ProseMirror .embed-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+.editor-host .ProseMirror .embed-bar-label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--fg-2);
+}
+.editor-host .ProseMirror .embed-bar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.editor-host .ProseMirror .embed-frame-body {
+  position: relative;
+  width: 100%;
+  background: var(--bg-muted);
+}
+.editor-host .ProseMirror .embed-frame-body iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.editor-host .ProseMirror .embed-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  color: var(--fg-3);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition:
+    background var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+.editor-host .ProseMirror .embed-icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--fg-1);
+}
+.editor-host .ProseMirror .embed-text-btn {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--accent-700);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+.editor-host .ProseMirror .embed-text-btn:hover {
+  background: var(--accent-50);
+}
+
+.editor-host .ProseMirror .embed-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+}
+.editor-host .ProseMirror .embed-input-field {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: var(--fs-base);
+  color: var(--fg-1);
+}
+.editor-host .ProseMirror .embed-input-field::placeholder {
+  color: var(--fg-4);
+}
+.editor-host .ProseMirror .embed-input-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-600);
+  color: var(--neutral-0);
+  border: 0;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+.editor-host .ProseMirror .embed-input-btn:hover {
+  background: var(--accent-700);
+}
+
+.editor-host .ProseMirror .embed-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  font-size: var(--fs-sm);
+}
+
+.editor-host .ProseMirror .embed-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  transition:
+    background var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out);
+}
+.editor-host .ProseMirror .embed-card:hover {
+  border-color: var(--border-strong);
+  background: var(--background);
+}
+.editor-host .ProseMirror .embed-card--error {
+  background: transparent;
+}
+.editor-host .ProseMirror .embed-card-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 0;
+  text-decoration: none;
+  color: inherit;
+}
+.editor-host .ProseMirror .embed-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--fg-3);
+}
+.editor-host .ProseMirror .embed-card-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.editor-host .ProseMirror .embed-card-title {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  color: var(--fg-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.editor-host .ProseMirror .embed-card-url {
+  font-size: var(--fs-sm);
+  color: var(--fg-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.editor-host .ProseMirror .embed-card-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  color: var(--fg-3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-muted);
+}
+
 /* Tippy popovers (slash menu, bubble menu) inherit our z-index + radius. */
 .tippy-box {
   background: transparent !important;

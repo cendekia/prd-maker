@@ -1,6 +1,7 @@
 import {
   Document,
   Image,
+  Link,
   Page,
   StyleSheet,
   Text,
@@ -100,6 +101,21 @@ const styles = StyleSheet.create({
   strike: { textDecoration: "line-through" },
   image: { marginVertical: 8, maxWidth: "100%" },
   imageCaption: { fontSize: 9, color: "#666", marginBottom: 4 },
+  embed: {
+    borderWidth: 1,
+    borderColor: "#e5e5e5",
+    borderRadius: 4,
+    padding: 10,
+    marginBottom: 8,
+  },
+  embedLabel: {
+    fontSize: 8,
+    color: "#666",
+    marginBottom: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  embedTitle: { fontSize: 11, fontWeight: 700, marginBottom: 2 },
 });
 
 export async function exportPagePdf(args: {
@@ -196,6 +212,26 @@ function Block({ node }: { node: Node }): ReactNode {
     }
     case "table":
       return <View style={styles.table}>{renderTableRows(node)}</View>;
+    case "embed": {
+      // No live iframes in a PDF — render a labelled link to the source.
+      const url = sanitizeHttpUrl(node.attrs?.url);
+      const title =
+        stringAttr(node.attrs?.title) ||
+        stringAttr(node.attrs?.providerLabel) ||
+        url ||
+        "Embed";
+      const label = stringAttr(node.attrs?.providerLabel);
+      if (!url) return <Text style={styles.paragraph}>{title}</Text>;
+      return (
+        <View style={styles.embed} wrap={false}>
+          {label ? <Text style={styles.embedLabel}>{label}</Text> : null}
+          <Text style={styles.embedTitle}>{title}</Text>
+          <Link src={url} style={styles.link}>
+            {url}
+          </Link>
+        </View>
+      );
+    }
     default:
       // Anything we don't recognise — show its inline projection so we don't
       // silently lose user content.
@@ -344,4 +380,12 @@ function sanitizeImageSrc(value: unknown): string | null {
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   if (/^data:image\//i.test(trimmed)) return trimmed;
   return null;
+}
+
+/** http(s)-only link target for embeds. */
+function sanitizeHttpUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : null;
 }

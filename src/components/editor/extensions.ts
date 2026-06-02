@@ -14,6 +14,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import { common, createLowlight } from "lowlight";
 
 import { CommentMark } from "./extensions/comment-mark";
+import { Embed } from "./extensions/embed";
 import { Mention, type MentionMember } from "./extensions/mention";
 import { PageLink } from "./extensions/page-link";
 import { PageLinkSuggestionExtension } from "./extensions/page-link-suggestion";
@@ -101,6 +102,7 @@ export function buildExtensions(opts: BuildExtensionsOptions) {
       },
     }),
     CommentMark,
+    Embed,
     SlashCommandsExtension,
   ];
 }

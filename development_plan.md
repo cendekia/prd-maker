@@ -440,7 +440,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 23
   - **User Instructions**: none
 
-- [ ] Step 31: Embeds — Figma, Linear, Loom, YouTube, generic oEmbed
+- [x] Step 31: Embeds — Figma, Linear, Loom, YouTube, generic oEmbed
   - **Task**: Add an `Embed` TipTap node that resolves a pasted URL on the server via `/api/embeds/resolve` returning provider + iframe HTML or oEmbed payload. Custom resolvers for Figma (file URL → embed), Linear (issue link → preview card), Loom (video → iframe), YouTube. Generic oEmbed fallback. Render with sandboxed iframe and a "Copy link" affordance.
   - **Files**:
     - `src/components/editor/extensions/embed.ts`

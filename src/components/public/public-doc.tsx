@@ -1,4 +1,6 @@
-import { Fragment, type JSX, type ReactNode } from "react";
+import { Fragment, type CSSProperties, type JSX, type ReactNode } from "react";
+
+import { isAllowedEmbedHost } from "@/lib/embeds/match";
 
 /**
  * Server-rendered React tree for the public publish surface.
@@ -159,6 +161,9 @@ function renderNode(node: Node, key: string): ReactNode {
       );
     }
 
+    case "embed":
+      return renderEmbed(node, key);
+
     default:
       // Unknown node — render children so we don't silently lose content.
       return <Fragment key={key}>{renderChildren(node, key)}</Fragment>;
@@ -172,6 +177,91 @@ function renderChildren(node: Node, parentKey: string): ReactNode {
       {renderNode(child, `${parentKey}.${i}`)}
     </Fragment>
   ));
+}
+
+const EMBED_IFRAME_ALLOW =
+  "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+const EMBED_IFRAME_SANDBOX =
+  "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation";
+
+/**
+ * Render an embed on the public surface. `embedUrl` is re-validated against the
+ * iframe host allowlist — we never iframe an arbitrary stored URL — so a
+ * tampered embed degrades to a plain link card.
+ */
+function renderEmbed(node: Node, key: string): ReactNode {
+  const url = sanitizeUrl(node.attrs?.url);
+  const embedUrl = stringAttr(node.attrs?.embedUrl);
+  const kind = stringAttr(node.attrs?.kind);
+  const title = stringAttr(node.attrs?.title) || hostnameOf(url) || "Embed";
+  const providerLabel =
+    stringAttr(node.attrs?.providerLabel) || hostnameOf(url) || "Link";
+
+  if (kind !== "link" && isAllowedEmbedHost(embedUrl)) {
+    const fixedHeight = numAttr(node.attrs?.fixedHeight);
+    const ratio = numAttr(node.attrs?.aspectRatio) || 16 / 9;
+    const bodyStyle: CSSProperties =
+      fixedHeight && fixedHeight > 0
+        ? { height: fixedHeight }
+        : { aspectRatio: String(ratio) };
+    return (
+      <div key={key} className="embed embed--frame">
+        <div className="embed-bar">
+          <span className="embed-bar-label">{providerLabel}</span>
+          {url ? (
+            <a
+              className="embed-bar-link"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              Open ↗
+            </a>
+          ) : null}
+        </div>
+        <div className="embed-frame-body" style={bodyStyle}>
+          <iframe
+            src={embedUrl}
+            title={title}
+            loading="lazy"
+            allow={EMBED_IFRAME_ALLOW}
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            sandbox={EMBED_IFRAME_SANDBOX}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!url) return null;
+  return (
+    <a
+      key={key}
+      className="embed embed--card"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+    >
+      <span className="embed-card-text">
+        <span className="embed-card-title">{title}</span>
+        <span className="embed-card-url">{url}</span>
+      </span>
+      <span className="embed-card-badge">{providerLabel}</span>
+    </a>
+  );
+}
+
+function numAttr(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+function hostnameOf(value: string): string {
+  try {
+    return new URL(value).host.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 }
 
 function wrapMarks(

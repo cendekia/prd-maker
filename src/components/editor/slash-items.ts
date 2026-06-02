@@ -3,6 +3,7 @@
 import type { Editor, Range } from "@tiptap/core";
 import {
   CheckSquare,
+  Clapperboard,
   Code,
   Heading1,
   Heading2,
@@ -144,5 +145,13 @@ export const defaultSlashItems: SlashCommandItem[] = [
       };
       input.click();
     },
+  },
+  {
+    title: "Embed",
+    description: "Figma, Loom, YouTube, or any link",
+    keywords: ["embed", "video", "figma", "loom", "youtube", "vimeo", "iframe"],
+    icon: Clapperboard,
+    command: ({ editor, range }) =>
+      editor.chain().focus().deleteRange(range).setEmbed({ url: "" }).run(),
   },
 ];
