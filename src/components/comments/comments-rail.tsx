@@ -160,6 +160,7 @@ export function CommentsRail({
   return (
     <aside
       className={cn(
+        "pm-slide-in-right",
         // Desktop: a 320px side panel. Mobile: a full-screen overlay sheet
         // (`inset-0` gives full width without a competing fixed width).
         "flex flex-col border-l bg-bg-subtle",

@@ -88,6 +88,8 @@ export function AppShell({
         <TopBar
           workspaceName={workspace.name}
           sectionLabel={section}
+          user={user}
+          workspaceSlug={workspace.slug}
           isMobile={isMobile}
           onToggleSidebar={
             isMobile

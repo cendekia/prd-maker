@@ -110,11 +110,11 @@ export function CommandPaletteProvider({
       {children}
       {open ? (
         <div
-          className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center bg-[oklch(0.145_0_0_/_0.4)] px-4 pt-[12vh]"
+          className="pm-fade-in fixed inset-0 z-[var(--z-modal)] flex items-start justify-center bg-[oklch(0.145_0_0_/_0.4)] px-4 pt-[12vh]"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg overflow-hidden rounded-[var(--radius-xl)] border bg-popover shadow-[var(--shadow-xl)]"
+            className="pm-pop-in w-full max-w-lg overflow-hidden rounded-[var(--radius-xl)] border bg-popover shadow-[var(--shadow-xl)]"
             onClick={(e) => e.stopPropagation()}
           >
             <Command

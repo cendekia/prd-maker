@@ -465,7 +465,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 14, Step 23
   - **User Instructions**: none
 
-- [ ] Step 33: Visual polish — Notion-like minimal aesthetic + dark mode QA
+- [x] Step 33: Visual polish — Notion-like minimal aesthetic + dark mode QA
   - **Task**: Tighten typography (Inter, generous line-height, content max-width 740px), refine palette to near-monochrome with a single accent color, audit every screen in light + dark, fix contrast issues, add subtle motion (Framer Motion) on tree expand, panel slide, modal open. Use `next-themes` system/light/dark switcher in account menu.
   - **Files**:
     - `src/app/globals.css`: refined CSS variables for both themes

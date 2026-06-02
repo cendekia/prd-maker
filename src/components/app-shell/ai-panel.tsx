@@ -11,7 +11,7 @@ interface Props {
 export function AIPanel({ onClose }: Props) {
   return (
     <aside
-      className="flex shrink-0 flex-col border-l bg-bg-subtle"
+      className="pm-slide-in-right flex shrink-0 flex-col border-l bg-bg-subtle"
       style={{ width: "var(--ai-panel-width)" }}
     >
       <div

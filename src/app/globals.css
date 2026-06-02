@@ -291,3 +291,41 @@
   .t-label   { font-size: 11px; line-height: 14px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-3); font-weight: var(--fw-medium); }
   .t-mono    { font-family: var(--font-mono); }
 }
+
+/* ============================================================
+ * Motion utilities (Step 33) — subtle, token-driven CSS entrances.
+ * Reused for modals/popovers (pop), side panels (slide), menus
+ * (fade-up). Honors prefers-reduced-motion.
+ * ============================================================ */
+@keyframes pm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pm-pop-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pm-slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pm-fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@layer utilities {
+  .pm-fade-in       { animation: pm-fade-in var(--dur-2) var(--ease-out); }
+  .pm-pop-in        { animation: pm-pop-in var(--dur-3) var(--ease-out); transform-origin: top center; }
+  .pm-slide-in-right{ animation: pm-slide-in-right var(--dur-3) var(--ease-out); }
+  .pm-fade-in-up    { animation: pm-fade-in-up var(--dur-2) var(--ease-out); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-fade-in,
+  .pm-pop-in,
+  .pm-slide-in-right,
+  .pm-fade-in-up {
+    animation: none;
+  }
+}

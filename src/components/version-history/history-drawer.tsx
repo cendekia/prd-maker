@@ -118,7 +118,7 @@ export function HistoryDrawer({
   return (
     <aside
       className={cn(
-        "flex w-full max-w-[920px] shrink-0 flex-col border-l bg-bg-subtle",
+        "pm-slide-in-right flex w-full max-w-[920px] shrink-0 flex-col border-l bg-bg-subtle",
         className,
       )}
       aria-label="Version history"

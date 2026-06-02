@@ -85,7 +85,7 @@ export function PageTreeNode({
         paddingLeft: 8 + row.depth * 14,
       }}
       className={cn(
-        "group relative flex h-7 items-center gap-1 rounded-[var(--radius-sm)] pr-1 text-[13px] transition-colors",
+        "pm-fade-in group relative flex h-7 items-center gap-1 rounded-[var(--radius-sm)] pr-1 text-[13px] transition-colors",
         isActive ? "bg-bg-active text-fg-1" : "text-fg-2 hover:bg-bg-hover hover:text-fg-1",
         isDragging && "opacity-50",
         isDropTarget && "ring-2 ring-brand-500 ring-inset",
@@ -179,7 +179,7 @@ export function PageTreeNode({
           </button>
           {menuOpen ? (
             <div
-              className="absolute right-0 top-full z-[var(--z-dropdown)] mt-1 w-44 rounded-[var(--radius-md)] border bg-popover p-1 shadow-[var(--shadow-lg)]"
+              className="pm-fade-in-up absolute right-0 top-full z-[var(--z-dropdown)] mt-1 w-44 rounded-[var(--radius-md)] border bg-popover p-1 shadow-[var(--shadow-lg)]"
               role="menu"
             >
               <MenuItem

@@ -1,10 +1,11 @@
 "use client";
 
-import { Globe, Menu, MoreHorizontal, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
+import { Globe, Menu, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 
+import { AccountMenu } from "./account-menu";
 import { PresenceAvatars } from "./presence-avatars";
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   onToggleAi: () => void;
   sidebarOpen: boolean;
   aiPanelOpen: boolean;
+  user: { name: string | null; email: string };
+  workspaceSlug: string;
   /** Below the `md` breakpoint the hamburger opens the nav drawer and the
    *  desktop action cluster is hidden. */
   isMobile?: boolean;
@@ -28,6 +31,8 @@ export function TopBar({
   onToggleAi,
   sidebarOpen,
   aiPanelOpen,
+  user,
+  workspaceSlug,
   isMobile = false,
 }: Props) {
   const palette = useCommandPalette();
@@ -90,7 +95,7 @@ export function TopBar({
           </kbd>
         </Button>
         {/* Page actions + AI toggle are desktop-only; on mobile the bar stays
-            a hamburger, breadcrumb, and search. */}
+            a hamburger, breadcrumb, search, and the account menu. */}
         <div className="hidden items-center gap-2 md:flex">
           <Button variant="outline" size="sm">
             <Globe />
@@ -106,10 +111,8 @@ export function TopBar({
           >
             {aiPanelOpen ? <PanelRight /> : <Sparkles />}
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="More">
-            <MoreHorizontal />
-          </Button>
         </div>
+        <AccountMenu user={user} workspaceSlug={workspaceSlug} />
       </div>
     </header>
   );
