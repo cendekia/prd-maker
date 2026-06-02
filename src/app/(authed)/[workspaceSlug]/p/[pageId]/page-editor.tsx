@@ -11,6 +11,7 @@ import { ExportMenu } from "@/components/page/export-menu";
 import { Button } from "@/components/ui/button";
 import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { usePageContent } from "@/hooks/use-page-content";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +65,16 @@ export function PageEditor({
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pendingAnchor, setPendingAnchor] = useState<PendingAnchor | null>(null);
 
+  const isMobile = useIsMobile();
+  // On mobile the editor is read-only and comment authoring is disabled — we
+  // never grant edit below the breakpoint, even with permission.
+  const effectiveEditable = editable && !isMobile;
+
+  // History is an editing affordance; close it if we drop to mobile.
+  useEffect(() => {
+    if (isMobile) setHistoryOpen(false);
+  }, [isMobile]);
+
   // Bubble menu Comment button -> open rail with selection-bound composer.
   useEffect(() => {
     function onStart(e: Event) {
@@ -82,7 +93,7 @@ export function PageEditor({
   const editorRef = useRef<TipTapEditor | null>(null);
   const { markDirty } = useAutoSnapshot({
     pageId,
-    enabled: editable,
+    enabled: effectiveEditable,
     getContentJson: () => editorRef.current?.getJSON() ?? null,
   });
 
@@ -135,17 +146,17 @@ export function PageEditor({
     <div className="flex h-full">
       <div className="flex-1 min-w-0 overflow-y-auto">
         <div className="mx-auto w-full max-w-[var(--content-max-width)] px-6 py-12">
-          <div className="mb-2 flex items-center gap-3 text-[12px] text-fg-3">
+          <div className="mb-2 flex flex-wrap items-center gap-3 gap-y-2 text-[12px] text-fg-3">
             {collab ? (
-              <CollabStatusIndicator state={syncState} editable={editable} />
+              <CollabStatusIndicator state={syncState} editable={effectiveEditable} />
             ) : (
               <SoloSaveIndicator
                 state={saveState}
                 lastSavedAt={lastSavedAt}
-                editable={editable}
+                editable={effectiveEditable}
               />
             )}
-            {!editable ? (
+            {!effectiveEditable ? (
               <span className="rounded-full bg-bg-muted px-2 py-0.5 text-fg-2">
                 Read-only
               </span>
@@ -161,7 +172,7 @@ export function PageEditor({
                 initialIsPublished={isPublished}
                 initialPublicSlug={publicSlug}
                 publicBaseUrl={publicBaseUrl}
-                canPublish={editable}
+                canPublish={effectiveEditable}
                 getContentJson={() => editorRef.current?.getJSON() ?? null}
               />
             </div>
@@ -169,7 +180,7 @@ export function PageEditor({
               variant="ghost"
               size="sm"
               className={cn(
-                "gap-1.5",
+                "hidden gap-1.5 md:inline-flex",
                 historyOpen && "bg-bg-active text-fg-1",
               )}
               onClick={() => {
@@ -204,7 +215,7 @@ export function PageEditor({
             value={titleDraft}
             onChange={(e) => setTitleDraft(e.target.value)}
             onBlur={() => {
-              if (editable) commitTitle();
+              if (effectiveEditable) commitTitle();
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -212,14 +223,14 @@ export function PageEditor({
                 (e.currentTarget as HTMLInputElement).blur();
               }
             }}
-            readOnly={!editable || renaming}
+            readOnly={!effectiveEditable || renaming}
             placeholder="Untitled"
             className="mb-6 block w-full bg-transparent text-[36px] font-semibold leading-[44px] tracking-[-0.02em] text-fg-1 placeholder:text-fg-4 focus:outline-none"
           />
 
           <Editor
             initialContent={initialContent as JSONContent | null}
-            editable={editable}
+            editable={effectiveEditable}
             onChange={collab ? undefined : handleSoloChange}
             workspaceId={workspaceId}
             workspaceSlug={workspaceSlug}
@@ -247,7 +258,7 @@ export function PageEditor({
         <HistoryDrawer
           pageId={pageId}
           getCurrentJson={() => editorRef.current?.getJSON() ?? null}
-          canRestore={editable}
+          canRestore={effectiveEditable}
           onRestored={(snapshotJson) => {
             const editor = editorRef.current;
             if (editor && snapshotJson) {
@@ -270,6 +281,7 @@ export function PageEditor({
           workspaceId={workspaceId}
           currentUserId={currentUserId}
           isOwner={isOwner}
+          readOnly={isMobile}
           onClose={() => {
             setCommentsOpen(false);
             setPendingAnchor(null);

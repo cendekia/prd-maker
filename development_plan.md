@@ -454,7 +454,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 10
   - **User Instructions**: none
 
-- [ ] Step 32: Mobile responsive — read + comment only
+- [x] Step 32: Mobile responsive — read + comment only
   - **Task**: Below 768px the layout collapses: hamburger drawer for the page tree, top bar simplifies to title + back, AI panel hidden. Editor switches to `editable: false` with comment-add disabled (read-only). Public-published pages already mobile-friendly; verify and tune.
   - **Files**:
     - `src/app/(authed)/[workspaceSlug]/layout.tsx`: responsive grid

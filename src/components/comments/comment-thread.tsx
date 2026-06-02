@@ -30,6 +30,8 @@ interface Props {
   isOwner: boolean;
   /** Highlights and scrolls this thread into view when true. */
   highlighted?: boolean;
+  /** Read-only (mobile): hide reply / resolve / delete actions. */
+  readOnly?: boolean;
   onReply: (parentId: string, body: string) => Promise<void>;
   onResolveToggle: (id: string, resolved: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -44,6 +46,7 @@ export function CommentThread({
   currentUserId,
   isOwner,
   highlighted,
+  readOnly = false,
   onReply,
   onResolveToggle,
   onDelete,
@@ -71,14 +74,14 @@ export function CommentThread({
               key={r.id}
               comment={r}
               compact
-              canDelete={r.author.id === currentUserId || isOwner}
+              canDelete={!readOnly && (r.author.id === currentUserId || isOwner)}
               onDelete={() => onDelete(r.id)}
             />
           ))}
         </div>
       ) : null}
 
-      <div className="mt-2 flex items-center gap-1.5">
+      <div className={cn("mt-2 flex items-center gap-1.5", readOnly && "hidden")}>
         <Button
           variant="ghost"
           size="sm"

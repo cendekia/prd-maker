@@ -174,6 +174,12 @@ function SoloEditor({
 
   useCommentEditorEvents(editor);
 
+  // Keep the live editor's editable state in sync with the prop so toggling it
+  // (e.g. crossing the mobile breakpoint) flips read-only without a remount.
+  useEffect(() => {
+    editor?.setEditable(editable);
+  }, [editor, editable]);
+
   useEffect(() => {
     onEditor?.(editor ?? null);
     return () => onEditor?.(null);
@@ -318,6 +324,12 @@ function CollabEditor({
   }, [editor, synced, initialContent]);
 
   useCommentEditorEvents(editor);
+
+  // Keep the live editor's editable state in sync with the prop so toggling it
+  // (e.g. crossing the mobile breakpoint) flips read-only without a remount.
+  useEffect(() => {
+    editor?.setEditable(editable);
+  }, [editor, editable]);
 
   useEffect(() => {
     onEditor?.(editor ?? null);

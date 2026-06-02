@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, MoreHorizontal, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
+import { Globe, Menu, MoreHorizontal, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useCommandPalette } from "@/hooks/use-command-palette";
@@ -15,6 +15,9 @@ interface Props {
   onToggleAi: () => void;
   sidebarOpen: boolean;
   aiPanelOpen: boolean;
+  /** Below the `md` breakpoint the hamburger opens the nav drawer and the
+   *  desktop action cluster is hidden. */
+  isMobile?: boolean;
 }
 
 export function TopBar({
@@ -25,6 +28,7 @@ export function TopBar({
   onToggleAi,
   sidebarOpen,
   aiPanelOpen,
+  isMobile = false,
 }: Props) {
   const palette = useCommandPalette();
   const isMac =
@@ -37,11 +41,19 @@ export function TopBar({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+        aria-label={
+          isMobile
+            ? sidebarOpen
+              ? "Close menu"
+              : "Open menu"
+            : sidebarOpen
+              ? "Hide sidebar"
+              : "Show sidebar"
+        }
         aria-pressed={sidebarOpen}
         onClick={onToggleSidebar}
       >
-        <PanelLeft />
+        {isMobile ? <Menu /> : <PanelLeft />}
       </Button>
 
       <div className="flex min-w-0 items-center gap-1.5 text-[13px] text-fg-3">
@@ -61,7 +73,9 @@ export function TopBar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <PresenceAvatars className="mr-1" />
+        <div className="mr-1 hidden md:flex">
+          <PresenceAvatars />
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -75,23 +89,27 @@ export function TopBar({
             {isMac ? "⌘K" : "Ctrl K"}
           </kbd>
         </Button>
-        <Button variant="outline" size="sm">
-          <Globe />
-          Share
-        </Button>
-        <Button size="sm">Publish</Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={aiPanelOpen ? "Hide AI panel" : "Show AI panel"}
-          aria-pressed={aiPanelOpen}
-          onClick={onToggleAi}
-        >
-          {aiPanelOpen ? <PanelRight /> : <Sparkles />}
-        </Button>
-        <Button variant="ghost" size="icon-sm" aria-label="More">
-          <MoreHorizontal />
-        </Button>
+        {/* Page actions + AI toggle are desktop-only; on mobile the bar stays
+            a hamburger, breadcrumb, and search. */}
+        <div className="hidden items-center gap-2 md:flex">
+          <Button variant="outline" size="sm">
+            <Globe />
+            Share
+          </Button>
+          <Button size="sm">Publish</Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={aiPanelOpen ? "Hide AI panel" : "Show AI panel"}
+            aria-pressed={aiPanelOpen}
+            onClick={onToggleAi}
+          >
+            {aiPanelOpen ? <PanelRight /> : <Sparkles />}
+          </Button>
+          <Button variant="ghost" size="icon-sm" aria-label="More">
+            <MoreHorizontal />
+          </Button>
+        </div>
       </div>
     </header>
   );

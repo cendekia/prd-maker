@@ -54,9 +54,9 @@ export default async function PublicPage({ params }: PublicPageProps) {
   if (!page) notFound();
 
   return (
-    <article className="mx-auto w-full max-w-[760px] px-6 py-14">
+    <article className="mx-auto w-full max-w-[760px] px-5 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <h1 className="text-[40px] font-semibold leading-[1.15] tracking-[-0.02em] text-fg-1">
+        <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-fg-1 sm:text-[40px]">
           {page.title}
         </h1>
         <p className="mt-3 text-[12px] text-fg-3">

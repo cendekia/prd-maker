@@ -28,6 +28,9 @@ interface Props {
   /** Called when the pending composer is dismissed/submitted so the host can
    *  clear its `pendingAnchor` state. */
   onPendingResolved?: () => void;
+  /** Read-only mode (mobile): hide all composers and per-thread authoring
+   *  actions; threads stay viewable. */
+  readOnly?: boolean;
   className?: string;
 }
 
@@ -49,6 +52,7 @@ export function CommentsRail({
   initialFocusId,
   pendingAnchor,
   onPendingResolved,
+  readOnly = false,
   className,
 }: Props) {
   const [comments, setComments] = useState<CommentDto[]>([]);
@@ -156,7 +160,11 @@ export function CommentsRail({
   return (
     <aside
       className={cn(
-        "flex w-[320px] shrink-0 flex-col border-l bg-bg-subtle",
+        // Desktop: a 320px side panel. Mobile: a full-screen overlay sheet
+        // (`inset-0` gives full width without a competing fixed width).
+        "flex flex-col border-l bg-bg-subtle",
+        "max-md:fixed max-md:inset-0 max-md:z-30 max-md:border-l-0",
+        "md:w-[320px] md:shrink-0",
         className,
       )}
       aria-label="Comments"
@@ -187,7 +195,7 @@ export function CommentsRail({
       </header>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {pendingAnchor ? (
+        {pendingAnchor && !readOnly ? (
           <div className="mb-3 rounded-[var(--radius-md)] border border-accent-300 bg-accent-50/40 p-3">
             <div className="mb-2 text-[11px] font-medium text-fg-2">
               Comment on selection
@@ -210,8 +218,9 @@ export function CommentsRail({
           <div className="text-[12px] text-fg-3">Loading…</div>
         ) : grouped.length === 0 && !pendingAnchor ? (
           <div className="rounded-[var(--radius-md)] border border-dashed p-4 text-center text-[12px] text-fg-3">
-            No comments yet. Select text in the editor and click the comment
-            icon, or leave a page-level comment below.
+            {readOnly
+              ? "No comments yet."
+              : "No comments yet. Select text in the editor and click the comment icon, or leave a page-level comment below."}
           </div>
         ) : grouped.length > 0 ? (
           <div className="space-y-3">
@@ -223,6 +232,7 @@ export function CommentsRail({
                 replies={replies}
                 currentUserId={currentUserId}
                 isOwner={isOwner}
+                readOnly={readOnly}
                 highlighted={parent.id === focusedId}
                 onReply={async (parentId, body) => {
                   await postComment(body, parentId);
@@ -236,16 +246,18 @@ export function CommentsRail({
         ) : null}
       </div>
 
-      <div className="border-t bg-background p-3">
-        <CommentInput
-          workspaceId={workspaceId}
-          placeholder="Comment on the whole page…"
-          submitLabel="Post"
-          onSubmit={async (body) => {
-            await postComment(body, null);
-          }}
-        />
-      </div>
+      {!readOnly ? (
+        <div className="border-t bg-background p-3">
+          <CommentInput
+            workspaceId={workspaceId}
+            placeholder="Comment on the whole page…"
+            submitLabel="Post"
+            onSubmit={async (body) => {
+              await postComment(body, null);
+            }}
+          />
+        </div>
+      ) : null}
     </aside>
   );
 }

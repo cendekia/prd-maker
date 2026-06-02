@@ -208,3 +208,19 @@
   border-radius: var(--radius-xs);
   background: var(--bg-muted);
 }
+
+/* Mobile tuning (Step 32): tighten headings and let wide tables scroll
+ * horizontally instead of overflowing the viewport. */
+@media (max-width: 640px) {
+  .prdmaker-public-prose h1 {
+    font-size: 22px;
+  }
+  .prdmaker-public-prose h2 {
+    font-size: 18px;
+  }
+  .prdmaker-public-prose table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
