@@ -509,7 +509,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 10
   - **User Instructions**: none
 
-- [ ] Step 40: Database schema for Epics and per-PRD agile metadata
+- [x] Step 40: Database schema for Epics and per-PRD agile metadata
   - **Task**: Add a workspace-scoped `Epic` model and agile fields on `Page`. `Epic`: id, workspaceId, `key` (human label e.g. `EPIC-1`, assigned on create in Step 41), name, description (nullable), `status` (`EpicStatus`), color, `position` (Float, fractional ordering like the page tree), createdById, archivedAt (nullable), timestamps; relations to `Workspace` (back-relation `epics`), `User` (relation `EpicCreatedBy`), and `Page[]`. New `Page` fields: `epicId` (nullable FK → Epic, `onDelete: SetNull`), `agileStatus` (`AgileStatus`, default `BACKLOG`), `priority` (`Priority`, nullable), `storyPoints` (Int, nullable), `targetSprint` (String, nullable), `assigneeId` (nullable FK → User, relation `PageAssignee`, `onDelete: SetNull`), `externalUrl` (String, nullable). Enums: `EpicStatus` (PLANNED, IN_PROGRESS, DONE), `AgileStatus` (BACKLOG, TODO, IN_PROGRESS, IN_REVIEW, DONE), `Priority` (LOW, MEDIUM, HIGH, URGENT). Indices: `Epic @@unique([workspaceId, key])`, `Epic @@index([workspaceId, status])`, `Page @@index([workspaceId, epicId])`. Add the matching back-relations on `User` (`assignedPages`, `epicsCreated`) and `Workspace` (`epics`).
   - **Files**:
     - `prisma/schema.prisma`: `Epic` model, `EpicStatus`/`AgileStatus`/`Priority` enums, new `Page` fields + relations, `User` and `Workspace` back-relations
