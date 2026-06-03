@@ -499,7 +499,7 @@ Total: ~38 steps across 11 sections.
 
 > Added from beta-user feedback. Numbered 39–43 to keep Steps 1–38 (and their cross-references) stable; intended execution order is **Steps 39–43 before Step 35**. All five depend only on already-completed steps. The Epic feature is delivered in four slices: schema (40), workspace board (41), per-PRD properties (42), and an in-document story breakdown (43).
 
-- [ ] Step 39: Full table editing via hover grips
+- [x] Step 39: Full table editing via hover grips
   - **Task**: Add Notion-style hover grips to editor tables. A ProseMirror plugin tracks the hovered cell and renders grip handles along the active table's row and column edges; clicking a grip opens a small popover menu (tippy.js, matching the slash-command / bubble-menu styling) with insert row above/below, insert column left/right, delete row, delete column, toggle header row, toggle header column, and delete table — all wired to the existing `@tiptap/extension-table` commands. Grips and menu are suppressed when the editor is not editable (read-only / mobile / public). No new table dependency is needed; this is only the missing UX layer over commands already available.
   - **Files**:
     - `src/components/editor/extensions/table-controls.ts`: ProseMirror plugin — hovered-cell tracking + row/column grip decorations, gated on `editor.isEditable`

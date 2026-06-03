@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 import { EditorBubbleMenu } from "./bubble-menu";
 import { buildExtensions } from "./extensions";
+import { EditorTableControls } from "./extensions/table-controls";
 import { EditorFloatingMenu } from "./floating-menu";
 import type { Editor as TipTapEditor } from "@tiptap/core";
 
@@ -197,6 +198,7 @@ function SoloEditor({
     <div className={cn("editor-host", className)}>
       <EditorBubbleMenu editor={editor} />
       <EditorFloatingMenu editor={editor} />
+      {editable ? <EditorTableControls editor={editor} /> : null}
       <EditorContent editor={editor} />
     </div>
   );
@@ -348,6 +350,7 @@ function CollabEditor({
     <div className={cn("editor-host", className)}>
       <EditorBubbleMenu editor={editor} />
       <EditorFloatingMenu editor={editor} />
+      {editable ? <EditorTableControls editor={editor} /> : null}
       <EditorContent editor={editor} />
     </div>
   );
