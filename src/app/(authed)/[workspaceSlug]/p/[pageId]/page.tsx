@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Role } from "@prisma/client";
 
 import { env } from "@/env";
+import type { PageAgileInitial } from "@/lib/agile";
 import { db } from "@/lib/db";
 import { issueCollabToken } from "@/lib/collab-token";
 import { getPageAccess } from "@/lib/permissions";
@@ -33,6 +34,15 @@ export default async function PageEditorRoute({ params }: PageProps) {
       archivedAt: true,
       isPublished: true,
       publicSlug: true,
+      epicId: true,
+      agileStatus: true,
+      priority: true,
+      storyPoints: true,
+      targetSprint: true,
+      assigneeId: true,
+      externalUrl: true,
+      epic: { select: { id: true, key: true, name: true, color: true } },
+      assignee: { select: { id: true, name: true, email: true, image: true } },
     },
   });
   if (!page || page.archivedAt) notFound();
@@ -55,6 +65,18 @@ export default async function PageEditorRoute({ params }: PageProps) {
       }
     : null;
 
+  const agile: PageAgileInitial = {
+    epicId: page.epicId,
+    agileStatus: page.agileStatus,
+    priority: page.priority,
+    storyPoints: page.storyPoints,
+    targetSprint: page.targetSprint,
+    assigneeId: page.assigneeId,
+    externalUrl: page.externalUrl,
+    epic: page.epic,
+    assignee: page.assignee,
+  };
+
   return (
     <PageEditor
       pageId={page.id}
@@ -69,6 +91,7 @@ export default async function PageEditorRoute({ params }: PageProps) {
       isPublished={page.isPublished}
       publicSlug={page.publicSlug}
       publicBaseUrl={env.NEXT_PUBLIC_APP_URL}
+      agile={agile}
     />
   );
 }

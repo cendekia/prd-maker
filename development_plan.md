@@ -533,7 +533,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 40, Step 9
   - **User Instructions**: none
 
-- [ ] Step 42: Per-PRD agile properties bar
+- [x] Step 42: Per-PRD agile properties bar
   - **Task**: Add a compact, inline-editable properties bar beneath the PRD title in the page editor exposing the page's agile metadata: Epic (searchable picker over workspace epics, with inline "create epic" via the Step 41 POST), status (`AgileStatus`), priority, story points, target sprint, assignee (workspace-member picker backed by the member-search API used by @mentions), and an external issue URL (Jira/Linear). Each field commits via `PATCH /api/pages/:id/agile`, scoped by workspace + `requireRole(EDITOR)`. The bar is read-only when the editor isn't editable and is omitted from public pages. Reuse existing popover/menu styling and the member-search endpoint from Step 14.
   - **Files**:
     - `src/components/page/agile-properties-bar.tsx`: properties strip with per-field popovers + status/priority chips (labels/colors from `src/lib/agile.ts`)

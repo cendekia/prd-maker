@@ -7,12 +7,14 @@ import { History as HistoryIcon, MessageSquare } from "lucide-react";
 
 import { CommentsRail, type PendingAnchor } from "@/components/comments/comments-rail";
 import { Editor, type CollabSyncState } from "@/components/editor/editor";
+import { AgilePropertiesBar } from "@/components/page/agile-properties-bar";
 import { ExportMenu } from "@/components/page/export-menu";
 import { Button } from "@/components/ui/button";
 import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { usePageContent } from "@/hooks/use-page-content";
+import type { PageAgileInitial } from "@/lib/agile";
 import { cn } from "@/lib/utils";
 
 import { PublishPopover } from "./components/publish-popover";
@@ -42,6 +44,7 @@ interface Props {
   isPublished: boolean;
   publicSlug: string | null;
   publicBaseUrl: string;
+  agile: PageAgileInitial;
 }
 
 export function PageEditor({
@@ -57,6 +60,7 @@ export function PageEditor({
   isPublished,
   publicSlug,
   publicBaseUrl,
+  agile,
 }: Props) {
   const [titleDraft, setTitleDraft] = useState(title);
   const [renaming, setRenaming] = useState(false);
@@ -226,6 +230,13 @@ export function PageEditor({
             readOnly={!effectiveEditable || renaming}
             placeholder="Untitled"
             className="mb-6 block w-full bg-transparent text-[36px] font-semibold leading-[44px] tracking-[-0.02em] text-fg-1 placeholder:text-fg-4 focus:outline-none"
+          />
+
+          <AgilePropertiesBar
+            pageId={pageId}
+            workspaceId={workspaceId}
+            editable={effectiveEditable}
+            initial={agile}
           />
 
           <Editor

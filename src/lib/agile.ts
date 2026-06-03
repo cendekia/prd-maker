@@ -111,6 +111,28 @@ export interface PageAgileMeta {
   externalUrl: string | null;
 }
 
+/** Display ref for the epic currently assigned to a PRD (properties bar). */
+export interface AgileEpicRef {
+  id: string;
+  key: string;
+  name: string;
+  color: string;
+}
+
+/** Display ref for the user currently assigned to a PRD (properties bar). */
+export interface AgileAssigneeRef {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+}
+
+/** A PRD's agile metadata plus resolved epic/assignee, for first paint. */
+export interface PageAgileInitial extends PageAgileMeta {
+  epic: AgileEpicRef | null;
+  assignee: AgileAssigneeRef | null;
+}
+
 /** An epic plus its board rollups (assigned-PRD counts). Built in Step 41. */
 export interface EpicSummary {
   id: string;
