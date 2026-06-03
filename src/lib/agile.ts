@@ -116,6 +116,7 @@ export interface EpicSummary {
   id: string;
   key: string;
   name: string;
+  description: string | null;
   color: string;
   status: EpicStatus;
   position: number;
@@ -124,3 +125,6 @@ export interface EpicSummary {
   /** Of those, how many have `agileStatus === DONE`. */
   doneCount: number;
 }
+
+/** Epic core fields without rollup counts — returned by create/update/move. */
+export type EpicCore = Omit<EpicSummary, "pageCount" | "doneCount">;

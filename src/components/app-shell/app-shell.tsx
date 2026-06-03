@@ -128,6 +128,8 @@ function sectionLabelFor(pathname: string, slug: string): string | null {
   switch (tail) {
     case "settings":
       return "Settings";
+    case "epics":
+      return "Epics";
     case "p":
       return null; // page title is a separate breadcrumb segment
     default:

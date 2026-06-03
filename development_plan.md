@@ -518,7 +518,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 7
   - **User Instructions**: Run `npx prisma migrate dev --name epics_and_agile`.
 
-- [ ] Step 41: Workspace Epics — list, Kanban board, and epic CRUD
+- [x] Step 41: Workspace Epics — list, Kanban board, and epic CRUD
   - **Task**: Add a workspace Epics surface at `/[workspaceSlug]/epics`. A Kanban board with columns by `EpicStatus` (Planned / In Progress / Done); each card shows the epic key, name, color, count of assigned PRDs, and a progress meter (share of its PRDs with `agileStatus = DONE`). Support create/edit/recolor/archive, drag-and-drop to change status and reorder within a column (fractional `position`, reusing the page-tree ordering approach in `src/lib/pages.ts`), and an epic detail panel listing the PRDs in the epic (each links to its page). Add an "Epics" entry to the app sidebar. Epic `key` is generated on create as `EPIC-<n>` (n = workspace epic count + 1, inside the create transaction). All reads/writes scope by workspace; create/edit/archive require `EDITOR`+ via `requireRole` (`src/lib/permissions.ts`). Reuse `@dnd-kit` (already used by the page tree).
   - **Files**:
     - `src/app/(authed)/[workspaceSlug]/epics/page.tsx`: board route (server-loads epics + rollups)
