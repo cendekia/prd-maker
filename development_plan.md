@@ -495,6 +495,68 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 33
   - **User Instructions**: none
 
+## Beta Feedback — Tables & Agile Epics
+
+> Added from beta-user feedback. Numbered 39–43 to keep Steps 1–38 (and their cross-references) stable; intended execution order is **Steps 39–43 before Step 35**. All five depend only on already-completed steps. The Epic feature is delivered in four slices: schema (40), workspace board (41), per-PRD properties (42), and an in-document story breakdown (43).
+
+- [ ] Step 39: Full table editing via hover grips
+  - **Task**: Add Notion-style hover grips to editor tables. A ProseMirror plugin tracks the hovered cell and renders grip handles along the active table's row and column edges; clicking a grip opens a small popover menu (tippy.js, matching the slash-command / bubble-menu styling) with insert row above/below, insert column left/right, delete row, delete column, toggle header row, toggle header column, and delete table — all wired to the existing `@tiptap/extension-table` commands. Grips and menu are suppressed when the editor is not editable (read-only / mobile / public). No new table dependency is needed; this is only the missing UX layer over commands already available.
+  - **Files**:
+    - `src/components/editor/extensions/table-controls.ts`: ProseMirror plugin — hovered-cell tracking + row/column grip decorations, gated on `editor.isEditable`
+    - `src/components/editor/extensions/table-controls-menu.tsx`: grip popover menu mapping actions to `editor.chain().focus().<command>().run()`
+    - `src/components/editor/extensions.ts`: register the TableControls extension alongside the existing `Table`/`TableRow`/`TableHeader`/`TableCell`
+    - `src/components/editor/editor.css`: grip handle, hover, and active-table styles (light/dark via design tokens)
+  - **Step Dependencies**: Step 10
+  - **User Instructions**: none
+
+- [ ] Step 40: Database schema for Epics and per-PRD agile metadata
+  - **Task**: Add a workspace-scoped `Epic` model and agile fields on `Page`. `Epic`: id, workspaceId, `key` (human label e.g. `EPIC-1`, assigned on create in Step 41), name, description (nullable), `status` (`EpicStatus`), color, `position` (Float, fractional ordering like the page tree), createdById, archivedAt (nullable), timestamps; relations to `Workspace` (back-relation `epics`), `User` (relation `EpicCreatedBy`), and `Page[]`. New `Page` fields: `epicId` (nullable FK → Epic, `onDelete: SetNull`), `agileStatus` (`AgileStatus`, default `BACKLOG`), `priority` (`Priority`, nullable), `storyPoints` (Int, nullable), `targetSprint` (String, nullable), `assigneeId` (nullable FK → User, relation `PageAssignee`, `onDelete: SetNull`), `externalUrl` (String, nullable). Enums: `EpicStatus` (PLANNED, IN_PROGRESS, DONE), `AgileStatus` (BACKLOG, TODO, IN_PROGRESS, IN_REVIEW, DONE), `Priority` (LOW, MEDIUM, HIGH, URGENT). Indices: `Epic @@unique([workspaceId, key])`, `Epic @@index([workspaceId, status])`, `Page @@index([workspaceId, epicId])`. Add the matching back-relations on `User` (`assignedPages`, `epicsCreated`) and `Workspace` (`epics`).
+  - **Files**:
+    - `prisma/schema.prisma`: `Epic` model, `EpicStatus`/`AgileStatus`/`Priority` enums, new `Page` fields + relations, `User` and `Workspace` back-relations
+    - `src/lib/agile.ts`: ordered status columns, status/priority label + color maps, and shared `Epic` / agile TS types
+    - `src/lib/types.ts`: extend page/tree types with optional agile metadata where consumed
+  - **Step Dependencies**: Step 7
+  - **User Instructions**: Run `npx prisma migrate dev --name epics_and_agile`.
+
+- [ ] Step 41: Workspace Epics — list, Kanban board, and epic CRUD
+  - **Task**: Add a workspace Epics surface at `/[workspaceSlug]/epics`. A Kanban board with columns by `EpicStatus` (Planned / In Progress / Done); each card shows the epic key, name, color, count of assigned PRDs, and a progress meter (share of its PRDs with `agileStatus = DONE`). Support create/edit/recolor/archive, drag-and-drop to change status and reorder within a column (fractional `position`, reusing the page-tree ordering approach in `src/lib/pages.ts`), and an epic detail panel listing the PRDs in the epic (each links to its page). Add an "Epics" entry to the app sidebar. Epic `key` is generated on create as `EPIC-<n>` (n = workspace epic count + 1, inside the create transaction). All reads/writes scope by workspace; create/edit/archive require `EDITOR`+ via `requireRole` (`src/lib/permissions.ts`). Reuse `@dnd-kit` (already used by the page tree).
+  - **Files**:
+    - `src/app/(authed)/[workspaceSlug]/epics/page.tsx`: board route (server-loads epics + rollups)
+    - `src/components/epics/epics-board.tsx`: `@dnd-kit` Kanban columns + drag handlers
+    - `src/components/epics/epic-card.tsx`: card with PRD count + progress meter
+    - `src/components/epics/epic-dialog.tsx`: create/edit epic (name, description, color, status)
+    - `src/components/epics/epic-detail.tsx`: panel listing the epic's PRDs
+    - `src/app/api/workspaces/[workspaceId]/epics/route.ts`: GET list (+ board rollups), POST create
+    - `src/app/api/workspaces/[workspaceId]/epics/[epicId]/route.ts`: PATCH (rename/recolor/status/position/archive), DELETE
+    - `src/lib/epics.ts`: epic service — create-with-key, board query (PRD counts + % done), reorder math
+    - `src/components/app-shell/sidebar.tsx`: add the "Epics" nav link
+  - **Step Dependencies**: Step 40, Step 9
+  - **User Instructions**: none
+
+- [ ] Step 42: Per-PRD agile properties bar
+  - **Task**: Add a compact, inline-editable properties bar beneath the PRD title in the page editor exposing the page's agile metadata: Epic (searchable picker over workspace epics, with inline "create epic" via the Step 41 POST), status (`AgileStatus`), priority, story points, target sprint, assignee (workspace-member picker backed by the member-search API used by @mentions), and an external issue URL (Jira/Linear). Each field commits via `PATCH /api/pages/:id/agile`, scoped by workspace + `requireRole(EDITOR)`. The bar is read-only when the editor isn't editable and is omitted from public pages. Reuse existing popover/menu styling and the member-search endpoint from Step 14.
+  - **Files**:
+    - `src/components/page/agile-properties-bar.tsx`: properties strip with per-field popovers + status/priority chips (labels/colors from `src/lib/agile.ts`)
+    - `src/components/page/epic-picker.tsx`: searchable epic select with inline create
+    - `src/app/api/pages/[pageId]/agile/route.ts`: PATCH agile fields (zod-validated enums; writes scoped by role)
+    - `src/app/(authed)/[workspaceSlug]/p/[pageId]/page-editor.tsx`: mount the bar under the title, passing `editable` + initial agile data
+    - `src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx`: load the page's agile fields + workspace epics for first paint
+  - **Step Dependencies**: Step 40, Step 41
+  - **User Instructions**: none
+
+- [ ] Step 43: In-document Epic / user-story breakdown block
+  - **Task**: Add a TipTap "Epic" block, inserted via `/epic`, holding an epic goal/summary line and a managed list of user-story child nodes. Each user story captures a title plus optional As-a / I-want / So-that fields, acceptance criteria, story points, and a status chip; stories can be added, reordered, and removed. Implement as two TipTap nodes — an `epicBlock` container and `userStory` children — with React NodeViews for the editing UI. Content persists in `contentJson` / Yjs like any other block (no new DB model; this is a content breakdown, distinct from the page-level agile metadata in Step 42). Add serialization rules so publish and export don't drop the nodes. Read-only when the editor isn't editable.
+  - **Files**:
+    - `src/components/editor/extensions/epic-block.ts`: `epicBlock` + `userStory` node schemas and the `/epic` insert command
+    - `src/components/editor/extensions/epic-block-view.tsx`: React NodeView for the epic container (header + story list + "add story")
+    - `src/components/editor/extensions/user-story-view.tsx`: React NodeView for a single story (fields, points, status chip, remove)
+    - `src/components/editor/extensions.ts`: register the new nodes
+    - `src/components/editor/slash-items.ts`: add the "Epic" slash item
+    - `src/components/editor/editor.css`: epic-block + user-story styles (light/dark)
+    - `src/lib/render-page.ts`, `src/lib/export-markdown.ts`, `src/lib/export-html.ts`: render/serialize the new nodes for publish + export
+  - **Step Dependencies**: Step 10
+  - **User Instructions**: none
+
 ## Testing
 
 - [ ] Step 35: Unit + integration tests with Vitest
