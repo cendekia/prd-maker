@@ -544,7 +544,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 40, Step 41
   - **User Instructions**: none
 
-- [ ] Step 43: In-document Epic / user-story breakdown block
+- [x] Step 43: In-document Epic / user-story breakdown block
   - **Task**: Add a TipTap "Epic" block, inserted via `/epic`, holding an epic goal/summary line and a managed list of user-story child nodes. Each user story captures a title plus optional As-a / I-want / So-that fields, acceptance criteria, story points, and a status chip; stories can be added, reordered, and removed. Implement as two TipTap nodes — an `epicBlock` container and `userStory` children — with React NodeViews for the editing UI. Content persists in `contentJson` / Yjs like any other block (no new DB model; this is a content breakdown, distinct from the page-level agile metadata in Step 42). Add serialization rules so publish and export don't drop the nodes. Read-only when the editor isn't editable.
   - **Files**:
     - `src/components/editor/extensions/epic-block.ts`: `epicBlock` + `userStory` node schemas and the `/epic` insert command

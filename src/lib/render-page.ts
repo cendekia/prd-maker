@@ -132,6 +132,9 @@ function renderNode(node: Node): string {
     case "embed":
       return renderEmbed(node);
 
+    case "epicBlock":
+      return renderEpicBlock(node);
+
     default:
       // Unknown node — render its children so we never silently drop content.
       return renderChildren(node);
@@ -199,6 +202,56 @@ function renderEmbed(node: Node): string {
     `<span class="embed-card-badge">${escapeHtml(providerLabel)}</span>` +
     `</a>`
   );
+}
+
+/**
+ * Epic block (Step 43) → plain prose: a heading, optional summary, and a list
+ * of user stories. Rendered with standard elements so it inherits the public /
+ * export prose styles without bespoke CSS.
+ */
+function renderEpicBlock(node: Node): string {
+  const title = stringAttr(node.attrs?.title) || "Untitled epic";
+  const summary = stringAttr(node.attrs?.summary);
+  const stories = Array.isArray(node.attrs?.stories)
+    ? (node.attrs?.stories as Record<string, unknown>[])
+    : [];
+
+  let out = `<h3>${escapeHtml(`Epic: ${title}`)}</h3>`;
+  if (summary) out += `<p>${escapeHtml(summary)}</p>`;
+  if (stories.length > 0) {
+    out += "<ul>";
+    for (const s of stories) {
+      const t = stringAttr(s.title) || "Untitled story";
+      const status = stringAttr(s.status);
+      const pts = numAttr(s.points);
+      const meta = [
+        status ? humanizeStatus(status) : "",
+        pts != null ? `${pts} pts` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      let li = `<strong>${escapeHtml(t)}</strong>`;
+      if (meta) li += ` <em>(${escapeHtml(meta)})</em>`;
+      const asA = stringAttr(s.asA);
+      const iWant = stringAttr(s.iWant);
+      const soThat = stringAttr(s.soThat);
+      if (asA || iWant || soThat) {
+        li += `<br>${escapeHtml(
+          `As a ${asA || "…"}, I want ${iWant || "…"}, so that ${soThat || "…"}.`,
+        )}`;
+      }
+      const acc = stringAttr(s.acceptance);
+      if (acc) li += `<br>Acceptance: ${escapeHtml(acc)}`;
+      out += `<li>${li}</li>`;
+    }
+    out += "</ul>";
+  }
+  return out;
+}
+
+function humanizeStatus(s: string): string {
+  const lower = s.toLowerCase().replace(/_/g, " ");
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
 function numAttr(v: unknown): number | null {

@@ -321,6 +321,12 @@
 .editor-host .ProseMirror .embed-node {
   margin: var(--space-5) 0;
 }
+
+/* Epic block (Step 43) — the React node view styles itself with tokens; this
+ * just gives the block breathing room like other block nodes. */
+.editor-host .ProseMirror .epic-node {
+  margin: var(--space-5) 0;
+}
 .editor-host .ProseMirror .embed-node[data-selected] .embed-frame,
 .editor-host .ProseMirror .embed-node[data-selected] .embed-card {
   outline: 2px solid var(--accent-500);

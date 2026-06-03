@@ -112,6 +112,9 @@ function renderBlock(node: Node, ctx: Ctx): string {
       return `[${escapeText(title)}](${url})`;
     }
 
+    case "epicBlock":
+      return renderEpicMarkdown(node);
+
     default:
       // Fallback: stringify any inline content we recognise.
       return renderInline(node);
@@ -247,6 +250,49 @@ function clampHeading(level: unknown): number {
   if (n < 1) return 1;
   if (n > 6) return 6;
   return n;
+}
+
+/** Epic block (Step 43) → a heading, summary, and a Markdown list of stories. */
+function renderEpicMarkdown(node: Node): string {
+  const title = stringAttr(node.attrs?.title) || "Untitled epic";
+  const summary = stringAttr(node.attrs?.summary);
+  const stories = Array.isArray(node.attrs?.stories)
+    ? (node.attrs?.stories as Record<string, unknown>[])
+    : [];
+
+  const lines: string[] = [`### Epic: ${escapeText(title)}`];
+  if (summary) lines.push("", escapeText(summary));
+  if (stories.length > 0) lines.push("");
+  for (const s of stories) {
+    const t = stringAttr(s.title) || "Untitled story";
+    const status = stringAttr(s.status);
+    const pts = typeof s.points === "number" ? s.points : null;
+    const meta = [
+      status ? humanizeStatus(status) : "",
+      pts != null ? `${pts} pts` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    let line = `- **${escapeText(t)}**`;
+    if (meta) line += ` _(${escapeText(meta)})_`;
+    lines.push(line);
+    const asA = stringAttr(s.asA);
+    const iWant = stringAttr(s.iWant);
+    const soThat = stringAttr(s.soThat);
+    if (asA || iWant || soThat) {
+      lines.push(
+        `  - As a ${escapeText(asA || "…")}, I want ${escapeText(iWant || "…")}, so that ${escapeText(soThat || "…")}.`,
+      );
+    }
+    const acc = stringAttr(s.acceptance);
+    if (acc) lines.push(`  - Acceptance: ${escapeText(acc)}`);
+  }
+  return lines.join("\n");
+}
+
+function humanizeStatus(s: string): string {
+  const lower = s.toLowerCase().replace(/_/g, " ");
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
 function stringAttr(v: unknown): string {

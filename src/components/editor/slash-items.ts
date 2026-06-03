@@ -9,6 +9,7 @@ import {
   Heading2,
   Heading3,
   Image as ImageIcon,
+  Layers,
   List,
   ListOrdered,
   Minus,
@@ -153,5 +154,13 @@ export const defaultSlashItems: SlashCommandItem[] = [
     icon: Clapperboard,
     command: ({ editor, range }) =>
       editor.chain().focus().deleteRange(range).setEmbed({ url: "" }).run(),
+  },
+  {
+    title: "Epic",
+    description: "Agile epic with a user-story breakdown",
+    keywords: ["agile", "epic", "story", "stories", "scrum", "backlog"],
+    icon: Layers,
+    command: ({ editor, range }) =>
+      editor.chain().focus().deleteRange(range).setEpicBlock().run(),
   },
 ];
