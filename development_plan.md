@@ -247,7 +247,7 @@ Total: ~38 steps across 11 sections.
 
 ## Templates
 
-- [ ] Step 17: Template picker, system templates, and workspace custom templates
+- [x] Step 17: Template picker, system templates, and workspace custom templates
   - **Task**: Seed system templates (Feature PRD, Tech Spec, RFC, One-Pager, Bug Report) into the DB on migration. Build "+ New page" dropdown that opens a template picker modal. Add `/app/[workspaceSlug]/settings/templates` for admins (OWNER) to publish custom workspace templates from any existing page.
   - **Files**:
     - `prisma/seed.ts`: insert system templates

@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Layers, Plus, Search, Settings } from "lucide-react";
+import { Layers, Search, Settings } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { usePageTree } from "@/hooks/use-page-tree";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
 
+import { NewPageButton } from "./new-page-button";
 import { PageTree } from "./page-tree";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
@@ -31,9 +31,9 @@ export function Sidebar({
   const [filter, setFilter] = useState("");
   const { createPage } = usePageTree(workspace.id, initialTree);
 
-  async function handleNewRootPage() {
+  async function handleCreateRootPage(templateId: string | null, title: string) {
     try {
-      const page = await createPage({ title: "Untitled" });
+      const page = await createPage({ title, templateId });
       router.push(`/${workspace.slug}/p/${page.id}`);
     } catch (err) {
       alert((err as Error).message);
@@ -60,14 +60,7 @@ export function Sidebar({
             className="h-7 w-full rounded-[var(--radius-sm)] border bg-background pl-7 pr-2 text-[12px] text-fg-1 placeholder:text-fg-4 focus:border-ring focus:outline-none focus-visible:shadow-[var(--shadow-focus)]"
           />
         </div>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          aria-label="New page"
-          onClick={handleNewRootPage}
-        >
-          <Plus />
-        </Button>
+        <NewPageButton workspaceId={workspace.id} onCreate={handleCreateRootPage} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-2">
