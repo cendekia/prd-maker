@@ -5,6 +5,7 @@ import {
   closestCorners,
   DndContext,
   DragOverlay,
+  MeasuringStrategy,
   PointerSensor,
   useDroppable,
   useSensor,
@@ -151,17 +152,30 @@ export function EpicsBoard({
     if (!card) return;
 
     // Build the target column without the dragged card, then insert it.
+    // Default to the end of the column — used when dropping on the column body
+    // or below the last card (fixes "drop at the bottom lands in the middle").
     const targetWithout = columns[toStatus].filter((x) => x.id !== activeId);
     let insertIndex = targetWithout.length;
     if (!isColumn) {
-      const i = targetWithout.findIndex((x) => x.id === overId);
-      if (i >= 0) insertIndex = i;
+      const overIdx = targetWithout.findIndex((x) => x.id === overId);
+      if (overIdx >= 0) {
+        // Insert AFTER the hovered card when the dragged card's center is past
+        // the hovered card's center, otherwise before it — respects direction
+        // so a downward drop past the last card lands at the bottom.
+        const activeRect = active.rect.current.translated;
+        const overRect = over.rect;
+        const after =
+          !!activeRect &&
+          activeRect.top + activeRect.height / 2 >
+            overRect.top + overRect.height / 2;
+        insertIndex = after ? overIdx + 1 : overIdx;
+      }
     }
-    if (
-      fromStatus === toStatus &&
-      insertIndex === columns[toStatus].findIndex((x) => x.id === activeId)
-    ) {
-      return; // dropped in its original slot — no-op
+    if (fromStatus === toStatus) {
+      // Re-inserting active at its original index (in the array sans active)
+      // reproduces the original order — nothing changed.
+      const origIdx = columns[toStatus].findIndex((x) => x.id === activeId);
+      if (insertIndex === origIdx) return;
     }
     targetWithout.splice(insertIndex, 0, { ...card, status: toStatus });
     const beforeId = targetWithout[insertIndex - 1]?.id ?? null;
@@ -276,6 +290,7 @@ export function EpicsBoard({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={() => setActiveId(null)}
