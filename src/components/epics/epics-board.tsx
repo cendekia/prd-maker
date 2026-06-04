@@ -4,11 +4,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   closestCorners,
   DndContext,
+  DragOverlay,
   PointerSensor,
   useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -101,6 +103,7 @@ export function EpicsBoard({
   const [columns, setColumns] = useState<Columns>(() => group(initialEpics));
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   // dnd-kit generates SSR-mismatched aria ids; render a static board first,
   // then enable drag after mount (same approach as the page tree).
@@ -125,7 +128,12 @@ export function EpicsBoard({
     });
   }
 
+  function handleDragStart(e: DragStartEvent) {
+    setActiveId(String(e.active.id));
+  }
+
   async function handleDragEnd(e: DragEndEvent) {
+    setActiveId(null);
     const { active, over } = e;
     if (!over) return;
     const activeId = String(active.id);
@@ -188,6 +196,12 @@ export function EpicsBoard({
     onOpen: (id: string) => setDetailId(id),
     onEdit: openEdit,
   };
+
+  const activeEpic = activeId
+    ? (Object.values(columns)
+        .flat()
+        .find((e) => e.id === activeId) ?? null)
+    : null;
 
   const board = (
     <div className="flex flex-1 gap-4 overflow-x-auto px-6 py-4">
@@ -262,9 +276,27 @@ export function EpicsBoard({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveId(null)}
         >
           {board}
+          {/* The dragged card is rendered once in an isolated overlay layer so
+              it follows the cursor via a GPU-composited transform — the source
+              card stays put (dimmed) instead of repainting its shadow every
+              frame, which is what made dragging feel laggy. */}
+          <DragOverlay dropAnimation={null}>
+            {activeEpic ? (
+              <div className="cursor-grabbing rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)]">
+                <EpicCard
+                  epic={activeEpic}
+                  canEdit={false}
+                  onOpen={() => {}}
+                  onEdit={() => {}}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       ) : (
         board
@@ -387,13 +419,19 @@ function SortableEpicCard({
   } = useSortable({ id: epic.id });
 
   return (
-    <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}>
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : undefined,
+      }}
+    >
       <EpicCard
         epic={epic}
         canEdit
         onOpen={onOpen}
         onEdit={onEdit}
-        dragging={isDragging}
         grip={
           <button
             ref={setActivatorNodeRef}
