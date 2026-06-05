@@ -5,6 +5,7 @@ import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { HocuspocusProvider, type WebSocketStatus } from "@hocuspocus/provider";
+import { prosemirrorJSONToYDoc } from "y-prosemirror";
 import * as Y from "yjs";
 
 import { usePresenceController } from "@/hooks/use-presence";
@@ -315,15 +316,23 @@ function CollabEditor({
   const seededRef = useRef(false);
   useEffect(() => {
     if (!editor || !synced || seededRef.current) return;
-    if (!initialContent) {
-      seededRef.current = true;
-      return;
-    }
-    if (editor.isEmpty) {
-      editor.commands.setContent(initialContent, false);
-    }
     seededRef.current = true;
-  }, [editor, synced, initialContent]);
+    if (!initialContent) return;
+    // Brand-new collab doc (e.g. a page created from a template): the Yjs doc
+    // arrives empty because only Page.contentJson was set at creation, not
+    // yDocState. Seed it by applying the JSON as a Yjs update built against the
+    // editor's own schema — the reliable way to plant content into a bound doc.
+    // (editor.commands.setContent does not consistently propagate into Yjs.)
+    // Skip when the doc already has content so existing pages are untouched.
+    const fragment = ydoc.getXmlFragment("default");
+    if (fragment.length > 0) return;
+    try {
+      const seedDoc = prosemirrorJSONToYDoc(editor.schema, initialContent, "default");
+      Y.applyUpdate(ydoc, Y.encodeStateAsUpdate(seedDoc));
+    } catch (err) {
+      console.error("[editor] failed to seed initial content:", err);
+    }
+  }, [editor, synced, initialContent, ydoc]);
 
   useCommentEditorEvents(editor);
 
