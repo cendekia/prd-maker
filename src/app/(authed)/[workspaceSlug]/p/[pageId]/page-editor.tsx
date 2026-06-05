@@ -14,6 +14,7 @@ import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { usePageContent } from "@/hooks/use-page-content";
+import { applyAiEditToPage } from "@/lib/ai-apply";
 import type { PageAgileInitial } from "@/lib/agile";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +91,39 @@ export function PageEditor({
     document.addEventListener("prdmaker:comment-start", onStart);
     return () => document.removeEventListener("prdmaker:comment-start", onStart);
   }, []);
+
+  // AI panel "Apply to page" -> snapshot-then-apply into this editor (Step 21).
+  // The panel lives in a sibling subtree, so it dispatches an event and we run
+  // the orchestration here where the live editor instance is in scope.
+  useEffect(() => {
+    function onApply(e: Event) {
+      const detail = (
+        e as CustomEvent<{ requestId: string; pageId: string; markdown: string }>
+      ).detail;
+      if (!detail || detail.pageId !== pageId) return;
+      const respond = (ok: boolean, error?: string) =>
+        document.dispatchEvent(
+          new CustomEvent("prdmaker:ai-apply-done", {
+            detail: { requestId: detail.requestId, ok, error },
+          }),
+        );
+      if (!effectiveEditable) {
+        respond(false, "This page is read-only.");
+        return;
+      }
+      applyAiEditToPage({
+        pageId,
+        markdown: detail.markdown,
+        editor: editorRef.current,
+      })
+        .then((r) => respond(r.ok, r.error))
+        .catch((err) =>
+          respond(false, err instanceof Error ? err.message : "Apply failed."),
+        );
+    }
+    document.addEventListener("prdmaker:ai-apply", onApply);
+    return () => document.removeEventListener("prdmaker:ai-apply", onApply);
+  }, [pageId, effectiveEditable]);
 
   // Snapshot orchestration. We hold a ref to the live editor so the periodic
   // auto-snapshot can read the freshest JSON (works in both solo + collab

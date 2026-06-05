@@ -44,6 +44,7 @@ model User {
   epicsCreated           Epic[]                  @relation("EpicCreatedBy")
   notifications          Notification[]
   notificationPreference NotificationPreference?
+  aiThreads              AiThread[]
 }
 
 model Account {
@@ -182,6 +183,7 @@ model Page {
   versions    PageVersion[]
   comments    Comment[]
   permissions PagePermission[]
+  aiThreads   AiThread[]
 
   @@index([workspaceId, parentId])
   @@index([workspaceId, archivedAt])
@@ -361,4 +363,34 @@ model AiUsage {
 
   @@unique([workspaceId, period])
   @@index([workspaceId])
+}
+
+/// Per-user, per-page AI chat thread (Step 20). One conversation each member
+/// keeps about a given PRD; messages persist so the thread survives reloads.
+model AiThread {
+  id        String   @id @default(cuid())
+  pageId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page     Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@unique([pageId, userId])
+  @@index([pageId])
+}
+
+model AiMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  /// "user" | "assistant" — maps directly to Anthropic message roles.
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  thread AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
 }

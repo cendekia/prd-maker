@@ -10,7 +10,7 @@ import { PresenceProvider } from "@/hooks/use-presence";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
 
-import { AIPanel } from "./ai-panel";
+import { AIPanel } from "@/components/ai-panel/ai-panel";
 import { MobileDrawer } from "./mobile-drawer";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./topbar";
@@ -44,6 +44,9 @@ export function AppShell({
 
   // Derive a section label for the breadcrumb (Settings, etc).
   const section = sectionLabelFor(pathname, workspace.slug);
+
+  // The AI panel chats about the page currently open at /:slug/p/:pageId.
+  const activePageId = pageIdFromPath(pathname);
 
   const sidebar = (
     <Sidebar
@@ -107,7 +110,10 @@ export function AppShell({
 
       {/* AI panel is desktop-only — hidden entirely on mobile. */}
       {!isMobile && aiPanelOpen ? (
-        <AIPanel onClose={() => setAiPanelOpen(false)} />
+        <AIPanel
+          pageId={activePageId}
+          onClose={() => setAiPanelOpen(false)}
+        />
       ) : null}
     </div>
 
@@ -119,6 +125,12 @@ export function AppShell({
     </PresenceProvider>
     </CommandPaletteProvider>
   );
+}
+
+/** Extract the page id from a `/:workspaceSlug/p/:pageId` path, else null. */
+function pageIdFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/[^/]+\/p\/([^/]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
 function sectionLabelFor(pathname: string, slug: string): string | null {

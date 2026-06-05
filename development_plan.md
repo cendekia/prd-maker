@@ -294,7 +294,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 4
   - **User Instructions**: Put a server `ANTHROPIC_API_KEY` in env (powers the free managed tier). Run `npx prisma migrate dev --name ai_provider`.
 
-- [ ] Step 20: AI side-panel chat — streaming, page context, quota enforcement
+- [x] Step 20: AI side-panel chat — streaming, page context, quota enforcement
   - **Task**: Implement the right-side AI panel with a per-page chat thread (`AiThread`, `AiMessage`). Stream responses via Server-Sent Events using `resolveAiClient` (managed Haiku by default; the user's key + Sonnet if they added one). The system prompt includes the current page's plain-text content. **Enforce quotas:** `assertWithinQuota` before a managed request, `recordUsage` after streaming (token counts from the response). When the managed quota is exhausted, show an "out of AI credits" state with CTAs to upgrade the plan or add a personal key (BYO skips the managed cap). Replace the placeholder panel from Step 9.
   - **Files**:
     - `prisma/schema.prisma`: AiThread, AiMessage
@@ -308,7 +308,7 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 19, Step 10
   - **User Instructions**: Run `npx prisma migrate dev --name ai_threads`.
 
-- [ ] Step 21: Guided Request → Plan → Spec workflow with safe AI writes into the page
+- [x] Step 21: Guided Request → Plan → Spec workflow with safe AI writes into the page
   - **Task**: Add a "Guide me" mode in the AI panel that walks the user through three stages using the bundled prompts (`request_prompt.md` template logic, `plan_prompt.md` template logic, plus a final spec stage), reusing the Step 19 resolver + Step 20 quota path. At each stage where AI proposes content for the page, render a "Apply to page" button. Clicking it calls `takeSnapshot(pageId, 'PRE_AI')` (Step 15) and only on success applies the AI's structured edit to the Yjs doc via a server-authored transform. If the snapshot fails, the apply button shows an error and does not write.
   - **Files**:
     - `src/lib/ai-prompts.ts`: bundled prompt templates

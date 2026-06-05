@@ -1,0 +1,193 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - button "PRD Maker Dataxet:Sonar" [ref=e6]:
+        - img "PRD Maker" [ref=e7]
+        - generic [ref=e8]: Dataxet:Sonar
+        - img [ref=e9]
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - img
+          - searchbox "Search pages…" [ref=e13]
+        - button "New page" [ref=e14]:
+          - img
+      - generic [ref=e15]:
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - button [ref=e141]:
+              - img [ref=e142]
+            - link "PRD Maker asdas" [ref=e145] [cursor=pointer]:
+              - /url: /dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch
+            - generic [ref=e146]:
+              - button "Add child page" [ref=e147]:
+                - img [ref=e148]
+              - button "Page menu" [ref=e150]:
+                - img [ref=e151]
+          - generic [ref=e155]:
+            - button [ref=e156]:
+              - img [ref=e157]
+            - 'link "New Feature #1" [ref=e160] [cursor=pointer]':
+              - /url: /dataxet-sonar/p/cmov4payv0002ubqzqa2ewbw2
+            - generic [ref=e161]:
+              - button "Add child page" [ref=e162]:
+                - img [ref=e163]
+              - button "Page menu" [ref=e165]:
+                - img [ref=e166]
+          - generic [ref=e170]:
+            - button [ref=e171]:
+              - img [ref=e172]
+            - link "Test Versioning" [ref=e175] [cursor=pointer]:
+              - /url: /dataxet-sonar/p/cmp23ujf00001ubw6esewec78
+            - generic [ref=e176]:
+              - button "Add child page" [ref=e177]:
+                - img [ref=e178]
+              - button "Page menu" [ref=e180]:
+                - img [ref=e181]
+          - generic [ref=e185]:
+            - button [ref=e186]:
+              - img [ref=e187]
+            - link "Feature PRD" [ref=e190] [cursor=pointer]:
+              - /url: /dataxet-sonar/p/cmpz5q8ag0001ubk2g2ddr7hm
+            - generic [ref=e191]:
+              - button "Add child page" [ref=e192]:
+                - img [ref=e193]
+              - button "Page menu" [ref=e195]:
+                - img [ref=e196]
+          - generic [ref=e200]:
+            - button [ref=e201]:
+              - img [ref=e202]
+            - link "Bug Report" [ref=e205] [cursor=pointer]:
+              - /url: /dataxet-sonar/p/cmq0dvj8j0001ubjqu3dbd6re
+            - generic [ref=e206]:
+              - button "Add child page" [ref=e207]:
+                - img [ref=e208]
+              - button "Page menu" [ref=e210]:
+                - img [ref=e211]
+        - status [ref=e215]
+      - generic [ref=e47]:
+        - link "Epics" [ref=e48] [cursor=pointer]:
+          - /url: /dataxet-sonar/epics
+          - img [ref=e49]
+          - text: Epics
+        - link "Settings" [ref=e53] [cursor=pointer]:
+          - /url: /dataxet-sonar/settings
+          - img [ref=e54]
+          - text: Settings
+        - generic [ref=e57]:
+          - paragraph [ref=e59]: cendiqkrn@gmail.com
+          - link "Sign out" [ref=e60] [cursor=pointer]:
+            - /url: /api/auth/signout
+    - generic [ref=e61]:
+      - banner [ref=e62]:
+        - button "Hide sidebar" [pressed] [ref=e63]:
+          - img
+        - generic [ref=e65]: Dataxet:Sonar
+        - generic [ref=e66]:
+          - generic "People on this page" [ref=e217]:
+            - generic "cendiqkrn@gmail.com (you)" [ref=e218]:
+              - generic [ref=e219]: CE
+          - button "Open command palette" [ref=e67]:
+            - img
+            - generic [ref=e68]: Search
+            - generic [ref=e69]: ⌘K
+          - generic [ref=e70]:
+            - button "Share" [ref=e71]:
+              - img
+              - text: Share
+            - button "Publish" [ref=e72]
+            - button "Hide AI panel" [pressed] [ref=e256]:
+              - img
+          - button "Notifications" [ref=e75]:
+            - img
+          - button "Account menu" [ref=e77]:
+            - generic [ref=e78]: CE
+      - main [ref=e79]:
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - generic [ref=e84]: Synced
+            - generic [ref=e85]:
+              - button "Export" [ref=e87]:
+                - img
+                - text: Export
+              - button "Publish" [ref=e89]:
+                - img
+                - text: Publish
+            - button "Toggle version history" [ref=e90]:
+              - img
+              - text: History
+            - button "Toggle comments" [ref=e91]:
+              - img
+              - text: Comments
+          - textbox "Untitled" [ref=e92]: Bug Report
+          - generic [ref=e93]:
+            - button "Epic" [ref=e95]:
+              - generic [ref=e96]: No epic
+              - img [ref=e97]
+            - button "Status" [ref=e100]:
+              - generic [ref=e102]: Backlog
+              - img [ref=e103]
+            - button "Priority" [ref=e106]:
+              - img [ref=e107]
+              - generic [ref=e109]: Priority
+              - img [ref=e110]
+            - button "Story points" [ref=e113]:
+              - img [ref=e114]
+              - generic [ref=e117]: Points
+            - button "Sprint" [ref=e119]:
+              - img [ref=e120]
+              - generic [ref=e122]: Sprint
+            - button "Assignee" [ref=e124]:
+              - img [ref=e125]
+              - generic [ref=e128]: Assignee
+              - img [ref=e129]
+            - button "External link" [ref=e132]:
+              - img [ref=e133]
+              - generic [ref=e136]: Link
+          - generic [ref=e221]:
+            - heading "Summary" [level=2] [ref=e222]
+            - paragraph [ref=e223]: A clear, one-line description of the bug.
+            - heading "Steps to reproduce" [level=2] [ref=e224]
+            - list [ref=e225]:
+              - listitem [ref=e226]:
+                - paragraph [ref=e227]: Go to …
+              - listitem [ref=e228]:
+                - paragraph [ref=e229]: Click on …
+              - listitem [ref=e230]:
+                - paragraph [ref=e231]: Observe …
+            - heading "Expected behavior" [level=2] [ref=e232]
+            - paragraph [ref=e233]
+            - heading "Actual behavior" [level=2] [ref=e234]
+            - paragraph [ref=e235]
+            - heading "Environment" [level=2] [ref=e236]
+            - list [ref=e237]:
+              - listitem [ref=e238]:
+                - paragraph [ref=e239]: "Browser / OS:"
+              - listitem [ref=e240]:
+                - paragraph [ref=e241]: "App version:"
+              - listitem [ref=e242]:
+                - paragraph [ref=e243]: "URL:"
+            - heading "Severity" [level=2] [ref=e244]
+            - paragraph [ref=e245]: Blocker / Major / Minor / Trivial
+    - complementary [ref=e257]:
+      - generic [ref=e258]:
+        - generic [ref=e259]:
+          - img [ref=e260]
+          - text: AI assistant
+          - generic [ref=e262]: Managed
+        - button "Close AI panel" [ref=e263]:
+          - img
+      - generic [ref=e264]:
+        - button "Chat" [pressed] [ref=e265]
+        - button "Guide me" [ref=e266]
+      - generic [ref=e267]:
+        - generic [ref=e285]: Summarize this PRD
+        - generic [ref=e287]:
+          - img [ref=e289]
+          - generic [ref=e291]: "# Bug Report PRD Summary This is a **bug report template** rather than a product requirements document. It provides a structured framework for documenting and submitting bugs with the following sections: - **Summary** – A one-line bug description - **Steps to Reproduce** – How to trigger the bug - **Expected Behavior** – What should happen - **Actual Behavior** – What actually happens - **Environment** – Browser/OS, app version, and URL context - **Severity** – Classification (Blocker, Major, Minor, or Trivial) **Current state:** The template is mostly empty placeholders and needs actual bug details filled in to be useful."
+      - generic [ref=e278]:
+        - textbox "Ask about this PRD…" [ref=e279]
+        - button "Send message" [disabled] [ref=e280]:
+          - img [ref=e281]
+  - button "Open Next.js Dev Tools" [ref=e251] [cursor=pointer]:
+    - img [ref=e252]
+  - alert [ref=e255]

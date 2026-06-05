@@ -1,0 +1,110 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - button "PRD Maker Dataxet:Sonar" [ref=e6]:
+      - img "PRD Maker" [ref=e7]
+      - generic [ref=e8]: Dataxet:Sonar
+      - img [ref=e9]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - img
+        - searchbox "Search pages…" [ref=e13]
+      - button "New page" [ref=e14]:
+        - img
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - img [ref=e19]
+        - link "PRD Maker asdas" [ref=e22] [cursor=pointer]:
+          - /url: /dataxet-sonar/p/cmosdwpvf0001ubaerxyl0nch
+      - generic [ref=e23]:
+        - img [ref=e25]
+        - 'link "New Feature #1" [ref=e28] [cursor=pointer]':
+          - /url: /dataxet-sonar/p/cmov4payv0002ubqzqa2ewbw2
+      - generic [ref=e29]:
+        - img [ref=e31]
+        - link "Test Versioning" [ref=e34] [cursor=pointer]:
+          - /url: /dataxet-sonar/p/cmp23ujf00001ubw6esewec78
+      - generic [ref=e35]:
+        - img [ref=e37]
+        - link "Feature PRD" [ref=e40] [cursor=pointer]:
+          - /url: /dataxet-sonar/p/cmpz5q8ag0001ubk2g2ddr7hm
+      - generic [ref=e41]:
+        - img [ref=e43]
+        - link "Bug Report" [ref=e46] [cursor=pointer]:
+          - /url: /dataxet-sonar/p/cmq0dvj8j0001ubjqu3dbd6re
+    - generic [ref=e47]:
+      - link "Epics" [ref=e48] [cursor=pointer]:
+        - /url: /dataxet-sonar/epics
+        - img [ref=e49]
+        - text: Epics
+      - link "Settings" [ref=e53] [cursor=pointer]:
+        - /url: /dataxet-sonar/settings
+        - img [ref=e54]
+        - text: Settings
+      - generic [ref=e57]:
+        - paragraph [ref=e59]: cendiqkrn@gmail.com
+        - link "Sign out" [ref=e60] [cursor=pointer]:
+          - /url: /api/auth/signout
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - button "Hide sidebar" [pressed] [ref=e63]:
+        - img
+      - generic [ref=e65]: Dataxet:Sonar
+      - generic [ref=e66]:
+        - button "Open command palette" [ref=e67]:
+          - img
+          - generic [ref=e68]: Search
+          - generic [ref=e69]: ⌘K
+        - generic [ref=e70]:
+          - button "Share" [ref=e71]:
+            - img
+            - text: Share
+          - button "Publish" [ref=e72]
+          - button "Show AI panel" [ref=e73]:
+            - img
+        - button "Notifications" [ref=e75]:
+          - img
+        - button "Account menu" [ref=e77]:
+          - generic [ref=e78]: CE
+    - main [ref=e79]:
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - generic [ref=e84]: Connecting…
+          - generic [ref=e85]:
+            - button "Export" [ref=e87]:
+              - img
+              - text: Export
+            - button "Publish" [ref=e89]:
+              - img
+              - text: Publish
+          - button "Toggle version history" [ref=e90]:
+            - img
+            - text: History
+          - button "Toggle comments" [ref=e91]:
+            - img
+            - text: Comments
+        - textbox "Untitled" [ref=e92]: Bug Report
+        - generic [ref=e93]:
+          - button "Epic" [ref=e95]:
+            - generic [ref=e96]: No epic
+            - img [ref=e97]
+          - button "Status" [ref=e100]:
+            - generic [ref=e102]: Backlog
+            - img [ref=e103]
+          - button "Priority" [ref=e106]:
+            - img [ref=e107]
+            - generic [ref=e109]: Priority
+            - img [ref=e110]
+          - button "Story points" [ref=e113]:
+            - img [ref=e114]
+            - generic [ref=e117]: Points
+          - button "Sprint" [ref=e119]:
+            - img [ref=e120]
+            - generic [ref=e122]: Sprint
+          - button "Assignee" [ref=e124]:
+            - img [ref=e125]
+            - generic [ref=e128]: Assignee
+            - img [ref=e129]
+          - button "External link" [ref=e132]:
+            - img [ref=e133]
+            - generic [ref=e136]: Link
+        - generic [ref=e138]: Loading editor…
