@@ -20,6 +20,7 @@
 # Env toggles:
 #   NO_CACHE=1      force a clean --no-cache rebuild
 #   SKIP_MIGRATE=1  skip `prisma migrate deploy` (e.g. no schema change)
+#   SKIP_SEED=1     skip `prisma db seed` (idempotent system templates)
 #
 # For infra changes (domain, TLS, proxy, new env vars) re-run prod-docker.sh.
 
@@ -91,7 +92,22 @@ else
   ok "Migrations applied (or already up to date)."
 fi
 
-# ---------- 3. Recreate only the changed services ----------
+# ---------- 3. Seed system templates (idempotent) ----------
+if [ "${SKIP_SEED:-0}" = "1" ]; then
+  warn "SKIP_SEED=1 — not running prisma db seed."
+else
+  log "Seeding system templates (prisma db seed) ..."
+  # Idempotent upsert of the built-in templates. Non-fatal: the app runs fine
+  # without it, so a seed hiccup shouldn't block the deploy.
+  if dc run --rm --no-deps next npx prisma db seed; then
+    ok "System templates seeded (or already up to date)."
+  else
+    warn "Seed failed — continuing. Re-run later with:"
+    warn "  docker compose -f $COMPOSE_FILE run --rm next npx prisma db seed"
+  fi
+fi
+
+# ---------- 4. Recreate only the changed services ----------
 log "Recreating app services (postgres + edge proxy stay up) ..."
 dc "${PROFILE_ARGS[@]}" up -d next collab
 ok "Containers updated."
