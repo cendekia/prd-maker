@@ -15,6 +15,13 @@ const serverSchema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
   RESEND_FROM: z.string().min(1).optional(),
 
+  /**
+   * Server-held Anthropic key powering the free managed AI tier (Step 19).
+   * Every user gets managed Claude Haiku with no setup; absence means the
+   * managed tier is disabled (BYO keys still work).
+   */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 
@@ -83,6 +90,7 @@ const rawEnv = {
   AUTH_URL: process.env.AUTH_URL,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   RESEND_FROM: process.env.RESEND_FROM,
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,

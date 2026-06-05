@@ -23,6 +23,15 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Optional bring-your-own Anthropic key (Step 19). Encrypted at rest with
+  // AES-256-GCM (see src/lib/crypto.ts); the plaintext key is never stored or
+  // returned after save. `anthropicKeyLast4` is the only non-secret hint shown
+  // back in the UI ("•••• last4").
+  anthropicKeyCipher String?
+  anthropicKeyIv     String?
+  anthropicKeyTag    String?
+  anthropicKeyLast4  String?
+
   accounts               Account[]
   sessions               Session[]
   workspaceMembers       WorkspaceMember[]
@@ -96,6 +105,7 @@ model Workspace {
   pages     Page[]
   templates Template[]
   epics     Epic[]
+  aiUsage   AiUsage[]
 }
 
 model WorkspaceMember {
@@ -330,4 +340,25 @@ model NotificationPreference {
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------- AI usage / quotas ----------
+
+/// One row per workspace per calendar-month, metering managed-tier AI usage
+/// (Step 19). BYO-key requests bypass the managed cap and are not metered
+/// here. `period` is the UTC "YYYY-MM" bucket; see src/lib/ai-usage.ts.
+model AiUsage {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  period       String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  requestCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, period])
+  @@index([workspaceId])
 }

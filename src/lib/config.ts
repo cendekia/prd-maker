@@ -76,6 +76,27 @@ export const PLAN_NAMES: Record<Plan, string> = {
   BUSINESS: "Business",
 };
 
+/**
+ * AI models (Step 19). The managed tier uses the cheap, fast Haiku for every
+ * user with no setup; a bring-your-own key unlocks the stronger Sonnet.
+ */
+export const AI_MODELS = {
+  managed: "claude-haiku-4-5",
+  byo: "claude-sonnet-4-6",
+} as const;
+
+/**
+ * Per-plan cap on managed-tier AI tokens (input + output combined) per
+ * workspace per calendar month (Step 19). BYO-key requests bypass this cap.
+ * Billing (Step 24/25) supplies each workspace's plan; until then every
+ * workspace meters against the FREE cap.
+ */
+export const AI_MANAGED_MONTHLY_TOKEN_CAP: Record<Plan, number> = {
+  FREE: 100_000,
+  PRO: 1_000_000,
+  BUSINESS: 5_000_000,
+};
+
 export const ROLES = ["OWNER", "EDITOR", "VIEWER"] as const;
 export type Role = (typeof ROLES)[number];
 
