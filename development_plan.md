@@ -262,7 +262,7 @@ Total: ~38 steps across 11 sections.
 
 ## Notifications
 
-- [ ] Step 18: Notification model, in-app inbox, and email delivery
+- [x] Step 18: Notification model, in-app inbox, and email delivery
   - **Task**: Add `Notification` Prisma model (id, userId, type, payload jsonb, readAt). Build the bell-icon inbox in the top bar with unread badge. Wire the existing notification triggers (mention, comment reply, page share, invite) to also send email via Resend, respecting per-user preferences in `/app/account/notifications`.
   - **Files**:
     - `prisma/schema.prisma`: add Notification + NotificationPreference

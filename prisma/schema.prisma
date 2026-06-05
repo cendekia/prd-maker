@@ -23,16 +23,18 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  workspaceMembers WorkspaceMember[]
-  invitesCreated   WorkspaceInvite[] @relation("InviteCreatedBy")
-  pagesCreated     Page[]            @relation("PageCreatedBy")
-  pageVersions     PageVersion[]
-  comments         Comment[]
-  pagePermissions  PagePermission[]
-  assignedPages    Page[]            @relation("PageAssignee")
-  epicsCreated     Epic[]            @relation("EpicCreatedBy")
+  accounts               Account[]
+  sessions               Session[]
+  workspaceMembers       WorkspaceMember[]
+  invitesCreated         WorkspaceInvite[]       @relation("InviteCreatedBy")
+  pagesCreated           Page[]                  @relation("PageCreatedBy")
+  pageVersions           PageVersion[]
+  comments               Comment[]
+  pagePermissions        PagePermission[]
+  assignedPages          Page[]                  @relation("PageAssignee")
+  epicsCreated           Epic[]                  @relation("EpicCreatedBy")
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
 }
 
 model Account {
@@ -297,4 +299,35 @@ model Epic {
 
   @@unique([workspaceId, key])
   @@index([workspaceId, status])
+}
+
+// ---------- Notifications ----------
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  /// NotificationType string — see src/lib/notifications.ts.
+  type      String
+  /// Denormalized render data (actor name, page title/slug, url, …).
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model NotificationPreference {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  /// Per-type email delivery toggles. The in-app inbox always receives.
+  emailMention Boolean  @default(true)
+  emailReply   Boolean  @default(true)
+  emailShare   Boolean  @default(true)
+  emailInvite  Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Settings } from "lucide-react";
+import { Bell, LogOut, Settings } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
@@ -82,6 +82,15 @@ export function AccountMenu({ user, workspaceSlug }: Props) {
           >
             <Settings className="size-3.5" />
             Workspace settings
+          </Link>
+          <Link
+            href="/account/notifications"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[13px] text-fg-2 hover:bg-bg-hover hover:text-fg-1"
+          >
+            <Bell className="size-3.5" />
+            Notification settings
           </Link>
           <Link
             href="/api/auth/signout"

@@ -2,6 +2,7 @@ import { Resend } from "resend";
 
 import { env } from "@/env";
 import { APP_URL, isDev } from "@/lib/config";
+import type { NotificationData, NotificationType } from "@/lib/notifications";
 
 const resendClient = env.RESEND_API_KEY
   ? new Resend(env.RESEND_API_KEY)
@@ -146,6 +147,107 @@ function inviteTemplate({
   <p style="font-size: 12px; color: #666; line-height: 1.5; margin: 0 0 8px;">Or paste this URL into your browser:</p>
   <p style="font-size: 12px; color: #666; word-break: break-all; margin: 0 0 24px;">${acceptUrl}</p>
   <p style="font-size: 12px; color: #999; margin: 0;">This invite expires in 7 days.</p>
+</body></html>`;
+}
+
+export async function sendNotificationEmail({
+  to,
+  type,
+  payload,
+}: {
+  to: string;
+  type: NotificationType;
+  payload: NotificationData;
+}) {
+  const msg = notificationMessage(type, payload);
+  const ctaUrl = buildCtaUrl(payload.url);
+  const text = [msg.heading, "", msg.body, "", ctaUrl].join("\n");
+  const html = notificationTemplate({
+    heading: msg.heading,
+    body: msg.body,
+    ctaLabel: msg.ctaLabel,
+    ctaUrl,
+  });
+  await sendEmail({ to, subject: msg.subject, html, text });
+}
+
+/**
+ * Resolve a notification's app-relative `url` to an absolute link, accepting
+ * only same-origin http(s) targets. Anything else (off-origin, javascript:,
+ * malformed) falls back to the app root — so a crafted payload can never
+ * inject a scheme or a different host into the email link.
+ */
+function buildCtaUrl(path: string | undefined): string {
+  if (!path) return APP_URL;
+  try {
+    const url = new URL(path, APP_URL);
+    const base = new URL(APP_URL);
+    if (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.origin === base.origin
+    ) {
+      return url.toString();
+    }
+  } catch {
+    /* malformed — fall through to the safe default */
+  }
+  return APP_URL;
+}
+
+function notificationMessage(type: NotificationType, payload: NotificationData) {
+  const actor = payload.actorName ?? "Someone";
+  const page = payload.pageTitle ?? "a page";
+  switch (type) {
+    case "comment.mention":
+      return {
+        subject: `${actor} mentioned you in ${page}`,
+        heading: `${actor} mentioned you`,
+        body: `${actor} mentioned you in a comment on “${page}”.`,
+        ctaLabel: "View comment",
+      };
+    case "comment.reply":
+      return {
+        subject: `${actor} replied in ${page}`,
+        heading: `${actor} replied to your comment`,
+        body: `${actor} replied to a thread in “${page}”.`,
+        ctaLabel: "View thread",
+      };
+    case "page.share":
+      return {
+        subject: `${actor} shared “${page}” with you`,
+        heading: `${actor} shared a page with you`,
+        body: `${actor} gave you access to “${page}”.`,
+        ctaLabel: "Open page",
+      };
+    case "workspace.invite":
+      return {
+        subject: "You have a new invitation",
+        heading: "You've been invited",
+        body: "You have a new workspace invitation on PRDMaker.",
+        ctaLabel: "View invite",
+      };
+  }
+}
+
+function notificationTemplate({
+  heading,
+  body,
+  ctaLabel,
+  ctaUrl,
+}: {
+  heading: string;
+  body: string;
+  ctaLabel: string;
+  ctaUrl: string;
+}) {
+  return `<!doctype html>
+<html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #111;">
+  <h1 style="font-size: 18px; margin: 0 0 12px;">${escapeHtml(heading)}</h1>
+  <p style="line-height: 1.5; margin: 0 0 24px; color: #333;">${escapeHtml(body)}</p>
+  <p style="margin: 0 0 32px;">
+    <a href="${escapeHtml(ctaUrl)}" style="display:inline-block; background:#111; color:#fff; padding:10px 16px; border-radius:6px; text-decoration:none; font-weight:500;">${escapeHtml(ctaLabel)}</a>
+  </p>
+  <p style="font-size: 12px; color: #999; line-height: 1.5; margin: 0;">You're receiving this because of your PRDMaker notification settings. Manage them in your account settings.</p>
 </body></html>`;
 }
 

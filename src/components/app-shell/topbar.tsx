@@ -3,6 +3,7 @@
 import { Globe, Menu, PanelLeft, PanelRight, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 
 import { AccountMenu } from "./account-menu";
@@ -112,6 +113,7 @@ export function TopBar({
             {aiPanelOpen ? <PanelRight /> : <Sparkles />}
           </Button>
         </div>
+        <NotificationBell />
         <AccountMenu user={user} workspaceSlug={workspaceSlug} />
       </div>
     </header>
