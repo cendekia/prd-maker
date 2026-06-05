@@ -1,6 +1,0 @@
-[   19005ms] [WARNING] The plate hooks must be used inside the <PlateProvider id={id}> component's context. @ https://www.rich-text-to-markdown.com/_next/static/chunks/4920a0a5-3b9cbcaf8d3238c0.js:5
-[   29865ms] [WARNING] Mermaid rendering failed: {str: Cannot read properties of null (reading 'getBoundingClientRect'), message: Cannot read properties of null (reading 'getBoundingClientRect'), hash: TypeError, error: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
-    at addHtmlSpan (htt…} @ https://markdownviewer.pages.dev/script.js:1124
-[   36171ms] [WARNING] Failed to save tabs to localStorage: QuotaExceededError: Failed to execute 'setItem' on 'Storage': Setting the value of 'markdownViewerTabs' exceeded the quota.
-    at saveTabsToStorage (https://markdownviewer.pages.dev/script.js:621:20)
-    at saveCurrentTabState (https://markdownviewer.pages.dev/script.js:901:5) @ https://markdownviewer.pages.dev/script.js:622
