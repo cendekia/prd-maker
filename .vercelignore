@@ -1,0 +1,24 @@
+# Things that are NOT part of the Vercel (Next.js web) build/deploy.
+# Keeping them out of the upload makes builds faster and avoids the web
+# type-check ever reaching into a package it isn't supposed to compile.
+
+# The Hocuspocus collaboration server deploys to Fly.io, not Vercel.
+apps
+
+# Self-hosted Docker + reverse-proxy deployment (the non-Vercel path).
+deploy
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+
+# Operational scripts — run in CI or on the Docker host, never in a Vercel build.
+scripts
+
+# CI/CD workflow definitions.
+.github
+
+# Planning / spec documents.
+development_plan.md
+request.md
+request_prompt.md
+plan_prompt.md

@@ -13,7 +13,15 @@ import {
 import { db } from "@/lib/db";
 import { getPageAccess } from "@/lib/permissions";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/**
+ * A streamed reply can run for tens of seconds (up to MAX_TOKENS). Vercel's
+ * default function timeout (~15s) would abort the SSE stream mid-reply, so we
+ * raise it. 60s is the Vercel Hobby ceiling and comfortably fits a Haiku/Sonnet
+ * turn; Pro/Enterprise can raise this further.
+ */
+export const maxDuration = 60;
 
 /** Max output tokens per turn — bounds latency and managed-quota burn. */
 const MAX_TOKENS = 4096;

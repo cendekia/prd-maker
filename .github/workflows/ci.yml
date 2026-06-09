@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same branch/PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web — typecheck · lint · build · unit
+    runs-on: ubuntu-latest
+    env:
+      # `next build` instantiates the Prisma client and runs env validation.
+      # A dummy URL is sufficient: Prisma connects lazily (no DB query happens
+      # at build time) and every secret in src/env.ts is optional. This keeps
+      # CI from needing real production secrets.
+      DATABASE_URL: postgresql://user:pass@localhost:5432/prdmaker?schema=public
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` runs the `prisma generate` postinstall; the explicit call keeps
+      # the dependency obvious and survives any postinstall change.
+      - name: Install
+        run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      # Activates automatically once Step 35 adds a `test` script; until then
+      # `--if-present` makes this a clean no-op instead of a hard failure.
+      - name: Unit tests
+        run: npm test --if-present
+      - name: Build
+        run: npm run build
+
+  collab:
+    name: Collab — typecheck · build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/collab
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/collab/package-lock.json
+
+      - name: Install
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+
+  # End-to-end tests (Playwright) arrive with Step 36 and run against a Vercel
+  # preview deploy. Add a job here that runs `npm run test:e2e` once it exists.

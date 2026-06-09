@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Never let two production deploys overlap; let an in-flight one finish.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Production DB migrations (Neon)
+    runs-on: ubuntu-latest
+    env:
+      # Migrations run DDL and must use Neon's DIRECT (non-pooled) connection
+      # string — a transaction pooler can't hold the session cleanly. Store the
+      # unpooled URL as a separate secret from the app's pooled DATABASE_URL.
+      DATABASE_URL: ${{ secrets.DATABASE_URL_UNPOOLED }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Apply migrations
+        run: bash scripts/db-migrate-deploy.sh
+
+  deploy-collab:
+    name: Deploy collab server to Heroku
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The Heroku CLI is preinstalled on GitHub's ubuntu runners; the fallback
+      # keeps this working if that ever changes. Build context is apps/collab,
+      # so it reuses apps/collab/Dockerfile.
+      - name: Deploy collab to Heroku Container Registry
+        working-directory: apps/collab
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP: ${{ secrets.HEROKU_COLLAB_APP }}
+        run: |
+          heroku --version || curl https://cli-assets.heroku.com/install.sh | sh
+          heroku container:login
+          heroku container:push web --app "$HEROKU_APP"
+          heroku container:release web --app "$HEROKU_APP"
+
+  # The Next.js web app is deployed by Vercel's Git integration automatically on
+  # every push to main (with preview deploys on PRs) — so there is deliberately
+  # no web-deploy job here. If you would rather this workflow own the web deploy,
+  # disable the Vercel Git integration and add a job that runs
+  # `vercel pull/build/deploy --prod` with VERCEL_TOKEN, VERCEL_ORG_ID and
+  # VERCEL_PROJECT_ID secrets. See deploy/vercel-heroku-neon.md.

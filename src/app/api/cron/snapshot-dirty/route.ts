@@ -14,6 +14,13 @@ import { takeSnapshot } from "@/lib/snapshots";
  * window over `Page.updatedAt` is intentionally a bit wider than the cadence
  * so a single missed run still gets caught.
  */
+// Reads the Authorization header, so it can never be statically rendered.
+export const dynamic = "force-dynamic";
+// The sweep snapshots every dirty page in a loop; on a busy workspace that can
+// outlast the default serverless timeout. (Sub-daily cron schedules require a
+// Vercel Pro plan — see vercel.json.)
+export const maxDuration = 60;
+
 const LOOKBACK_MS = 35 * 60 * 1000;
 const MIN_SINCE_LAST_SNAPSHOT_MS = 30 * 60 * 1000;
 

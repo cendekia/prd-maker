@@ -5,6 +5,10 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "native" covers local dev and the Docker (alpine/musl) build; the explicit
+  // rhel target is the query-engine binary Vercel / AWS Lambda load at runtime.
+  // Without it a Vercel build can ship a client that can't find its engine.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

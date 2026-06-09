@@ -24,6 +24,9 @@ const FORMATS: Record<Format, { mime: string; ext: string }> = {
  * parsers that don't work in Next's edge runtime.
  */
 export const runtime = "nodejs";
+// PDF rendering of a large doc can run several seconds past the default
+// serverless timeout.
+export const maxDuration = 60;
 
 export async function GET(_req: Request, { params }: Params) {
   const { pageId, format } = await params;

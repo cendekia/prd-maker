@@ -7,6 +7,9 @@ import { parseUrl } from "@/lib/embeds/match";
 // Resolution may make an outbound oEmbed request (SoundCloud) — keep this on
 // the Node.js runtime where `fetch` + `AbortSignal.timeout` are available.
 export const runtime = "nodejs";
+// An outbound oEmbed request can be slow; cap it well under the platform max so
+// a hung provider returns an error instead of a function timeout.
+export const maxDuration = 15;
 
 /**
  * POST /api/embeds/resolve  { url }  ->  EmbedData

@@ -1,0 +1,14 @@
+# Heroku Container Registry build for the PRDMaker Hocuspocus collab server
+# (Step 37). Reuses apps/collab/Dockerfile — Heroku's router proxies the
+# WebSocket upgrade natively, and the server already binds Heroku's dynamic
+# $PORT on 0.0.0.0 (the Hocuspocus default).
+#
+# Primary deploy is `heroku container:push web` run from this directory (see
+# deploy/vercel-heroku-neon.md). This heroku.yml additionally enables
+# `git push heroku` container builds for anyone who deploys apps/collab as a
+# git subtree.
+build:
+  docker:
+    web: Dockerfile
+run:
+  web: node dist/server.js

@@ -5,14 +5,14 @@ The PRDMaker request is a substantial multi-tenant SaaS — Notion/Confluence-cl
 - **DB:** PostgreSQL via Prisma; hosted on Neon or Supabase
 - **Auth:** Auth.js v5 with magic-link (Resend) + Google OAuth; SSO via SAML Jackson (BoxyHQ) gated to Business tier
 - **Editor:** TipTap v2 + ProseMirror, with `y-prosemirror` binding
-- **Real-time:** Yjs + Hocuspocus server (separate Node process) on Fly.io / Render; auth via JWT; persistence via Postgres
+- **Real-time:** Yjs + Hocuspocus server (separate Node process) on Heroku; auth via JWT; persistence via Postgres
 - **AI:** Anthropic SDK; user-supplied API key encrypted with AES-256-GCM using a server-side master key; streamed responses via Server-Sent Events
 - **Billing:** Stripe (Checkout + Customer Portal + webhook); per-seat metered against workspace member count
 - **Email:** Resend (magic links + notifications)
 - **Search:** Postgres full-text search (tsvector + GIN); upgrade-path to Typesense if needed
 - **Embeds:** oEmbed via iframely-compatible parser; manual handlers for Figma, Linear, Loom, YouTube
 - **PDF export:** `@react-pdf/renderer` server-side
-- **Hosting:** Next.js on Vercel; Hocuspocus on Fly.io; Postgres on Neon
+- **Hosting:** Next.js on Vercel; Hocuspocus on Heroku; Postgres on Neon
 
 Architectural notes:
 - **Tenancy:** Every domain row has a `workspaceId` FK. All queries scope by workspace via a request-context guard.
@@ -598,17 +598,18 @@ Total: ~38 steps across 11 sections.
 
 ## Deployment & Observability
 
-- [ ] Step 37: Deployment — Vercel (web) + Fly.io (collab) + Neon (Postgres)
-  - **Task**: Vercel project for the Next.js app (env vars piped from `.env.example`). Fly.io app for `apps/collab` with persistent volume + secrets for `COLLAB_SECRET` and DB URL. CI on push: GitHub Actions running typecheck → lint → unit → e2e (against a preview deploy). Production database on Neon with a separate branch for staging.
+- [x] Step 37: Deployment — Vercel (web) + Heroku (collab) + Neon (Postgres)
+  - **Task**: Vercel project for the Next.js app (env vars piped from `.env.example`). Heroku app for `apps/collab` running the Docker image via the Container Registry, with config vars for `COLLAB_SECRET` and the DB URL. CI on push: GitHub Actions running typecheck → lint → unit → e2e (against a preview deploy). Production database on Neon with a separate branch for staging.
   - **Files**:
     - `vercel.json`: cron, redirects, headers
-    - `apps/collab/fly.toml`
+    - `apps/collab/heroku.yml`
     - `apps/collab/Dockerfile`
     - `.github/workflows/ci.yml`: typecheck, lint, unit, e2e
     - `.github/workflows/deploy.yml`: deploy on main
     - `scripts/db-migrate-deploy.sh`: prod migration runner
   - **Step Dependencies**: Step 36
-  - **User Instructions**: Create Vercel project, Fly.io app, Neon project. Add all env vars to each platform. Configure Stripe webhook to production URL. Configure Resend production domain DNS (SPF, DKIM, DMARC). Point your domain DNS at Vercel. Smoke-test sign-in, page creation, multiplayer, AI, publish, billing checkout against production with a test Stripe card before announcing.
+  - **User Instructions**: Create Vercel project, Heroku app, Neon project. Add all env vars / config vars to each platform. Configure Stripe webhook to production URL. Configure Resend production domain DNS (SPF, DKIM, DMARC). Point your domain DNS at Vercel. Smoke-test sign-in, page creation, multiplayer, AI, publish, billing checkout against production with a test Stripe card before announcing. Full runbook + env-var matrix + GitHub Actions secrets are in `deploy/vercel-heroku-neon.md`.
+  - **Build notes (delivered)**: Added `apps/collab/heroku.yml`, `.github/workflows/ci.yml` + `deploy.yml`, `scripts/db-migrate-deploy.sh`, `.vercelignore`, and `deploy/vercel-heroku-neon.md`; expanded `vercel.json` with security headers. Vercel-serverless hardening applied to existing code so it actually runs on the platform: `runtime`/`maxDuration` on streaming + long-running routes (AI chat, AI apply, PDF export, embed resolve, cron sweep), `@react-pdf/renderer` added to `serverExternalPackages`, Prisma `rhel-openssl-3.0.x` engine target, `engines.node` pinned to 22.x, and the root `tsconfig` scoped away from `apps/` so the web type-check never depends on the collab package. Collab runs as a **single** Heroku web dyno built from `apps/collab/Dockerfile` via the Container Registry (Heroku proxies WebSockets natively; Hocuspocus binds `0.0.0.0`/`$PORT`, and its 30s ping keepalive clears Heroku's 55s idle-WS cutoff). Deviations from the task text: the web app is redeployed by **Vercel's Git integration**, so `deploy.yml` only runs prod migrations + the Heroku container release; CI runs typecheck/lint/build today with unit/e2e guarded by `--if-present` until Steps 35–36 land. **Run exactly one collab dyno** — there is no Hocuspocus Redis adapter, so a second dyno wouldn't share document state. The existing Docker/Caddy self-host path is left intact alongside this managed path. Verified: `prisma generate` (RHEL engine present), `next lint`, `tsc --noEmit` (web + collab), and a full `next build` all pass.
 
 - [ ] Step 38: Observability — Sentry, structured logs, basic product analytics
   - **Task**: Wire Sentry (web + collab) for error tracking. Add structured logging via `pino` with a JSON transport for Vercel/Fly logs. Add PostHog (or Plausible) for product analytics on auth, workspace create, page create, AI message sent, publish, upgrade events. Add a `/api/health` endpoint for uptime monitoring.

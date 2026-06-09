@@ -5,6 +5,11 @@ import { auth } from "@/auth";
 import { getPageAccess } from "@/lib/permissions";
 import { takeSnapshot } from "@/lib/snapshots";
 
+export const runtime = "nodejs";
+// Snapshotting serialises the live editor doc + writes a version row; give it
+// headroom past the default serverless timeout on large pages.
+export const maxDuration = 30;
+
 /**
  * Snapshot gate for AI writes into a page (Step 21).
  *
