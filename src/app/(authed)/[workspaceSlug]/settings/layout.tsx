@@ -18,6 +18,7 @@ export default async function SettingsLayout({ children, params }: LayoutProps) 
     { href: base, label: "General", exact: true },
     { href: `${base}/members`, label: "Members" },
     { href: `${base}/invites`, label: "Invites" },
+    { href: `${base}/stacks`, label: "Stacks" },
   ];
   if (member.role === Role.OWNER) {
     tabs.push({ href: `${base}/templates`, label: "Templates" });
