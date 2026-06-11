@@ -49,6 +49,7 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   aiThreads              AiThread[]
+  agentThreads           AgentThread[]
   featuresCreated        Feature[]               @relation("FeatureCreatedBy")
   impactAnalyses         ImpactAnalysis[]        @relation("ImpactAnalysisCreatedBy")
   agentJobsRequested     AgentJob[]              @relation("AgentJobRequestedBy")
@@ -119,6 +120,7 @@ model Workspace {
   featureLinks   FeatureLink[]
   impactAnalyses ImpactAnalysis[]
   agentJobs      AgentJob[]
+  agentThreads   AgentThread[]
 }
 
 model WorkspaceMember {
@@ -613,6 +615,39 @@ model ImpactAnalysis {
 
   @@index([pageId, createdAt])
   @@index([workspaceId])
+}
+
+/// Per-user, workspace-scope agent chat thread (Step 48) — deliberately
+/// separate from the per-page AiThread so Step 20 page chat stays untouched.
+model AgentThread {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AgentMessage[]
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model AgentMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  /// "user" | "assistant" — maps directly to Anthropic message roles.
+  role      String
+  content   String   @db.Text
+  /// Tool-call trace for transparency — [{name, ok, input, result}], all
+  /// strings truncated at write time. Null on user turns / tool-less replies.
+  toolUse   Json?
+  createdAt DateTime @default(now())
+
+  thread AgentThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
 }
 
 /// DB-backed queue for background agent work, drained by the agent-sync cron

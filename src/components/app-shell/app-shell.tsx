@@ -112,6 +112,7 @@ export function AppShell({
       {!isMobile && aiPanelOpen ? (
         <AIPanel
           pageId={activePageId}
+          workspace={{ id: workspace.id, slug: workspace.slug }}
           onClose={() => setAiPanelOpen(false)}
         />
       ) : null}

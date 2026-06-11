@@ -5,6 +5,7 @@ import { Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAiChat } from "@/hooks/use-ai-chat";
+import { useAgentChat } from "@/hooks/use-agent-chat";
 import { GUIDED_STAGES, type GuidedStage } from "@/lib/ai-prompts";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ import { Composer } from "./composer";
 import { GuidedMode } from "./guided-mode";
 import { Message } from "./message";
 import { QuotaNotice } from "./quota-notice";
+import { ToolActivity } from "./tool-activity";
 
 const SUGGESTIONS = [
   "Summarize this PRD",
@@ -20,35 +22,59 @@ const SUGGESTIONS = [
   "Draft acceptance criteria",
 ];
 
+const AGENT_SUGGESTIONS = [
+  "What does this application look like?",
+  "What's connected to the login feature?",
+  "What would a forgot-password feature impact?",
+];
+
 type Mode = "chat" | "guided";
+type Scope = "page" | "workspace";
 
 interface Props {
   pageId: string | null;
+  workspace: { id: string; slug: string };
   onClose: () => void;
 }
 
-export function AIPanel({ pageId, onClose }: Props) {
-  const { messages, status, error, quota, quotaExceeded, byo, send } =
-    useAiChat(pageId);
+export function AIPanel({ pageId, workspace, onClose }: Props) {
+  const [scope, setScope] = useState<Scope>(pageId ? "page" : "workspace");
+  const page = useAiChat(pageId);
+  const agent = useAgentChat(workspace.id);
   const [mode, setMode] = useState<Mode>("chat");
   const [stage, setStage] = useState<GuidedStage>("request");
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Off a page there's nothing for page scope to talk to — follow the route.
+  useEffect(() => {
+    if (!pageId) setScope("workspace");
+  }, [pageId]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages]);
+  }, [page.messages, agent.messages]);
 
-  const streaming = status === "streaming";
-  const blocked = quotaExceeded && !byo;
-  const composerDisabled = !pageId || streaming || status === "loading" || blocked;
-  const showIntro =
-    !!pageId && messages.length === 0 && !blocked && status !== "loading";
-  const guided = mode === "guided";
+  const isWorkspace = scope === "workspace";
+  const active = isWorkspace ? agent : page;
+  const streaming = active.status === "streaming";
+  const blocked = active.quotaExceeded && !active.byo;
+  const guided = !isWorkspace && mode === "guided";
+
+  const composerDisabled =
+    streaming || active.status === "loading" || blocked || (!isWorkspace && !pageId);
   const placeholder = blocked
     ? "Out of managed AI credits"
-    : guided
-      ? GUIDED_STAGES.find((s) => s.id === stage)?.placeholder ?? "Ask…"
-      : "Ask about this PRD…";
+    : isWorkspace
+      ? "Ask about the whole application…"
+      : guided
+        ? GUIDED_STAGES.find((s) => s.id === stage)?.placeholder ?? "Ask…"
+        : "Ask about this PRD…";
+
+  const showIntro =
+    active.messages.length === 0 &&
+    !blocked &&
+    active.status !== "loading" &&
+    (isWorkspace || !!pageId);
 
   return (
     <aside
@@ -61,9 +87,9 @@ export function AIPanel({ pageId, onClose }: Props) {
       >
         <div className="flex items-center gap-2 text-[13px] font-medium text-fg-1">
           <Sparkles className="size-4 text-brand-500" />
-          AI assistant
+          {isWorkspace ? "Workspace agent" : "AI assistant"}
           <span className="rounded-[var(--radius-full)] bg-bg-active px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-fg-3">
-            {byo ? "Personal key" : "Managed"}
+            {active.byo ? "Personal key" : "Managed"}
           </span>
         </div>
         <Button
@@ -76,30 +102,73 @@ export function AIPanel({ pageId, onClose }: Props) {
         </Button>
       </div>
 
-      {!pageId ? (
-        <EmptyState
-          title="Open a PRD to start chatting"
-          body="The AI assistant works on the page you're viewing. Open a document, then ask away."
+      {/* Scope: the page assistant vs the workspace agent */}
+      <div className="flex shrink-0 items-center gap-1 border-b bg-background px-3 py-2">
+        <ModeTab
+          label="This page"
+          active={!isWorkspace}
+          onClick={() => setScope("page")}
         />
-      ) : (
-        <>
-          {/* Chat vs Guide me */}
-          <div className="flex shrink-0 items-center gap-1 border-b bg-background px-3 py-2">
-            <ModeTab label="Chat" active={mode === "chat"} onClick={() => setMode("chat")} />
+        <ModeTab
+          label="Workspace"
+          active={isWorkspace}
+          onClick={() => setScope("workspace")}
+        />
+        {!isWorkspace ? (
+          <div className="ml-auto flex items-center gap-1">
+            <ModeTab
+              label="Chat"
+              active={mode === "chat"}
+              onClick={() => setMode("chat")}
+            />
             <ModeTab
               label="Guide me"
               active={mode === "guided"}
               onClick={() => setMode("guided")}
             />
           </div>
+        ) : null}
+      </div>
 
+      {!isWorkspace && !pageId ? (
+        <EmptyState
+          title="Open a PRD to start chatting"
+          body="Page scope works on the document you're viewing. Open one, or switch to Workspace to talk to the agent about the whole application."
+        />
+      ) : (
+        <>
           {guided ? (
             <GuidedMode activeStage={stage} onStageChange={setStage} />
           ) : null}
 
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-3">
             {showIntro ? (
-              guided ? (
+              isWorkspace ? (
+                <div className="flex flex-col items-center px-3 pt-6 text-center">
+                  <Sparkles className="mb-3 size-6 text-brand-500" />
+                  <p className="t-h3 text-fg-1">Ask the workspace agent</p>
+                  <p className="mt-2 text-[13px] leading-[18px] text-fg-3">
+                    It knows your stacks and feature map, can read PRDs, and
+                    suggests features and links — every suggestion waits for
+                    your review.
+                  </p>
+                  <div className="mt-4 flex w-full flex-col gap-1.5">
+                    {AGENT_SUGGESTIONS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => agent.send(s)}
+                        className={cn(
+                          "rounded-[var(--radius-md)] border bg-background px-3 py-2 text-left text-[13px] text-fg-2",
+                          "hover:bg-bg-hover hover:text-fg-1",
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : guided ? (
                 <p className="px-1 pt-2 text-[13px] leading-[19px] text-fg-3">
                   Start with the <strong className="text-fg-1">Request</strong>{" "}
                   stage: describe your idea below and I&apos;ll shape it into a
@@ -120,7 +189,7 @@ export function AIPanel({ pageId, onClose }: Props) {
                       <button
                         key={s}
                         type="button"
-                        onClick={() => send(s)}
+                        onClick={() => page.send(s)}
                         className={cn(
                           "rounded-[var(--radius-md)] border bg-background px-3 py-2 text-left text-[13px] text-fg-2",
                           "hover:bg-bg-hover hover:text-fg-1",
@@ -134,36 +203,52 @@ export function AIPanel({ pageId, onClose }: Props) {
               )
             ) : null}
 
-            {messages.map((m, i) => {
-              const isLast = i === messages.length - 1;
-              const appliable =
-                guided &&
-                m.role === "assistant" &&
-                m.content.trim().length > 0 &&
-                !(streaming && isLast);
-              return (
-                <div key={m.id} className="space-y-0">
-                  <Message message={m} streaming={streaming && isLast} />
-                  {appliable ? (
-                    <div className="pl-6">
-                      <ApplyToPageButton pageId={pageId} markdown={m.content} />
+            {isWorkspace
+              ? agent.messages.map((m, i) => {
+                  const isLast = i === agent.messages.length - 1;
+                  return (
+                    <div key={m.id}>
+                      {m.role === "assistant" && m.tools && m.tools.length > 0 ? (
+                        <ToolActivity tools={m.tools} />
+                      ) : null}
+                      <Message message={m} streaming={streaming && isLast} />
                     </div>
-                  ) : null}
-                </div>
-              );
-            })}
+                  );
+                })
+              : page.messages.map((m, i) => {
+                  const isLast = i === page.messages.length - 1;
+                  const appliable =
+                    guided &&
+                    m.role === "assistant" &&
+                    m.content.trim().length > 0 &&
+                    !(streaming && isLast);
+                  return (
+                    <div key={m.id} className="space-y-0">
+                      <Message message={m} streaming={streaming && isLast} />
+                      {appliable && pageId ? (
+                        <div className="pl-6">
+                          <ApplyToPageButton pageId={pageId} markdown={m.content} />
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
 
-            {blocked ? <QuotaNotice quota={quota} /> : null}
+            {blocked ? <QuotaNotice quota={active.quota} /> : null}
 
-            {error ? (
+            {active.error ? (
               <p className="rounded-[var(--radius-md)] bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
-                {error}
+                {active.error}
               </p>
             ) : null}
           </div>
 
           <Composer
-            onSend={(text) => send(text, guided ? { stage } : undefined)}
+            onSend={(text) =>
+              isWorkspace
+                ? agent.send(text)
+                : page.send(text, guided ? { stage } : undefined)
+            }
             disabled={composerDisabled}
             placeholder={placeholder}
           />
