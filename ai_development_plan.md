@@ -1,0 +1,197 @@
+<brainstorming>
+Today the AI is page-scoped: the panel chats about one PRD (Step 20) and the guided flow drafts into one PRD (Step 21). The product team's mental model is bigger: **one workspace = one application**, built from several stacks (Backend, API, WebSocket, Frontend, Email UI), each stack owning features, and features wiring across stacks (an FE "Sign-up form" consumes an API "Register endpoint" which triggers an Email "Welcome mail"). The agent should hold that mind map, so a new PRD or a change request (CR) immediately surfaces what it touches.
+
+Key design decisions:
+
+- **The mind map is a typed graph in Postgres, not an embeddings index.** `Stack` → `Feature` (node) → `FeatureLink` (typed edge), plus `PageFeature` joining PRDs to the features they DEFINE / MODIFY / REFERENCE — a CR is simply a page with MODIFIES joins. Feature catalogs for one application are small (tens to low hundreds), so the whole catalog fits in a prompt; retrieval is "catalog + graph neighborhood + `Page.contentText`", no vector store needed. Anthropic has no embeddings API (Voyage would be a new vendor), so pgvector is deliberately deferred as an upgrade path, mirroring the Step 22 "FTS now, Typesense later" philosophy.
+- **The agent proposes; humans confirm.** Extraction and chat tools only ever write rows with `status = SUGGESTED`. A review queue promotes them to CONFIRMED/ACTIVE (or rejects/merges). This keeps the canonical graph trustworthy and makes AI mistakes cheap. Without this gate, one bad extraction run would poison every later impact analysis.
+- **"Agent" = a server-side tool-use loop** on the same Anthropic SDK, client resolved per request by the existing `resolveAiClient` (Step 19) and metered by the existing `assertWithinQuota`/`recordUsage` path — every model call in a loop is recorded, with a hard turn cap. Tools are workspace-scoped by construction: the executor injects `workspaceId` from the session, never trusting model arguments for tenancy.
+- **Workspace chat gets its own `AgentThread`/`AgentMessage` models** instead of relaxing `AiThread.pageId` — the existing `@@unique([pageId, userId])` page-chat stays untouched, and agent messages need an extra `toolUse` trace column anyway. The panel gains a "This page | Workspace" scope toggle.
+- **Background extraction is a DB-queued job drained by a Vercel cron**, the same pattern as `snapshot-dirty` (Step 15) — no new queue infra. Jobs always run on the managed server key (BYO keys are per-user and can't serve unattended jobs) and are metered. Interactive calls (chat, impact runs) use the requesting user's resolved client, so BYO works there.
+- **Impact analysis is deterministic assembly + LLM reasoning, persisted.** Candidates = the page's linked features, their 2-hop neighborhood, and the catalog summary; the model returns a structured report (impacted features per stack, severity, suggested new links, open questions) stored as `ImpactAnalysis` and rendered as a card on the PRD. "Apply suggestions" writes SUGGESTED rows that flow into the same review queue.
+- **One "Features" surface** (sidebar entry beside Epics) with three tabs: List (manual CRUD), Map (React Flow + dagre mind map), Suggestions (review queue). The graph visualization is read-only in v1.
+- **Deployment + UI constraints inherited from Step 37 and the styling conventions:** every new AI/cron route declares `runtime = "nodejs"` + `maxDuration`; crons register in `vercel.json`; motion uses the `pm-*` CSS conventions (no framer-motion); plan/config constants are never imported into client components — gate flags are passed server → client as props.
+- **Numbering continues at 44** (the beta-feedback block took 39–43) so cross-references into `development_plan.md` stay stable. Steps 44–54, each ≤ ~10 files.
+
+Out of scope for v1 (recorded so they're conscious cuts, not omissions): pgvector/Voyage semantic retrieval, auto-proposed feature-summary revisions after a CR merges, drag-to-link editing on the map, notifications on new suggestions, and Epic ↔ Feature linkage.
+</brainstorming>
+
+# AI Workspace Agent — Implementation Plan
+
+> **Extension of `development_plan.md` (Steps 44–54).** This plan upgrades the AI from a per-PRD assistant (Steps 19–21) into a **workspace-level agent**: one workspace represents one application composed of multiple stacks (e.g. Backend, API, WebSocket, Frontend, Email UI); each stack owns features; features connect across stacks. The agent maintains that feature mind map and uses it so that when the product team drafts a new feature PRD — or files a CR against an existing one — it can say which existing features are connected or impacted, across which stacks.
+
+## How this connects to development_plan.md
+
+- **Builds directly on (all complete):** Step 19 `resolveAiClient` + `AiUsage` quotas, Step 20 AI panel / SSE chat conventions, Step 21 guided flow + snapshot-then-apply, Step 15 snapshot hooks, Step 23 publish action, Steps 40–42 epics + agile properties bar, Step 9 app shell/sidebar.
+- **Soft dependencies (planned, not required):** Step 22 — the agent's `search_pages` tool starts as title `ILIKE` over `Page.contentText`-backed pages and swaps to the tsvector FTS when Step 22 lands; Step 25 — gating ships behind a `PLAN_LIMITS.workspaceAgent` flag that Step 25's enforcement picks up; Step 35 — Step 54's tests target the same Vitest harness.
+- **Conventions inherited:** workspace tenancy on every query, fail-closed gates, ≤20 files per step, `runtime`/`maxDuration` on every long-running route (Step 37 build notes), `pm-*` CSS motion + token classes, no `@/lib/config` imports in client components.
+- **Numbering:** Steps 44–54 (39–43 are taken by the beta-feedback block). Intended execution order is sequential; Step 51 (map) can run any time after Step 46.
+
+---
+
+## Agent Foundation — Schema & Stacks
+
+- [x] Step 44: Database schema — stacks, features, links, page↔feature joins, impact analyses, agent jobs
+  - **Task**: Add the feature-graph models. `Stack`: id, workspaceId, name, `type` (`StackType`), description (nullable), color, `position` (Float, fractional ordering like the page tree), timestamps; `@@unique([workspaceId, name])`. `Feature` (graph node): id, workspaceId, stackId, name, `summary` (Text — one/two sentences the agent reads as the node's meaning), `status` (`FeatureStatus`: SUGGESTED / ACTIVE / DEPRECATED), `origin` (`AgentOrigin`: AGENT / MANUAL), createdById (nullable — null for agent-created), archivedAt (nullable), timestamps; `@@index([workspaceId, stackId])`, `@@index([workspaceId, status])`. `FeatureLink` (typed edge): id, workspaceId, fromFeatureId, toFeatureId, `kind` (`FeatureLinkKind`: DEPENDS_ON, CONSUMES, TRIGGERS, EXTENDS, IMPACTS, RELATES_TO), `status` (`SuggestionStatus`: SUGGESTED / CONFIRMED / REJECTED), `origin`, `confidence` (Float, nullable), `rationale` (nullable — why the agent thinks the edge exists), timestamps; `@@unique([fromFeatureId, toFeatureId, kind])`, both FKs `onDelete: Cascade`. `PageFeature` (PRD↔feature join): id, pageId, featureId, `role` (`PageFeatureRole`: DEFINES / MODIFIES / REFERENCES — MODIFIES is the CR marker), `status` (`SuggestionStatus`), `origin`, timestamps; `@@unique([pageId, featureId, role])`. `ImpactAnalysis`: id, workspaceId, pageId, `status` (`ImpactRunStatus`: RUNNING / READY / FAILED), `report` (Json, nullable — structured shape defined in types), model, error (nullable), createdById, createdAt; `@@index([pageId, createdAt])`. `AgentJob` (DB-backed queue): id, workspaceId, `type` (`AgentJobType`: SCAN_WORKSPACE / EXTRACT_PAGE), pageId (nullable), `status` (`AgentJobStatus`: QUEUED / RUNNING / DONE / FAILED), attempts (Int, default 0), error (nullable), requestedById (nullable), timestamps; `@@index([status, createdAt])`, `@@index([workspaceId, type, pageId])` (queue dedupe is enforced in service code — Prisma doesn't model partial uniques). Add back-relations on `Workspace` (stacks, features, featureLinks, impactAnalyses, agentJobs), `Page` (featureLinks `PageFeature[]`, impactAnalyses), and `User`. Create `src/lib/agent/types.ts` with shared TS types (graph node/edge, the `ImpactReport` JSON contract) plus label/color maps for link kinds and statuses, mirroring `src/lib/agile.ts` style.
+  - **Files**:
+    - `prisma/schema.prisma`: new models + enums + back-relations
+    - `src/lib/agent/types.ts`: shared agent/graph TS types, `ImpactReport` shape, label/color maps
+  - **Step Dependencies**: Step 7, Step 40 (`development_plan.md`)
+  - **User Instructions**: Run `npx prisma migrate dev --name workspace_agent`.
+  - **Build notes (delivered)**: Schema + `src/lib/agent/types.ts` landed as specced, with small hardening deviations: `Feature.stack` uses `onDelete: NoAction` instead of `Restrict` — Postgres still blocks deleting a stack that has features (the Step 45 rule), but the check defers to statement end so workspace-cascade deletes don't trip over it; `ImpactAnalysis.model` is nullable so FAILED rows can be recorded even when client resolution itself fails; `AgentJob.pageId` stays a plain column (no FK) so jobs tolerate vanished pages; extra indices for query/FK hygiene (`FeatureLink @@index([toFeatureId])` for reverse-neighbor lookups, `ImpactAnalysis @@index([workspaceId])`, `Stack @@index([workspaceId, position])`). Fail-closed defaults: `status SUGGESTED` + `origin AGENT` on Feature/FeatureLink/PageFeature (manual code paths must explicitly set MANUAL/ACTIVE/CONFIRMED); `FeatureLink.kind` and `PageFeature.role` are required with no default. `types.ts` additionally ships the `ImpactSeverity`/`ImpactKind` unions (report-internal, not DB enums) and transport types (`WorkspaceGraph`, `FeatureNode`, `FeatureEdge`, `StackSummary`, `FeaturePageRef`, `PageFeatureItem`). Verified: `prisma format`/`validate`/`generate`, full `tsc --noEmit`, eslint — all clean. Migration deliberately left to the user (see User Instructions).
+
+- [ ] Step 45: Stack management — settings CRUD + default application stacks
+  - **Task**: Build `/app/[workspaceSlug]/settings/stacks`: list stacks ordered by `position` with name, type badge, color, feature count; create/rename/recolor/retype dialogs; drag-to-reorder (fractional position, reusing the page-tree math); archive/delete — delete is blocked while features reference the stack (prompt to reassign first). Writes require `EDITOR`+ via `requireRole` (matching epics). Include a one-click **"Set up default stacks"** empty-state action that seeds the 1-workspace-=-1-application defaults — Frontend, Backend, API, WebSocket, Email UI — fully editable afterwards. Service functions in `src/lib/agent/stacks.ts`; REST routes scoped by workspace.
+  - **Files**:
+    - `src/app/(authed)/[workspaceSlug]/settings/stacks/page.tsx`: settings tab UI
+    - `src/app/(authed)/[workspaceSlug]/settings/stacks/actions.ts`: create/update/reorder/delete/seed server actions
+    - `src/app/api/workspaces/[workspaceId]/stacks/route.ts`: GET list, POST create
+    - `src/app/api/workspaces/[workspaceId]/stacks/[stackId]/route.ts`: PATCH, DELETE
+    - `src/lib/agent/stacks.ts`: stack service + default-seed definition
+    - `src/app/(authed)/[workspaceSlug]/settings/layout.tsx`: add the Stacks tab to settings nav
+  - **Step Dependencies**: Step 44, Step 6
+  - **User Instructions**: none
+
+## Feature Graph Core
+
+- [ ] Step 46: Feature graph services + Features surface (list view, manual curation)
+  - **Task**: Implement the graph service layer in `src/lib/agent/features.ts`: workspace-scoped feature CRUD with a normalized-name duplicate check per stack (case/whitespace-insensitive), archive; link create/update/delete (human-created rows are born `CONFIRMED`, origin `MANUAL`); graph queries — `neighbors(featureId)`, `subgraph(featureIds, depth)` for n-hop neighborhoods, `fullGraph(workspaceId)` for the map; rollups (linked-PRD count per feature via `PageFeature`). Add the workspace **Features** surface at `/app/[workspaceSlug]/features` with a tabbed shell — **List | Map | Suggestions** (Map and Suggestions render empty-state stubs until Steps 51/50) — and a "Features" sidebar entry beside Epics. List tab: features grouped by stack with the stack's color, search-as-you-type filter, status chips; clicking opens a feature detail sheet showing summary (inline-editable), links grouped by kind and direction with add/remove via a searchable feature picker, and linked PRDs with role chips that jump to the page. All writes `EDITOR`+; reads any member.
+  - **Files**:
+    - `src/lib/agent/features.ts`: feature + link services, graph queries, rollups
+    - `src/app/(authed)/[workspaceSlug]/features/page.tsx`: tabbed Features surface (server-loads stacks + graph)
+    - `src/components/agent/features-list.tsx`: grouped list with filter
+    - `src/components/agent/feature-detail.tsx`: detail sheet (summary, links, PRDs)
+    - `src/components/agent/feature-dialog.tsx`: create/edit feature
+    - `src/components/agent/link-editor.tsx`: add/remove typed links with feature picker
+    - `src/app/api/workspaces/[workspaceId]/features/route.ts`: GET graph/list, POST create
+    - `src/app/api/workspaces/[workspaceId]/features/[featureId]/route.ts`: PATCH, DELETE
+    - `src/app/api/workspaces/[workspaceId]/feature-links/route.ts`: POST create, PATCH/DELETE by linkId
+    - `src/components/app-shell/sidebar.tsx`: add the "Features" nav entry
+  - **Step Dependencies**: Step 45, Step 9
+  - **User Instructions**: none
+
+- [ ] Step 47: Agent context + tool layer (server library, no UI)
+  - **Task**: Build the agent's brain-stem as a pure server library. `src/lib/agent/context.ts`: `buildWorkspaceContext(workspaceId, budgetChars)` renders the application overview — stacks in order, each with its features as "name — one-line summary [status]" lines, counts, and recent PRD titles — char-budgeted like `ai-context.ts`; when the catalog exceeds budget, truncate per stack evenly and append a note telling the model to use tools for detail; CONFIRMED/ACTIVE rows are canonical, SUGGESTED rows are included capped and labeled "(unconfirmed)". Also `buildAgentSystemPrompt` reusing the Step 20 prompt voice. `src/lib/agent/tools.ts`: Anthropic tool definitions plus a zod-validated executor where **`workspaceId` is injected from the authenticated session, never read from model arguments** — cross-tenant access is impossible by construction. Read tools: `list_stacks`, `list_features({stack?, query?, status?})`, `get_feature(featureId)` (summary + links + linked PRDs), `search_pages(query)` (title `ILIKE` now; upgrade to Step 22 FTS when it lands), `read_page(pageId)` (title + `contentText`, char-capped, page-access-checked per Step 26 semantics via `getPageAccess`). Write tools — `propose_feature(stackId, name, summary)`, `propose_link(fromFeatureId, toFeatureId, kind, rationale)`, `link_page_feature(pageId, featureId, role)` — only ever create `SUGGESTED` rows; the agent cannot mutate the canonical graph. `src/lib/agent/prompts.ts`: agent system prompt, extraction prompt, and impact-analysis prompt templates with strict JSON output contracts (parsed with zod, retried once on parse failure).
+  - **Files**:
+    - `src/lib/agent/context.ts`: workspace-context builder + agent system prompt
+    - `src/lib/agent/tools.ts`: tool schemas + workspace-scoped executor
+    - `src/lib/agent/prompts.ts`: extraction + impact prompt templates and JSON contracts
+  - **Step Dependencies**: Step 46, Step 19
+  - **User Instructions**: none
+
+## Workspace Agent Chat
+
+- [ ] Step 48: Agentic chat — tool-use loop + workspace scope in the AI panel
+  - **Task**: Add `AgentThread` / `AgentMessage` Prisma models (`AgentThread` `@@unique([workspaceId, userId])`; `AgentMessage` stores role, content, and a nullable `toolUse` Json trace of tool calls + results for transparency) — deliberately separate from the per-page `AiThread` so Step 20 chat is untouched. Implement `src/lib/agent/loop.ts`: a streaming tool-use loop over the resolved client — send messages + tools; when the response contains `tool_use` blocks, execute them through the Step 47 executor, append `tool_result` blocks, and continue; hard cap of 8 assistant turns per request; for managed (non-BYO) requests `assertWithinQuota` up front and `recordUsage` after **every** model call in the loop. Add `/api/agent/chat/route.ts` mirroring the `/api/ai/chat` conventions exactly (`runtime = "nodejs"`, `dynamic = "force-dynamic"`, `maxDuration = 60`, same SSE event format) extended with `{type: "tool", name, status: "start" | "end"}` events. In the panel, add a **"This page | Workspace"** scope toggle in the `ai-panel.tsx` header: workspace scope renders the agent thread with tool-activity chips ("Searching features…", "Reading PRD…") between message bubbles, reusing `quota-notice.tsx` for the out-of-credits state. New `use-agent-chat.ts` hook modeled on `use-ai-chat.ts`.
+  - **Files**:
+    - `prisma/schema.prisma`: AgentThread, AgentMessage
+    - `src/lib/agent/loop.ts`: streaming tool-use loop with turn cap + per-call metering
+    - `src/app/api/agent/chat/route.ts`: GET thread + quota, POST SSE agent run
+    - `src/components/ai-panel/ai-panel.tsx`: scope toggle + workspace mode
+    - `src/components/ai-panel/tool-activity.tsx`: tool-call activity chips
+    - `src/hooks/use-agent-chat.ts`: SSE consumer incl. tool events
+  - **Step Dependencies**: Step 47, Step 20
+  - **User Instructions**: Run `npx prisma migrate dev --name agent_threads`.
+
+## Graph Automation
+
+- [ ] Step 49: Extraction pipeline — PRDs → suggested features & links (sync jobs)
+  - **Task**: Build the pipeline that keeps the mind map current. `src/lib/agent/extract.ts`: for one page, prompt the model with the page title + `contentText` **plus the existing per-stack feature catalog**, and require structured JSON back: features the PRD touches (each either a reference to an existing `featureId` or a new proposal with stack + name + summary), links among them (kind, confidence, rationale), and the page's role per feature (DEFINES / MODIFIES / REFERENCES). Handing the model the catalog and asking it to reference existing IDs is the primary dedupe mechanism; upserts are idempotent (skip suggestions that already exist, never touch CONFIRMED rows), so re-running a page is safe. Extraction always runs on the **managed server key** (background jobs have no user for BYO resolution) with Haiku, output-token-bounded, and metered via `recordUsage`. `src/lib/agent/jobs.ts`: enqueue with QUEUED-dedupe on `[workspaceId, type, pageId]`, claim/run/complete with an attempts cap (3) and error capture. Triggers: a **"Sync workspace"** button on the Features surface (enqueues `SCAN_WORKSPACE`, which fans out one `EXTRACT_PAGE` per non-archived page); auto-enqueue `EXTRACT_PAGE` on publish (Step 23 action) and on MANUAL/PRE_AI snapshots (Step 15's `takeSnapshot`) so edited PRDs re-extract; a cron `/api/cron/agent-sync` (every 10 minutes, `runtime = "nodejs"`, `maxDuration = 60`, authenticated the same way as `snapshot-dirty`) drains a small batch (~3 jobs) per run so a big backlog never exceeds the function window.
+  - **Files**:
+    - `src/lib/agent/extract.ts`: extraction prompt run + idempotent suggested-row upserts
+    - `src/lib/agent/jobs.ts`: enqueue/dedupe/claim/complete queue service
+    - `src/app/api/cron/agent-sync/route.ts`: cron drain (batched)
+    - `src/app/api/workspaces/[workspaceId]/agent/sync/route.ts`: POST manual sync trigger
+    - `src/lib/snapshots.ts`: enqueue hook on MANUAL/PRE_AI snapshots
+    - `src/app/(authed)/[workspaceSlug]/p/[pageId]/actions.ts`: enqueue hook on publish
+    - `src/components/agent/sync-button.tsx`: Features-surface sync button with last-sync status
+    - `vercel.json`: register the agent-sync cron
+  - **Step Dependencies**: Step 47, Step 44
+  - **User Instructions**: After deploy, verify the `agent-sync` cron is registered in the Vercel dashboard (note: Hobby-plan cron frequency limits apply — daily on Hobby; the 10-minute cadence needs Pro, same caveat as Step 15).
+
+- [ ] Step 50: Review queue — confirm, edit, merge, or reject agent suggestions
+  - **Task**: Fill in the **Suggestions** tab on the Features surface — the human-in-the-loop gate that keeps the graph canonical. Three grouped sections: suggested **features**, suggested **links**, suggested **page↔feature roles**; each card shows the agent's rationale, confidence, and the source PRD. Actions: accept (feature → `ACTIVE`, link/join → `CONFIRMED`), edit-then-accept (fix name/summary/kind before promoting), reject (→ `REJECTED`; extraction idempotency means the same suggestion isn't re-proposed), and **merge into existing feature** (picker; re-points the duplicate's links and page joins onto the target, then archives the duplicate). Bulk accept per section. Tab badge + sidebar dot show the pending count. All resolution actions `EDITOR`+ and workspace-scoped.
+  - **Files**:
+    - `src/components/agent/suggestions-tab.tsx`: grouped queue UI + bulk actions
+    - `src/components/agent/suggestion-card.tsx`: rationale/confidence/source-page card
+    - `src/components/agent/merge-dialog.tsx`: merge-into-feature picker
+    - `src/app/api/workspaces/[workspaceId]/agent/suggestions/route.ts`: GET grouped queue, POST resolve (accept/edit/reject/merge/bulk)
+    - `src/lib/agent/features.ts`: resolve + merge service logic (re-point links/joins, archive dupe)
+    - `src/app/(authed)/[workspaceSlug]/features/page.tsx`: tab wiring + badge counts
+    - `src/components/app-shell/sidebar.tsx`: pending-suggestions dot on the Features entry
+  - **Step Dependencies**: Step 49, Step 46
+  - **User Instructions**: none
+
+## Mind Map
+
+- [ ] Step 51: Feature mind-map visualization (React Flow)
+  - **Task**: Fill in the **Map** tab with the workspace mind map: `@xyflow/react` rendering features as nodes (colored/badged by stack, with a stack legend) and `FeatureLink`s as labeled directed edges styled per kind — dashed for SUGGESTED, solid for CONFIRMED. Auto-layout via a `dagre` wrapper in `src/lib/agent/layout.ts` (left-to-right ranking, features visually clustered by stack). Interactions: click a node to open the Step 46 feature-detail sheet; filters for stack (multi-select), status, and text search; a **focus mode** that narrows the canvas to a selected feature's n-hop neighborhood (`subgraph` query); deep link `?feature=<id>` so impact reports and feature chips can land here pre-focused; zoom/fit/minimap controls. The map is read-only in v1 (edge editing stays in the detail sheet — drag-to-link is future work). React Flow is browser-only: load the map component with a dynamic `ssr: false` import. Styling uses design-token classes and `pm-*` motion conventions (no framer-motion), with dark mode via the existing CSS variables.
+  - **Files**:
+    - `src/components/agent/feature-map.tsx`: React Flow canvas, filters, focus mode (dynamic import host)
+    - `src/components/agent/feature-map-node.tsx`: custom feature node (stack color, status)
+    - `src/components/agent/feature-map-edge.tsx`: kind-styled edge with label
+    - `src/lib/agent/layout.ts`: dagre layout wrapper (graph → positioned nodes)
+    - `src/app/(authed)/[workspaceSlug]/features/page.tsx`: Map tab wiring + deep-link param
+    - `package.json`: `@xyflow/react`, `dagre` (+ types)
+  - **Step Dependencies**: Step 46 (Step 50 enriches it with confirmed data)
+  - **User Instructions**: none
+
+## Impact Analysis & Change Requests
+
+- [ ] Step 52: Impact analysis — new-PRD and CR impact reports
+  - **Task**: The headline capability. **CR designation:** extend the agile properties bar (Step 42) with a "Features" field — a picker (inline-create, modeled on `epic-picker.tsx`) that joins the page to features as DEFINES (this PRD specs it) or MODIFIES (this PRD is a CR against it); human-set joins are born CONFIRMED. **Analyze impact:** a button beside the field (plus a quick action in the panel's workspace mode) calls `POST /api/agent/impact` (`runtime = "nodejs"`, `maxDuration = 60`): `src/lib/agent/impact.ts` deterministically assembles candidates — the page's linked features, their 2-hop graph neighborhood via `subgraph`, the budgeted catalog summary, and the page's `contentText` — then makes one structured model call through the user's resolved client (BYO works here, managed is quota-checked + metered) and persists an `ImpactAnalysis` row whose `report` follows the `ImpactReport` contract from Step 44: impacted features grouped by stack, each with impact kind, severity, and rationale; suggested new links; cross-stack contract notes (e.g. "API response shape change → FE consumer + Email payload"); open questions. A RUNNING row is written first so failures persist as FAILED with the error. **Impact card:** rendered on the PRD under the properties bar — collapsible, latest report with severity chips and feature chips deep-linking to the map (`?feature=`), a history dropdown of prior runs, re-run button, and **"Apply suggestions"**, which writes the report's proposed links/joins as SUGGESTED rows feeding the Step 50 queue. When a page gains its first MODIFIES join, show a one-time "Run impact analysis?" nudge. Note: impact runs never write page content — AI writes into the document still go exclusively through the Step 21 snapshot-then-apply path.
+  - **Files**:
+    - `src/lib/agent/impact.ts`: candidate assembly + model call + report persistence
+    - `src/app/api/agent/impact/route.ts`: POST run (quota + access checks), GET history for a page
+    - `src/components/page/feature-links-field.tsx`: properties-bar Features picker (DEFINES/MODIFIES)
+    - `src/components/agent/impact-card.tsx`: report card, history, apply-suggestions
+    - `src/components/page/agile-properties-bar.tsx`: mount the Features field + analyze button
+    - `src/app/(authed)/[workspaceSlug]/p/[pageId]/page.tsx`: load page features + latest impact for first paint
+    - `src/components/ai-panel/ai-panel.tsx`: workspace-mode quick action "Analyze this PRD's impact"
+  - **Step Dependencies**: Step 47, Step 50, Step 42
+  - **User Instructions**: none
+
+## Integration, Gating & Tests
+
+- [ ] Step 53: Guided-flow integration, plan gating, and agent onboarding polish
+  - **Task**: Make the agent ambient instead of a separate destination. **Guided flow (Step 21):** inject a compact `buildWorkspaceContext` variant into the stage prompts — the Request stage now asks which stacks the idea touches, the Plan stage references likely-connected existing features by name, and the Spec stage calls out cross-stack contracts; after the final "Apply to page" succeeds, auto-enqueue `EXTRACT_PAGE` for the page and surface a "Run impact analysis" CTA in the panel. **Gating:** add `workspaceAgent: boolean` to `PLAN_LIMITS` (true for all plans at launch — usage is already bounded by the AI token quotas, and flipping FREE to false later is a one-line change) plus an `assertWorkspaceAgent` helper in `plan-gate.ts` applied to the Features surface, agent chat, sync, and impact routes; the flag reaches client components as a server-passed prop, never via a `@/lib/config` import. **Onboarding:** Features-surface empty state explaining the model ("One workspace is one application — define its stacks, then let the agent map features from your PRDs") with seed-stacks and first-sync CTAs; extend `scripts/db-report` with agent metrics (features by status, pending suggestions, jobs, impact runs).
+  - **Files**:
+    - `src/lib/ai-prompts.ts`: guided stage prompts accept workspace context
+    - `src/components/ai-panel/guided-mode.tsx`: post-apply extract + impact CTA
+    - `src/lib/agent/context.ts`: compact context variant for guided stages
+    - `src/lib/config.ts`: `PLAN_LIMITS.workspaceAgent`
+    - `src/lib/plan-gate.ts`: `assertWorkspaceAgent`
+    - `src/components/agent/agent-empty-state.tsx`: onboarding explainer + CTAs
+    - `scripts/db-report.ts`: agent usage metrics
+  - **Step Dependencies**: Step 52, Step 21 (`development_plan.md`); aligns with Step 25 when billing lands
+  - **User Instructions**: none
+
+- [ ] Step 54: Agent test coverage
+  - **Task**: Lock the invariants with tests targeting the Step 35 Vitest harness (if Step 35 hasn't landed yet, bootstrap the minimal `vitest.config.ts` + `tests/setup.ts` here and let Step 35 absorb them). **The critical security test:** the tool executor with workspace A's session context must refuse to read or write workspace B's stacks/features/pages for every tool, even when the model supplies B's ids. Also: context-builder budget truncation (over-budget catalogs truncate per stack and stay parseable); extraction idempotency (running the same extraction payload twice creates no duplicate suggestions; CONFIRMED rows are never overwritten); merge logic (links and page joins re-point, duplicate archives, no orphan edges); graph queries (n-hop `subgraph` correctness on a seeded fixture); job queue (QUEUED dedupe, attempts cap, claim exclusivity); impact candidate assembly (linked features + 2-hop neighborhood, deterministic ordering); and the agent loop against a mocked Anthropic client scripted to emit `tool_use` → expect `tool_result` continuation, turn-cap enforcement, and per-call `recordUsage`.
+  - **Files**:
+    - `tests/agent/tools-tenancy.test.ts`: cross-workspace denial per tool
+    - `tests/agent/context.test.ts`: budget truncation
+    - `tests/agent/extract.test.ts`: idempotent upserts
+    - `tests/agent/merge.test.ts`: merge re-pointing
+    - `tests/agent/graph.test.ts`: n-hop subgraph queries
+    - `tests/agent/jobs.test.ts`: dedupe, attempts, claim
+    - `tests/agent/impact-candidates.test.ts`: candidate assembly
+    - `tests/agent/loop.test.ts`: mocked tool-use loop, turn cap, metering
+  - **Step Dependencies**: Steps 47–52; aligns with Step 35 (`development_plan.md`)
+  - **User Instructions**: Have Docker running locally if using the testcontainers Postgres harness; `npm test` runs the suite.
+
+---
+
+## Approach Summary
+
+The plan builds the agent the same way the main plan built the product — spine first: **schema → stacks → manually curated graph → tools → chat loop** (Steps 44–48) gives a working workspace agent you can talk to over a hand-built mind map by Step 48. Automation then takes over curation (extraction + review queue, Steps 49–50), visualization makes the map legible (Step 51), and the headline feature — impact analysis for new PRDs and CRs — lands on top of trustworthy data (Step 52), followed by ambient integration and tests.
+
+**Key implementation considerations the code-gen system should keep in mind:**
+
+1. **Tenancy in the tool layer is the security boundary.** The executor injects `workspaceId` from the session; model-supplied arguments are never trusted for tenancy, and `read_page` re-checks page access. Step 54's cross-workspace denial test guards this permanently.
+2. **The agent proposes, humans confirm.** Every AI-originated graph write is `SUGGESTED`; only the Step 50 review queue promotes to CONFIRMED/ACTIVE. Canonical-graph quality is the product — don't shortcut this gate, even for "obviously correct" suggestions.
+3. **Every model call is metered.** Loop turns, extraction jobs, impact runs — all route through `resolveAiClient` and (when managed) `assertWithinQuota`/`recordUsage`. Background jobs always run managed (BYO is per-user); interactive calls use the requester's key, so BYO users get Sonnet-grade impact reports on their own bill.
+4. **The graph is metadata, not content.** Yjs/`contentJson` remain the only sources of page truth; extraction reads the `contentText` projection and never writes into documents. AI writes into a page still go exclusively through the Step 21 snapshot-then-apply path.
+5. **Deployment constraints are inherited from Step 37.** Every new agent route declares `runtime = "nodejs"` and `maxDuration`; the cron registers in `vercel.json` and drains small batches so it never outlives its window; nothing new touches the edge middleware or the collab dyno.
+6. **UI conventions hold.** Design-token utility classes, `pm-*` CSS motion (no framer-motion), no `@/lib/config` imports in client components (gate flags and quotas arrive as server-passed props), React Flow loaded client-only.
+7. **Scale escape hatches are named, not built.** Catalog-in-prompt + graph adjacency covers hundreds of features; if a workspace outgrows that, the upgrade path is pgvector on Neon + Voyage embeddings behind the same `context.ts`/`tools.ts` interfaces — no schema change required.

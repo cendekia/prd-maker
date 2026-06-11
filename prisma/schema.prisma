@@ -4,7 +4,7 @@
 // versions, templates, AI threads, billing, audit, etc.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // "native" covers local dev and the Docker (alpine/musl) build; the explicit
   // rhel target is the query-engine binary Vercel / AWS Lambda load at runtime.
   // Without it a Vercel build can ship a client that can't find its engine.
@@ -49,6 +49,9 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   aiThreads              AiThread[]
+  featuresCreated        Feature[]               @relation("FeatureCreatedBy")
+  impactAnalyses         ImpactAnalysis[]        @relation("ImpactAnalysisCreatedBy")
+  agentJobsRequested     AgentJob[]              @relation("AgentJobRequestedBy")
 }
 
 model Account {
@@ -105,12 +108,17 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members   WorkspaceMember[]
-  invites   WorkspaceInvite[]
-  pages     Page[]
-  templates Template[]
-  epics     Epic[]
-  aiUsage   AiUsage[]
+  members        WorkspaceMember[]
+  invites        WorkspaceInvite[]
+  pages          Page[]
+  templates      Template[]
+  epics          Epic[]
+  aiUsage        AiUsage[]
+  stacks         Stack[]
+  features       Feature[]
+  featureLinks   FeatureLink[]
+  impactAnalyses ImpactAnalysis[]
+  agentJobs      AgentJob[]
 }
 
 model WorkspaceMember {
@@ -178,16 +186,18 @@ model Page {
   assigneeId   String?
   externalUrl  String?
 
-  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  parent      Page?            @relation("PageChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Page[]           @relation("PageChildren")
-  createdBy   User             @relation("PageCreatedBy", fields: [createdById], references: [id])
-  epic        Epic?            @relation(fields: [epicId], references: [id], onDelete: SetNull)
-  assignee    User?            @relation("PageAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
-  versions    PageVersion[]
-  comments    Comment[]
-  permissions PagePermission[]
-  aiThreads   AiThread[]
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent         Page?            @relation("PageChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Page[]           @relation("PageChildren")
+  createdBy      User             @relation("PageCreatedBy", fields: [createdById], references: [id])
+  epic           Epic?            @relation(fields: [epicId], references: [id], onDelete: SetNull)
+  assignee       User?            @relation("PageAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  versions       PageVersion[]
+  comments       Comment[]
+  permissions    PagePermission[]
+  aiThreads      AiThread[]
+  featureLinks   PageFeature[]
+  impactAnalyses ImpactAnalysis[]
 
   @@index([workspaceId, parentId])
   @@index([workspaceId, archivedAt])
@@ -397,4 +407,235 @@ model AiMessage {
   thread AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId, createdAt])
+}
+
+// ---------- Workspace agent — feature graph (ai_development_plan.md Step 44) ----------
+//
+// One workspace = one application. Stacks are its deployable surfaces;
+// features are graph nodes owned by a stack; FeatureLink rows are typed
+// cross-stack edges; PageFeature ties PRDs to the features they define,
+// modify (= change request), or reference. The agent only ever writes rows
+// with status SUGGESTED — the review queue (Step 50) promotes them.
+
+/// Deployable surface of the application (Step 45 seeds Frontend, Backend,
+/// API, WebSocket, Email UI by default).
+enum StackType {
+  FRONTEND
+  BACKEND
+  API
+  WEBSOCKET
+  EMAIL
+  MOBILE
+  INFRA
+  OTHER
+}
+
+enum FeatureStatus {
+  SUGGESTED
+  ACTIVE
+  DEPRECATED
+}
+
+/// Provenance of a graph row — agent-written (extraction, chat tools) or
+/// human-written. Status, not origin, is what gates canonical reads.
+enum AgentOrigin {
+  AGENT
+  MANUAL
+}
+
+/// Directed edge semantics between features. See src/lib/agent/types.ts for
+/// labels + one-line descriptions used in pickers and agent prompts.
+enum FeatureLinkKind {
+  DEPENDS_ON
+  CONSUMES
+  TRIGGERS
+  EXTENDS
+  IMPACTS
+  RELATES_TO
+}
+
+/// Review lifecycle of agent-proposed rows. The agent only writes SUGGESTED;
+/// the Step 50 queue promotes to CONFIRMED or parks as REJECTED (kept so the
+/// same suggestion isn't re-proposed by a later extraction run).
+enum SuggestionStatus {
+  SUGGESTED
+  CONFIRMED
+  REJECTED
+}
+
+/// How a PRD relates to a feature. MODIFIES marks a change request (CR).
+enum PageFeatureRole {
+  DEFINES
+  MODIFIES
+  REFERENCES
+}
+
+enum ImpactRunStatus {
+  RUNNING
+  READY
+  FAILED
+}
+
+enum AgentJobType {
+  SCAN_WORKSPACE
+  EXTRACT_PAGE
+}
+
+enum AgentJobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+/// A deployable surface of the workspace's application (BE, API, WS, FE,
+/// Email UI, …). Features belong to exactly one stack; links wire features
+/// across stacks. Managed in settings (Step 45).
+model Stack {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  type        StackType @default(OTHER)
+  description String?
+  /// Hex accent for the stack's features in lists and the mind map.
+  color       String    @default("#5333D8")
+  /// Fractional ordering — same approach as the page tree.
+  position    Float     @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  features  Feature[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, position])
+}
+
+/// Node of the workspace feature mind map. Fail-closed defaults: agent
+/// writes are born SUGGESTED/AGENT; manual code paths (Step 46) explicitly
+/// set ACTIVE/MANUAL. `summary` is the unit of context the model reads in
+/// the workspace catalog — keep it to one or two crisp sentences.
+model Feature {
+  id          String        @id @default(cuid())
+  workspaceId String
+  stackId     String
+  name        String
+  summary     String        @db.Text
+  status      FeatureStatus @default(SUGGESTED)
+  origin      AgentOrigin   @default(AGENT)
+  /// Null for agent-created rows.
+  createdById String?
+  archivedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// NoAction (not Restrict): Postgres still blocks deleting a stack that has
+  /// features (Step 45 prompts to reassign first), but the check defers to
+  /// statement end so workspace-cascade deletes don't trip over it.
+  stack     Stack     @relation(fields: [stackId], references: [id], onDelete: NoAction)
+  createdBy User?     @relation("FeatureCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  linksFrom FeatureLink[] @relation("FeatureLinkFrom")
+  linksTo   FeatureLink[] @relation("FeatureLinkTo")
+  pageLinks PageFeature[]
+
+  @@index([workspaceId, stackId])
+  @@index([workspaceId, status])
+}
+
+/// Directed, typed edge of the mind map (from → to), usually cross-stack:
+/// an FE "Sign-up form" CONSUMES an API "Register endpoint" which TRIGGERS
+/// an Email "Welcome mail". `kind` has no default — edge semantics must be
+/// stated explicitly by every writer.
+model FeatureLink {
+  id            String           @id @default(cuid())
+  workspaceId   String
+  fromFeatureId String
+  toFeatureId   String
+  kind          FeatureLinkKind
+  status        SuggestionStatus @default(SUGGESTED)
+  origin        AgentOrigin      @default(AGENT)
+  /// Agent's 0–1 confidence on SUGGESTED rows; null on manual rows.
+  confidence    Float?
+  /// Why the agent thinks this edge exists — shown in the review queue.
+  rationale     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  fromFeature Feature   @relation("FeatureLinkFrom", fields: [fromFeatureId], references: [id], onDelete: Cascade)
+  toFeature   Feature   @relation("FeatureLinkTo", fields: [toFeatureId], references: [id], onDelete: Cascade)
+
+  @@unique([fromFeatureId, toFeatureId, kind])
+  @@index([workspaceId, status])
+  @@index([toFeatureId])
+}
+
+/// Joins a PRD to a feature it DEFINES, MODIFIES (= change request), or
+/// REFERENCES. Tenancy derives through page/feature — both carry the same
+/// workspaceId by construction (enforced in the service layer).
+model PageFeature {
+  id        String           @id @default(cuid())
+  pageId    String
+  featureId String
+  role      PageFeatureRole
+  status    SuggestionStatus @default(SUGGESTED)
+  origin    AgentOrigin      @default(AGENT)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  page    Page    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, featureId, role])
+  @@index([featureId])
+}
+
+/// One impact-analysis run for a PRD (Step 52). A RUNNING row is written
+/// before the model call so failures persist as FAILED + error. `report`
+/// follows the ImpactReport contract in src/lib/agent/types.ts.
+model ImpactAnalysis {
+  id          String          @id @default(cuid())
+  workspaceId String
+  pageId      String
+  status      ImpactRunStatus @default(RUNNING)
+  report      Json?
+  /// Model id that produced the report (BYO Sonnet vs managed Haiku).
+  model       String?
+  error       String?
+  createdById String
+  createdAt   DateTime        @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdBy User      @relation("ImpactAnalysisCreatedBy", fields: [createdById], references: [id])
+
+  @@index([pageId, createdAt])
+  @@index([workspaceId])
+}
+
+/// DB-backed queue for background agent work, drained by the agent-sync cron
+/// (Step 49) — same infra-free pattern as snapshot-dirty. `pageId` is a plain
+/// column (no FK): a job whose page has vanished is skipped and marked DONE.
+/// QUEUED-dedupe on [workspaceId, type, pageId] lives in service code —
+/// Prisma doesn't model partial uniques.
+model AgentJob {
+  id            String         @id @default(cuid())
+  workspaceId   String
+  type          AgentJobType
+  pageId        String?
+  status        AgentJobStatus @default(QUEUED)
+  attempts      Int            @default(0)
+  error         String?
+  /// Null when enqueued by the system (publish/snapshot hooks, cron fan-out).
+  requestedById String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  requestedBy User?     @relation("AgentJobRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([workspaceId, type, pageId])
 }
