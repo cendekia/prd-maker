@@ -287,6 +287,26 @@ export interface WorkspaceGraph {
   links: FeatureEdge[];
 }
 
+/** Minimal endpoint info for rendering a link row's far side. */
+export interface FeatureLinkEndpoint {
+  id: string;
+  name: string;
+  stackId: string;
+}
+
+/** A link with both endpoints resolved — served by the feature-detail API. */
+export interface FeatureDetailLink extends FeatureEdge {
+  fromFeature: FeatureLinkEndpoint;
+  toFeature: FeatureLinkEndpoint;
+}
+
+/** Payload of GET /features/[featureId] (detail sheet, Step 46). */
+export interface FeatureDetail {
+  feature: FeatureNode;
+  links: FeatureDetailLink[];
+  pages: FeaturePageRef[];
+}
+
 /** A PRD as attached to a feature (feature detail sheet, Step 46). */
 export interface FeaturePageRef {
   /** PageFeature row id (needed for role changes / detach). */

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Layers, Search, Settings } from "lucide-react";
+import { Layers, Network, Search, Settings } from "lucide-react";
 
 import { usePageTree } from "@/hooks/use-page-tree";
 import type { PageTreeNode, WorkspaceSummary } from "@/lib/types";
@@ -73,6 +73,13 @@ export function Sidebar({
       </div>
 
       <div className="border-t px-2 py-2">
+        <Link
+          href={`/${workspace.slug}/features`}
+          className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-[12px] text-fg-2 hover:bg-bg-hover hover:text-fg-1"
+        >
+          <Network className="size-3.5" />
+          Features
+        </Link>
         <Link
           href={`/${workspace.slug}/epics`}
           className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-[12px] text-fg-2 hover:bg-bg-hover hover:text-fg-1"
