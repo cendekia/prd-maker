@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { Role } from "@prisma/client";
 
+import { enqueueExtractPage } from "@/lib/agent/jobs";
 import { db } from "@/lib/db";
 import { assertCanPublish, PlanGateError } from "@/lib/plan-gate";
 import { requirePageAccess } from "@/lib/permissions";
@@ -89,6 +90,18 @@ export async function publishPageAction(
     where: { id: page.id },
     data: { isPublished: true, publicSlug: desired },
   });
+
+  // Publishing marks the PRD as settled — queue a feature-map re-extraction
+  // (Step 49). Best-effort: never block the publish on it.
+  try {
+    await enqueueExtractPage({
+      workspaceId: page.workspaceId,
+      pageId: page.id,
+      requestedById: user.id,
+    });
+  } catch {
+    /* extraction is best-effort */
+  }
 
   revalidatePath(`/p/${desired}`);
   return { ok: true, publicSlug: desired };

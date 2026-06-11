@@ -2,6 +2,7 @@ import "server-only";
 
 import { Prisma, VersionKind, type PageVersion } from "@prisma/client";
 
+import { enqueueExtractPage } from "@/lib/agent/jobs";
 import { db } from "@/lib/db";
 import { extractText } from "@/lib/editor-text";
 
@@ -57,7 +58,13 @@ export async function takeSnapshot({
 
   const page = await db.page.findUnique({
     where: { id: pageId },
-    select: { id: true, contentJson: true, yDocState: true, archivedAt: true },
+    select: {
+      id: true,
+      workspaceId: true,
+      contentJson: true,
+      yDocState: true,
+      archivedAt: true,
+    },
   });
   if (!page) throw new Error(`Page ${pageId} not found`);
   if (page.archivedAt) throw new Error(`Page ${pageId} is archived`);
@@ -106,6 +113,21 @@ export async function takeSnapshot({
         contentText: extractText(contentJson),
       },
     });
+  }
+
+  // MANUAL/PRE_AI snapshots mark meaningful edits — queue a re-extraction so
+  // the agent's feature map keeps up (Step 49). Never let this fail the
+  // snapshot itself: the snapshot-before-AI guarantee is the hard invariant.
+  if (versionKind !== VersionKind.AUTO) {
+    try {
+      await enqueueExtractPage({
+        workspaceId: page.workspaceId,
+        pageId,
+        requestedById: userId,
+      });
+    } catch {
+      /* extraction is best-effort */
+    }
   }
 
   return { version, created: true };

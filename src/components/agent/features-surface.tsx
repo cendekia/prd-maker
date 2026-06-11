@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { FeatureDetail } from "./feature-detail";
 import { FeatureDialog, type FeatureDialogState } from "./feature-dialog";
 import { FeaturesList } from "./features-list";
+import { SyncButton } from "./sync-button";
 
 type Tab = "list" | "map" | "suggestions";
 
@@ -112,15 +113,18 @@ export function FeaturesSurface({
             ))}
           </div>
           {canEdit ? (
-            <Button
-              size="sm"
-              onClick={() => setDialog({ mode: "create", stackId: null })}
-              disabled={!hasStacks}
-              title={hasStacks ? undefined : "Set up stacks first"}
-            >
-              <Plus />
-              New feature
-            </Button>
+            <>
+              {hasStacks ? <SyncButton workspaceId={workspaceId} /> : null}
+              <Button
+                size="sm"
+                onClick={() => setDialog({ mode: "create", stackId: null })}
+                disabled={!hasStacks}
+                title={hasStacks ? undefined : "Set up stacks first"}
+              >
+                <Plus />
+                New feature
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
