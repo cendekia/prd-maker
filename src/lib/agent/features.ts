@@ -4,6 +4,7 @@ import {
   AgentOrigin,
   FeatureLinkKind,
   FeatureStatus,
+  PageFeatureRole,
   Prisma,
   Role,
   SuggestionStatus,
@@ -17,6 +18,11 @@ import type {
   FeatureDetailLink,
   FeatureEdge,
   FeatureNode,
+  SuggestedFeatureItem,
+  SuggestedLinkItem,
+  SuggestedPageLinkItem,
+  SuggestionCounts,
+  SuggestionQueue,
   WorkspaceGraph,
 } from "@/lib/agent/types";
 
@@ -559,4 +565,590 @@ export async function deleteLink(input: DeleteLinkInput): Promise<void> {
     throw new Error("Link not found.");
   }
   await db.featureLink.delete({ where: { id: input.linkId } });
+}
+
+// ─────────────────────────── Suggestion review (Step 50)
+// The human-in-the-loop gate: everything the agent wrote sits here as
+// SUGGESTED until someone accepts (feature → ACTIVE, link/join → CONFIRMED),
+// rejects (REJECTED rows stay as tombstones so nothing re-proposes them;
+// rejected features tombstone via archivedAt since FeatureStatus has no
+// REJECTED), or merges a duplicate feature into an existing one.
+
+/** Everything pending review, grouped. */
+export async function getSuggestionQueue(
+  workspaceId: string,
+): Promise<SuggestionQueue> {
+  const [features, links, pageLinks] = await Promise.all([
+    db.feature.findMany({
+      where: {
+        workspaceId,
+        status: FeatureStatus.SUGGESTED,
+        archivedAt: null,
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        name: true,
+        summary: true,
+        stackId: true,
+        createdAt: true,
+        pageLinks: {
+          where: {
+            status: { not: SuggestionStatus.REJECTED },
+            page: { archivedAt: null },
+          },
+          select: { pageId: true, page: { select: { title: true } } },
+        },
+      },
+    }),
+    db.featureLink.findMany({
+      where: {
+        workspaceId,
+        status: SuggestionStatus.SUGGESTED,
+        fromFeature: { archivedAt: null },
+        toFeature: { archivedAt: null },
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        kind: true,
+        confidence: true,
+        rationale: true,
+        createdAt: true,
+        fromFeature: { select: { id: true, name: true, status: true } },
+        toFeature: { select: { id: true, name: true, status: true } },
+      },
+    }),
+    db.pageFeature.findMany({
+      where: {
+        status: SuggestionStatus.SUGGESTED,
+        page: { archivedAt: null },
+        feature: { workspaceId, archivedAt: null },
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        role: true,
+        createdAt: true,
+        pageId: true,
+        page: { select: { title: true } },
+        feature: { select: { id: true, name: true, status: true } },
+      },
+    }),
+  ]);
+
+  const featureItems: SuggestedFeatureItem[] = features.map((f) => ({
+    id: f.id,
+    name: f.name,
+    summary: f.summary,
+    stackId: f.stackId,
+    createdAt: f.createdAt.toISOString(),
+    pages: dedupePages(
+      f.pageLinks.map((p) => ({
+        pageId: p.pageId,
+        title: p.page.title || "Untitled",
+      })),
+    ),
+  }));
+  const linkItems: SuggestedLinkItem[] = links.map((l) => ({
+    id: l.id,
+    kind: l.kind,
+    confidence: l.confidence,
+    rationale: l.rationale,
+    createdAt: l.createdAt.toISOString(),
+    from: l.fromFeature,
+    to: l.toFeature,
+  }));
+  const pageLinkItems: SuggestedPageLinkItem[] = pageLinks.map((p) => ({
+    id: p.id,
+    role: p.role,
+    createdAt: p.createdAt.toISOString(),
+    pageId: p.pageId,
+    pageTitle: p.page.title || "Untitled",
+    featureId: p.feature.id,
+    featureName: p.feature.name,
+    featureStatus: p.feature.status,
+  }));
+
+  return { features: featureItems, links: linkItems, pageLinks: pageLinkItems };
+}
+
+function dedupePages(
+  pages: { pageId: string; title: string }[],
+): { pageId: string; title: string }[] {
+  const seen = new Set<string>();
+  return pages.filter((p) =>
+    seen.has(p.pageId) ? false : (seen.add(p.pageId), true),
+  );
+}
+
+export async function getSuggestionCounts(
+  workspaceId: string,
+): Promise<SuggestionCounts> {
+  const [features, links, pageLinks] = await Promise.all([
+    db.feature.count({
+      where: { workspaceId, status: FeatureStatus.SUGGESTED, archivedAt: null },
+    }),
+    db.featureLink.count({
+      where: {
+        workspaceId,
+        status: SuggestionStatus.SUGGESTED,
+        fromFeature: { archivedAt: null },
+        toFeature: { archivedAt: null },
+      },
+    }),
+    db.pageFeature.count({
+      where: {
+        status: SuggestionStatus.SUGGESTED,
+        page: { archivedAt: null },
+        feature: { workspaceId, archivedAt: null },
+      },
+    }),
+  ]);
+  return { features, links, pageLinks, total: features + links + pageLinks };
+}
+
+/** Sidebar badge helper — one number, same filters as the queue. */
+export async function countPendingSuggestions(
+  workspaceId: string,
+): Promise<number> {
+  return (await getSuggestionCounts(workspaceId)).total;
+}
+
+interface ResolveFeatureInput {
+  workspaceId: string;
+  actorRole: Role;
+  featureId: string;
+  action: "accept" | "reject";
+  /** Optional fixes applied on accept. */
+  edits?: { name?: string; summary?: string; stackId?: string };
+}
+
+export async function resolveSuggestedFeature(
+  input: ResolveFeatureInput,
+): Promise<void> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const feature = await db.feature.findUnique({
+    where: { id: input.featureId },
+    select: {
+      workspaceId: true,
+      status: true,
+      archivedAt: true,
+      stackId: true,
+      name: true,
+    },
+  });
+  if (
+    !feature ||
+    feature.workspaceId !== input.workspaceId ||
+    feature.status !== FeatureStatus.SUGGESTED ||
+    feature.archivedAt
+  ) {
+    throw new Error("This suggestion is no longer pending.");
+  }
+
+  if (input.action === "reject") {
+    // Tombstone the feature (archived suggestion = rejected; extraction and
+    // propose_feature both refuse to re-propose archived names) and park its
+    // dependent suggestions so they don't dangle in the queue.
+    await db.$transaction([
+      db.feature.update({
+        where: { id: input.featureId },
+        data: { archivedAt: new Date() },
+      }),
+      db.featureLink.updateMany({
+        where: {
+          status: SuggestionStatus.SUGGESTED,
+          OR: [
+            { fromFeatureId: input.featureId },
+            { toFeatureId: input.featureId },
+          ],
+        },
+        data: { status: SuggestionStatus.REJECTED },
+      }),
+      db.pageFeature.updateMany({
+        where: {
+          featureId: input.featureId,
+          status: SuggestionStatus.SUGGESTED,
+        },
+        data: { status: SuggestionStatus.REJECTED },
+      }),
+    ]);
+    return;
+  }
+
+  const data: Prisma.FeatureUpdateInput = { status: FeatureStatus.ACTIVE };
+  const targetStackId = input.edits?.stackId ?? feature.stackId;
+  if (input.edits?.stackId && input.edits.stackId !== feature.stackId) {
+    const stack = await db.stack.findUnique({
+      where: { id: input.edits.stackId },
+      select: { workspaceId: true },
+    });
+    if (!stack || stack.workspaceId !== input.workspaceId) {
+      throw new Error("Stack not found.");
+    }
+    data.stack = { connect: { id: input.edits.stackId } };
+  }
+  if (input.edits?.name !== undefined) {
+    const name = input.edits.name.trim();
+    if (!name || name.length > 80) {
+      throw new Error("Feature name must be 1–80 characters.");
+    }
+    data.name = name;
+  }
+  if (input.edits?.name !== undefined || input.edits?.stackId !== undefined) {
+    await assertNameAvailable(
+      input.workspaceId,
+      targetStackId,
+      input.edits?.name ?? feature.name,
+      input.featureId,
+    );
+  }
+  if (input.edits?.summary !== undefined) {
+    const summary = input.edits.summary.trim();
+    if (!summary) throw new Error("Summary can't be empty.");
+    data.summary = summary;
+  }
+  await db.feature.update({ where: { id: input.featureId }, data });
+}
+
+interface ResolveLinkInput {
+  workspaceId: string;
+  actorRole: Role;
+  linkId: string;
+  action: "accept" | "reject";
+  /** Optional kind fix applied on accept. */
+  kind?: FeatureLinkKind;
+}
+
+export async function resolveSuggestedLink(
+  input: ResolveLinkInput,
+): Promise<void> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const link = await db.featureLink.findUnique({
+    where: { id: input.linkId },
+    select: {
+      workspaceId: true,
+      status: true,
+      kind: true,
+      fromFeatureId: true,
+      toFeatureId: true,
+      fromFeature: { select: { status: true, archivedAt: true } },
+      toFeature: { select: { status: true, archivedAt: true } },
+    },
+  });
+  if (
+    !link ||
+    link.workspaceId !== input.workspaceId ||
+    link.status !== SuggestionStatus.SUGGESTED
+  ) {
+    throw new Error("This suggestion is no longer pending.");
+  }
+
+  if (input.action === "reject") {
+    await db.featureLink.update({
+      where: { id: input.linkId },
+      data: { status: SuggestionStatus.REJECTED },
+    });
+    return;
+  }
+
+  if (input.kind && input.kind !== link.kind) {
+    const clash = await db.featureLink.findUnique({
+      where: {
+        fromFeatureId_toFeatureId_kind: {
+          fromFeatureId: link.fromFeatureId,
+          toFeatureId: link.toFeatureId,
+          kind: input.kind,
+        },
+      },
+      select: { id: true },
+    });
+    if (clash) {
+      throw new Error(
+        "These features already have a link of that kind — act on that card instead.",
+      );
+    }
+  }
+
+  // Confirming an edge implies its endpoints are real: cascade-activate any
+  // still-suggested endpoint feature.
+  await db.$transaction([
+    db.featureLink.update({
+      where: { id: input.linkId },
+      data: {
+        status: SuggestionStatus.CONFIRMED,
+        ...(input.kind ? { kind: input.kind } : {}),
+      },
+    }),
+    db.feature.updateMany({
+      where: {
+        id: { in: [link.fromFeatureId, link.toFeatureId] },
+        status: FeatureStatus.SUGGESTED,
+        archivedAt: null,
+      },
+      data: { status: FeatureStatus.ACTIVE },
+    }),
+  ]);
+}
+
+interface ResolvePageLinkInput {
+  workspaceId: string;
+  actorRole: Role;
+  pageFeatureId: string;
+  action: "accept" | "reject";
+  /** Optional role fix applied on accept. */
+  role?: PageFeatureRole;
+}
+
+export async function resolveSuggestedPageLink(
+  input: ResolvePageLinkInput,
+): Promise<void> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const join = await db.pageFeature.findUnique({
+    where: { id: input.pageFeatureId },
+    select: {
+      status: true,
+      role: true,
+      pageId: true,
+      featureId: true,
+      feature: { select: { workspaceId: true, status: true, archivedAt: true } },
+    },
+  });
+  if (
+    !join ||
+    join.feature.workspaceId !== input.workspaceId ||
+    join.status !== SuggestionStatus.SUGGESTED
+  ) {
+    throw new Error("This suggestion is no longer pending.");
+  }
+
+  if (input.action === "reject") {
+    await db.pageFeature.update({
+      where: { id: input.pageFeatureId },
+      data: { status: SuggestionStatus.REJECTED },
+    });
+    return;
+  }
+
+  if (input.role && input.role !== join.role) {
+    const clash = await db.pageFeature.findUnique({
+      where: {
+        pageId_featureId_role: {
+          pageId: join.pageId,
+          featureId: join.featureId,
+          role: input.role,
+        },
+      },
+      select: { id: true },
+    });
+    if (clash) {
+      throw new Error(
+        "This PRD is already connected with that role — act on that card instead.",
+      );
+    }
+  }
+
+  await db.$transaction([
+    db.pageFeature.update({
+      where: { id: input.pageFeatureId },
+      data: {
+        status: SuggestionStatus.CONFIRMED,
+        ...(input.role ? { role: input.role } : {}),
+      },
+    }),
+    db.feature.updateMany({
+      where: {
+        id: join.featureId,
+        status: FeatureStatus.SUGGESTED,
+        archivedAt: null,
+      },
+      data: { status: FeatureStatus.ACTIVE },
+    }),
+  ]);
+}
+
+interface MergeFeatureInput {
+  workspaceId: string;
+  actorRole: Role;
+  /** The suggested duplicate being merged away. */
+  featureId: string;
+  /** The feature that absorbs its links and PRD connections. */
+  targetFeatureId: string;
+}
+
+/**
+ * Merge a suggested duplicate into an existing feature: every link and PRD
+ * join is re-pointed at the target (rows that would collide with an existing
+ * triple are dropped, would-be self-links removed), then the duplicate is
+ * archived — which also tombstones its name against re-proposal.
+ */
+export async function mergeSuggestedFeature(
+  input: MergeFeatureInput,
+): Promise<void> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  if (input.featureId === input.targetFeatureId) {
+    throw new Error("Pick a different feature to merge into.");
+  }
+  const [source, target] = await Promise.all([
+    db.feature.findUnique({
+      where: { id: input.featureId },
+      select: { workspaceId: true, status: true, archivedAt: true },
+    }),
+    db.feature.findUnique({
+      where: { id: input.targetFeatureId },
+      select: { workspaceId: true, archivedAt: true },
+    }),
+  ]);
+  if (
+    !source ||
+    source.workspaceId !== input.workspaceId ||
+    source.status !== FeatureStatus.SUGGESTED ||
+    source.archivedAt
+  ) {
+    throw new Error("This suggestion is no longer pending.");
+  }
+  if (
+    !target ||
+    target.workspaceId !== input.workspaceId ||
+    target.archivedAt
+  ) {
+    throw new Error("Merge target not found.");
+  }
+
+  await db.$transaction(async (tx) => {
+    const links = await tx.featureLink.findMany({
+      where: {
+        OR: [
+          { fromFeatureId: input.featureId },
+          { toFeatureId: input.featureId },
+        ],
+      },
+      select: {
+        id: true,
+        fromFeatureId: true,
+        toFeatureId: true,
+        kind: true,
+      },
+    });
+    for (const link of links) {
+      const newFrom =
+        link.fromFeatureId === input.featureId
+          ? input.targetFeatureId
+          : link.fromFeatureId;
+      const newTo =
+        link.toFeatureId === input.featureId
+          ? input.targetFeatureId
+          : link.toFeatureId;
+      if (newFrom === newTo) {
+        await tx.featureLink.delete({ where: { id: link.id } });
+        continue;
+      }
+      const clash = await tx.featureLink.findUnique({
+        where: {
+          fromFeatureId_toFeatureId_kind: {
+            fromFeatureId: newFrom,
+            toFeatureId: newTo,
+            kind: link.kind,
+          },
+        },
+        select: { id: true },
+      });
+      if (clash && clash.id !== link.id) {
+        await tx.featureLink.delete({ where: { id: link.id } });
+      } else {
+        await tx.featureLink.update({
+          where: { id: link.id },
+          data: { fromFeatureId: newFrom, toFeatureId: newTo },
+        });
+      }
+    }
+
+    const joins = await tx.pageFeature.findMany({
+      where: { featureId: input.featureId },
+      select: { id: true, pageId: true, role: true },
+    });
+    for (const join of joins) {
+      const clash = await tx.pageFeature.findUnique({
+        where: {
+          pageId_featureId_role: {
+            pageId: join.pageId,
+            featureId: input.targetFeatureId,
+            role: join.role,
+          },
+        },
+        select: { id: true },
+      });
+      if (clash) {
+        await tx.pageFeature.delete({ where: { id: join.id } });
+      } else {
+        await tx.pageFeature.update({
+          where: { id: join.id },
+          data: { featureId: input.targetFeatureId },
+        });
+      }
+    }
+
+    await tx.feature.update({
+      where: { id: input.featureId },
+      data: { archivedAt: new Date() },
+    });
+  });
+}
+
+/** Accept every pending suggestion in one group; collisions are skipped. */
+export async function bulkAcceptSuggestions(input: {
+  workspaceId: string;
+  actorRole: Role;
+  group: "features" | "links" | "pageLinks";
+}): Promise<{ accepted: number; failed: number }> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const queue = await getSuggestionQueue(input.workspaceId);
+  let accepted = 0;
+  let failed = 0;
+
+  if (input.group === "features") {
+    for (const f of queue.features) {
+      try {
+        await resolveSuggestedFeature({
+          workspaceId: input.workspaceId,
+          actorRole: input.actorRole,
+          featureId: f.id,
+          action: "accept",
+        });
+        accepted++;
+      } catch {
+        failed++;
+      }
+    }
+  } else if (input.group === "links") {
+    for (const l of queue.links) {
+      try {
+        await resolveSuggestedLink({
+          workspaceId: input.workspaceId,
+          actorRole: input.actorRole,
+          linkId: l.id,
+          action: "accept",
+        });
+        accepted++;
+      } catch {
+        failed++;
+      }
+    }
+  } else {
+    for (const p of queue.pageLinks) {
+      try {
+        await resolveSuggestedPageLink({
+          workspaceId: input.workspaceId,
+          actorRole: input.actorRole,
+          pageFeatureId: p.id,
+          action: "accept",
+        });
+        accepted++;
+      } catch {
+        failed++;
+      }
+    }
+  }
+  return { accepted, failed };
 }

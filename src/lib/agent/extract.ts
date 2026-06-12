@@ -161,20 +161,28 @@ async function applyExtraction(
   return db.$transaction(async (tx) => {
     const outcome: ExtractOutcome = { ...EMPTY };
 
-    const [stacks, features] = await Promise.all([
+    const [stacks, allFeatures] = await Promise.all([
       tx.stack.findMany({ where: { workspaceId }, select: { id: true } }),
       tx.feature.findMany({
-        where: { workspaceId, archivedAt: null },
-        select: { id: true, stackId: true, name: true },
+        where: { workspaceId },
+        select: { id: true, stackId: true, name: true, archivedAt: true },
       }),
     ]);
     const stackIds = new Set(stacks.map((s) => s.id));
+    const features = allFeatures.filter((f) => !f.archivedAt);
     const featureIds = new Set(features.map((f) => f.id));
     const byNormalizedName = new Map(
       features.map((f) => [
         `${f.stackId}:${normalizeFeatureName(f.name)}`,
         f.id,
       ]),
+    );
+    // Archived names are tombstones (rejected/merged-away suggestions or
+    // retired features) — never re-propose them (Step 50).
+    const archivedNames = new Set(
+      allFeatures
+        .filter((f) => f.archivedAt)
+        .map((f) => `${f.stackId}:${normalizeFeatureName(f.name)}`),
     );
 
     // Pass 1 — resolve/create features and map the model's local keys.
@@ -206,6 +214,9 @@ async function applyExtraction(
         if (existing) {
           featureId = existing;
           outcome.reusedFeatures++;
+        } else if (archivedNames.has(nameKey)) {
+          outcome.droppedItems++; // a human rejected/retired this name
+          continue;
         } else {
           const created = await tx.feature.create({
             data: {

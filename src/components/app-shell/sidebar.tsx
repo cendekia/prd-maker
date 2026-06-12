@@ -18,6 +18,8 @@ interface Props {
   initialTree: PageTreeNode[];
   userEmail: string;
   userName: string | null;
+  /** Pending agent suggestions — badge on the Features entry (Step 50). */
+  suggestionCount?: number;
 }
 
 export function Sidebar({
@@ -26,6 +28,7 @@ export function Sidebar({
   initialTree,
   userEmail,
   userName,
+  suggestionCount = 0,
 }: Props) {
   const router = useRouter();
   const [filter, setFilter] = useState("");
@@ -79,6 +82,14 @@ export function Sidebar({
         >
           <Network className="size-3.5" />
           Features
+          {suggestionCount > 0 ? (
+            <span
+              title={`${suggestionCount} agent suggestions awaiting review`}
+              className="ml-auto rounded-[var(--radius-full)] bg-brand-500 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white"
+            >
+              {suggestionCount}
+            </span>
+          ) : null}
         </Link>
         <Link
           href={`/${workspace.slug}/epics`}

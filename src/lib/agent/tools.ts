@@ -300,16 +300,24 @@ const proposeFeatureTool = defineTool({
 
     const normalized = normalizeFeatureName(args.name);
     const siblings = await db.feature.findMany({
-      where: { workspaceId: ctx.workspaceId, stackId: args.stackId, archivedAt: null },
-      select: { id: true, name: true },
+      where: { workspaceId: ctx.workspaceId, stackId: args.stackId },
+      select: { id: true, name: true, archivedAt: true },
     });
     const existing = siblings.find(
-      (s) => normalizeFeatureName(s.name) === normalized,
+      (s) => !s.archivedAt && normalizeFeatureName(s.name) === normalized,
     );
     if (existing) {
       return {
         featureId: existing.id,
         note: `"${existing.name}" already exists in this stack — reference it by id instead of creating a duplicate.`,
+      };
+    }
+    const tombstoned = siblings.find(
+      (s) => !!s.archivedAt && normalizeFeatureName(s.name) === normalized,
+    );
+    if (tombstoned) {
+      return {
+        note: "A feature with this name was previously rejected or archived here — don't re-propose it.",
       };
     }
 

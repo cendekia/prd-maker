@@ -332,6 +332,55 @@ export interface PageFeatureItem {
   origin: AgentOrigin;
 }
 
+/* -------------------------- Suggestion queue ---------------------------- */
+
+/** A suggested feature awaiting review (Step 50). */
+export interface SuggestedFeatureItem {
+  id: string;
+  name: string;
+  summary: string;
+  stackId: string;
+  createdAt: string;
+  /** PRDs already connected to this feature (pending or confirmed joins). */
+  pages: { pageId: string; title: string }[];
+}
+
+/** A suggested typed edge awaiting review. */
+export interface SuggestedLinkItem {
+  id: string;
+  kind: FeatureLinkKind;
+  confidence: number | null;
+  rationale: string | null;
+  createdAt: string;
+  from: { id: string; name: string; status: FeatureStatus };
+  to: { id: string; name: string; status: FeatureStatus };
+}
+
+/** A suggested PRD↔feature connection awaiting review. */
+export interface SuggestedPageLinkItem {
+  id: string;
+  role: PageFeatureRole;
+  createdAt: string;
+  pageId: string;
+  pageTitle: string;
+  featureId: string;
+  featureName: string;
+  featureStatus: FeatureStatus;
+}
+
+export interface SuggestionQueue {
+  features: SuggestedFeatureItem[];
+  links: SuggestedLinkItem[];
+  pageLinks: SuggestedPageLinkItem[];
+}
+
+export interface SuggestionCounts {
+  features: number;
+  links: number;
+  pageLinks: number;
+  total: number;
+}
+
 /* --------------------------- Impact report ------------------------------ */
 
 /**

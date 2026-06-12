@@ -20,6 +20,8 @@ interface Props {
   workspaces: WorkspaceSummary[];
   initialTree: PageTreeNode[];
   user: { email: string; name: string | null };
+  /** Pending agent suggestions — Features badge in the sidebar (Step 50). */
+  suggestionCount?: number;
   children: React.ReactNode;
 }
 
@@ -28,6 +30,7 @@ export function AppShell({
   workspaces,
   initialTree,
   user,
+  suggestionCount,
   children,
 }: Props) {
   const isMobile = useIsMobile();
@@ -55,6 +58,7 @@ export function AppShell({
       initialTree={initialTree}
       userEmail={user.email}
       userName={user.name}
+      suggestionCount={suggestionCount}
     />
   );
 

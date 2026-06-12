@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Sparkles, Workflow } from "lucide-react";
+import { Plus, Workflow } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { FeatureNode, WorkspaceGraph } from "@/lib/agent/types";
+import type {
+  FeatureNode,
+  SuggestionQueue,
+  WorkspaceGraph,
+} from "@/lib/agent/types";
 import { cn } from "@/lib/utils";
 
 import { FeatureDetail } from "./feature-detail";
 import { FeatureDialog, type FeatureDialogState } from "./feature-dialog";
 import { FeaturesList } from "./features-list";
+import { SuggestionsTab } from "./suggestions-tab";
 import { SyncButton } from "./sync-button";
 
 type Tab = "list" | "map" | "suggestions";
@@ -29,6 +34,7 @@ interface Props {
   workspaceId: string;
   workspaceSlug: string;
   initialGraph: WorkspaceGraph;
+  initialQueue: SuggestionQueue;
   initialTab: string | null;
   initialFeatureId: string | null;
   canEdit: boolean;
@@ -39,6 +45,7 @@ export function FeaturesSurface({
   workspaceId,
   workspaceSlug,
   initialGraph,
+  initialQueue,
   initialTab,
   initialFeatureId,
   canEdit,
@@ -84,6 +91,10 @@ export function FeaturesSurface({
   }
 
   const hasStacks = graph.stacks.length > 0;
+  const pendingCount =
+    initialQueue.features.length +
+    initialQueue.links.length +
+    initialQueue.pageLinks.length;
 
   return (
     <div className="flex h-full flex-col">
@@ -102,13 +113,18 @@ export function FeaturesSurface({
                 type="button"
                 onClick={() => switchTab(t.id)}
                 className={cn(
-                  "rounded-[var(--radius-sm)] px-2.5 py-1 text-[12px] font-medium transition-colors",
+                  "flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1 text-[12px] font-medium transition-colors",
                   tab === t.id
                     ? "bg-background text-fg-1 shadow-[var(--shadow-xs)]"
                     : "text-fg-3 hover:text-fg-1",
                 )}
               >
                 {t.label}
+                {t.id === "suggestions" && pendingCount > 0 ? (
+                  <span className="rounded-[var(--radius-full)] bg-brand-500 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white">
+                    {pendingCount}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -145,10 +161,14 @@ export function FeaturesSurface({
             body="The interactive feature map (React Flow) lands in Step 51. The graph you curate here will render as stack-colored nodes with typed edges."
           />
         ) : (
-          <StubPanel
-            icon={<Sparkles className="mx-auto size-8 text-fg-4" />}
-            title="Agent suggestions"
-            body="Once extraction lands (Steps 49–50), features and links the agent finds in your PRDs queue here for review before joining the canonical graph."
+          <SuggestionsTab
+            workspaceId={workspaceId}
+            workspaceSlug={workspaceSlug}
+            queue={initialQueue}
+            stacks={graph.stacks}
+            features={graph.features}
+            canEdit={canEdit}
+            onChanged={() => router.refresh()}
           />
         )}
       </div>

@@ -1,7 +1,7 @@
 import { Role } from "@prisma/client";
 
 import { FeaturesSurface } from "@/components/agent/features-surface";
-import { listGraph } from "@/lib/agent/features";
+import { getSuggestionQueue, listGraph } from "@/lib/agent/features";
 import { ROLE_RANK } from "@/lib/config";
 import { requireWorkspace } from "@/lib/workspace";
 
@@ -18,13 +18,17 @@ export default async function FeaturesPage({ params, searchParams }: PageProps) 
     searchParams,
   ]);
   const { workspace, member } = await requireWorkspace(workspaceSlug);
-  const graph = await listGraph(workspace.id);
+  const [graph, queue] = await Promise.all([
+    listGraph(workspace.id),
+    getSuggestionQueue(workspace.id),
+  ]);
 
   return (
     <FeaturesSurface
       workspaceId={workspace.id}
       workspaceSlug={workspace.slug}
       initialGraph={graph}
+      initialQueue={queue}
       initialTab={tab ?? null}
       initialFeatureId={feature ?? null}
       canEdit={ROLE_RANK[member.role] >= ROLE_RANK[Role.EDITOR]}

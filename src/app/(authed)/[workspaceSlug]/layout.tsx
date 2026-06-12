@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell/app-shell";
+import { countPendingSuggestions } from "@/lib/agent/features";
 import { getPageTree } from "@/lib/pages";
 import {
   listUserWorkspaces,
@@ -16,9 +17,10 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps)
   const { workspace } = await requireWorkspace(workspaceSlug);
   const user = await requireUser();
 
-  const [initialTree, allWorkspaces] = await Promise.all([
+  const [initialTree, allWorkspaces, suggestionCount] = await Promise.all([
     getPageTree(workspace.id),
     listUserWorkspaces(user.id),
+    countPendingSuggestions(workspace.id),
   ]);
 
   const workspacesSummary = allWorkspaces.map((m) => ({
@@ -34,6 +36,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps)
       workspaces={workspacesSummary}
       initialTree={initialTree}
       user={{ email: user.email, name: user.name ?? null }}
+      suggestionCount={suggestionCount}
     >
       {children}
     </AppShell>
