@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { Plus, Workflow } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -17,6 +18,19 @@ import { FeatureDialog, type FeatureDialogState } from "./feature-dialog";
 import { FeaturesList } from "./features-list";
 import { SuggestionsTab } from "./suggestions-tab";
 import { SyncButton } from "./sync-button";
+
+// React Flow is browser-only — load the canvas client-side.
+const FeatureMap = dynamic(
+  () => import("./feature-map").then((m) => m.FeatureMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center text-[13px] text-fg-3">
+        Loading map…
+      </div>
+    ),
+  },
+);
 
 type Tab = "list" | "map" | "suggestions";
 
@@ -54,7 +68,11 @@ export function FeaturesSurface({
   const router = useRouter();
   const [graph, setGraph] = useState(initialGraph);
   const [tab, setTab] = useState<Tab>(parseTab(initialTab));
-  const [selectedId, setSelectedId] = useState<string | null>(initialFeatureId);
+  // A `?feature=` deep link opens the detail sheet — except on the map tab,
+  // where it pre-focuses the canvas instead (Step 51).
+  const [selectedId, setSelectedId] = useState<string | null>(
+    parseTab(initialTab) === "map" ? null : initialFeatureId,
+  );
   const [dialog, setDialog] = useState<FeatureDialogState>(null);
 
   // Server actions / refreshes re-render the page; keep local graph in sync.
@@ -155,11 +173,13 @@ export function FeaturesSurface({
             onNew={(stackId) => setDialog({ mode: "create", stackId })}
           />
         ) : tab === "map" ? (
-          <StubPanel
-            icon={<Workflow className="mx-auto size-8 text-fg-4" />}
-            title="Mind map"
-            body="The interactive feature map (React Flow) lands in Step 51. The graph you curate here will render as stack-colored nodes with typed edges."
-          />
+          <div className="h-full">
+            <FeatureMap
+              graph={graph}
+              initialFocusId={initialFeatureId}
+              onSelectFeature={(id) => setSelectedId(id)}
+            />
+          </div>
         ) : (
           <SuggestionsTab
             workspaceId={workspaceId}
@@ -200,26 +220,6 @@ export function FeaturesSurface({
           onDeleted={removeFeature}
         />
       ) : null}
-    </div>
-  );
-}
-
-function StubPanel({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="px-6 py-10">
-      <div className="mx-auto max-w-md rounded-[var(--radius-xl)] border border-dashed px-6 py-10 text-center">
-        {icon}
-        <h2 className="t-h3 mt-3">{title}</h2>
-        <p className="mt-1.5 text-[13px] leading-[20px] text-fg-3">{body}</p>
-      </div>
     </div>
   );
 }

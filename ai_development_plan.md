@@ -132,7 +132,7 @@ Out of scope for v1 (recorded so they're conscious cuts, not omissions): pgvecto
 
 ## Mind Map
 
-- [ ] Step 51: Feature mind-map visualization (React Flow)
+- [x] Step 51: Feature mind-map visualization (React Flow)
   - **Task**: Fill in the **Map** tab with the workspace mind map: `@xyflow/react` rendering features as nodes (colored/badged by stack, with a stack legend) and `FeatureLink`s as labeled directed edges styled per kind — dashed for SUGGESTED, solid for CONFIRMED. Auto-layout via a `dagre` wrapper in `src/lib/agent/layout.ts` (left-to-right ranking, features visually clustered by stack). Interactions: click a node to open the Step 46 feature-detail sheet; filters for stack (multi-select), status, and text search; a **focus mode** that narrows the canvas to a selected feature's n-hop neighborhood (`subgraph` query); deep link `?feature=<id>` so impact reports and feature chips can land here pre-focused; zoom/fit/minimap controls. The map is read-only in v1 (edge editing stays in the detail sheet — drag-to-link is future work). React Flow is browser-only: load the map component with a dynamic `ssr: false` import. Styling uses design-token classes and `pm-*` motion conventions (no framer-motion), with dark mode via the existing CSS variables.
   - **Files**:
     - `src/components/agent/feature-map.tsx`: React Flow canvas, filters, focus mode (dynamic import host)
@@ -143,6 +143,7 @@ Out of scope for v1 (recorded so they're conscious cuts, not omissions): pgvecto
     - `package.json`: `@xyflow/react`, `dagre` (+ types)
   - **Step Dependencies**: Step 46 (Step 50 enriches it with confirmed data)
   - **User Instructions**: none
+  - **Build notes (delivered)**: Shipped with three pragmatic deviations: **`@dagrejs/dagre`** (the maintained fork with built-in types) instead of legacy `dagre` + `@types/dagre`; **focus-mode BFS computed client-side** — the whole graph is already in the surface's memory, so the server `subgraph` query stays reserved for Step 52's impact candidates; and **stack clustering rendered as color + legend** (the stack chips double as multi-select filters) over dagre's edge-driven left-to-right ranking, rather than hard swimlanes — the ranking itself reads as the application's dependency flow (FE → API → WS), which is the insight that matters. Custom node: stack dot + type badge + PRD-count/"unconfirmed" hint, dashed border for suggestions, hover crosshair enters focus mode; custom edge: token-colored stroke + kind-colored arrowhead + a label chip riding the curve, dashed with a "?" suffix while suggested. Node click opens the Step 46 detail sheet; on the map tab a `?feature=` deep link **pre-focuses** the canvas instead of opening the sheet. Canvas is `next/dynamic ssr:false`, `colorMode` follows next-themes, and it's fully read-only (no drag/connect/delete). Verified: `tsc`, eslint, full `next build` (the features route bundles to 12.6 kB; the React Flow chunk loads on demand), and a live run over the curated graph — 22 nodes / 23 edges laid out in legible clusters, node click → sheet (showing the re-pointed TRIGGERS edge), and the deep-link focus rendering exactly the 6-node ±2-hop neighborhood of "Login endpoint" across three stacks, with zero console errors.
 
 ## Impact Analysis & Change Requests
 
