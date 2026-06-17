@@ -425,3 +425,20 @@ export interface ImpactReport {
   contractNotes: string[];
   openQuestions: string[];
 }
+
+/** One persisted impact run, as served to the PRD's impact card (Step 52). */
+export interface ImpactAnalysisItem {
+  id: string;
+  status: ImpactRunStatus;
+  model: string | null;
+  error: string | null;
+  createdAt: string;
+  report: ImpactReport | null;
+}
+
+/** Stack/name lookup for feature ids referenced inside impact reports. */
+export interface ImpactFeatureMeta {
+  name: string;
+  stackName: string;
+  stackColor: string;
+}

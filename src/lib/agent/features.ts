@@ -18,6 +18,7 @@ import type {
   FeatureDetailLink,
   FeatureEdge,
   FeatureNode,
+  PageFeatureItem,
   SuggestedFeatureItem,
   SuggestedLinkItem,
   SuggestedPageLinkItem,
@@ -1094,6 +1095,176 @@ export async function mergeSuggestedFeature(
       data: { archivedAt: new Date() },
     });
   });
+}
+
+// ─────────────────────────── PRD ↔ feature joins (Step 52)
+// The properties-bar Features field: humans connect a PRD to the features it
+// DEFINES or MODIFIES (= change request). Human writes are born
+// CONFIRMED/MANUAL, mirroring the link semantics in createLink.
+
+const pageFeatureItemSelect = {
+  id: true,
+  role: true,
+  status: true,
+  origin: true,
+  feature: {
+    select: {
+      id: true,
+      name: true,
+      stackId: true,
+      stack: { select: { name: true, color: true } },
+    },
+  },
+} as const;
+
+type PageFeatureRow = Prisma.PageFeatureGetPayload<{
+  select: typeof pageFeatureItemSelect;
+}>;
+
+function toPageFeatureItem(row: PageFeatureRow): PageFeatureItem {
+  return {
+    id: row.id,
+    featureId: row.feature.id,
+    name: row.feature.name,
+    stackId: row.feature.stackId,
+    stackName: row.feature.stack.name,
+    stackColor: row.feature.stack.color,
+    role: row.role,
+    status: row.status,
+    origin: row.origin,
+  };
+}
+
+/** A PRD's feature connections (pending + confirmed; rejected hidden). */
+export async function listPageFeatures(
+  pageId: string,
+  workspaceId: string,
+): Promise<PageFeatureItem[]> {
+  const rows = await db.pageFeature.findMany({
+    where: {
+      pageId,
+      status: { not: SuggestionStatus.REJECTED },
+      feature: { workspaceId, archivedAt: null },
+    },
+    orderBy: { createdAt: "asc" },
+    select: pageFeatureItemSelect,
+  });
+  return rows.map(toPageFeatureItem);
+}
+
+interface SetPageFeatureInput {
+  workspaceId: string;
+  actorRole: Role;
+  pageId: string;
+  featureId: string;
+  role: PageFeatureRole;
+}
+
+/**
+ * Human-set PRD↔feature connection — born CONFIRMED/MANUAL. An existing
+ * SUGGESTED/REJECTED row for the same triple is promoted in place, and
+ * connecting a still-suggested feature implicitly activates it.
+ */
+export async function setPageFeature(
+  input: SetPageFeatureInput,
+): Promise<PageFeatureItem> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const [page, feature] = await Promise.all([
+    db.page.findUnique({
+      where: { id: input.pageId },
+      select: { workspaceId: true, archivedAt: true },
+    }),
+    db.feature.findUnique({
+      where: { id: input.featureId },
+      select: { workspaceId: true, archivedAt: true, status: true },
+    }),
+  ]);
+  if (!page || page.workspaceId !== input.workspaceId || page.archivedAt) {
+    throw new Error("Page not found.");
+  }
+  if (
+    !feature ||
+    feature.workspaceId !== input.workspaceId ||
+    feature.archivedAt
+  ) {
+    throw new Error("Feature not found.");
+  }
+
+  const existing = await db.pageFeature.findUnique({
+    where: {
+      pageId_featureId_role: {
+        pageId: input.pageId,
+        featureId: input.featureId,
+        role: input.role,
+      },
+    },
+    select: { id: true, status: true },
+  });
+  if (existing && existing.status === SuggestionStatus.CONFIRMED) {
+    throw new Error("This PRD is already connected with that role.");
+  }
+
+  const [row] = await db.$transaction([
+    existing
+      ? db.pageFeature.update({
+          where: { id: existing.id },
+          data: {
+            status: SuggestionStatus.CONFIRMED,
+            origin: AgentOrigin.MANUAL,
+          },
+          select: pageFeatureItemSelect,
+        })
+      : db.pageFeature.create({
+          data: {
+            pageId: input.pageId,
+            featureId: input.featureId,
+            role: input.role,
+            status: SuggestionStatus.CONFIRMED,
+            origin: AgentOrigin.MANUAL,
+          },
+          select: pageFeatureItemSelect,
+        }),
+    db.feature.updateMany({
+      where: {
+        id: input.featureId,
+        status: FeatureStatus.SUGGESTED,
+        archivedAt: null,
+      },
+      data: { status: FeatureStatus.ACTIVE },
+    }),
+  ]);
+  return toPageFeatureItem(row);
+}
+
+interface RemovePageFeatureInput {
+  workspaceId: string;
+  actorRole: Role;
+  pageFeatureId: string;
+}
+
+/**
+ * Detach a connection from the PRD side. Agent suggestions are REJECTED
+ * (tombstoned against re-proposal); confirmed/manual rows are deleted.
+ */
+export async function removePageFeature(
+  input: RemovePageFeatureInput,
+): Promise<void> {
+  requireRoleOnWorkspace(input.actorRole, Role.EDITOR);
+  const row = await db.pageFeature.findUnique({
+    where: { id: input.pageFeatureId },
+    select: { status: true, feature: { select: { workspaceId: true } } },
+  });
+  if (!row || row.feature.workspaceId !== input.workspaceId) {
+    throw new Error("Connection not found.");
+  }
+  if (row.status === SuggestionStatus.SUGGESTED) {
+    await db.pageFeature.update({
+      where: { id: input.pageFeatureId },
+      data: { status: SuggestionStatus.REJECTED },
+    });
+  } else {
+    await db.pageFeature.delete({ where: { id: input.pageFeatureId } });
+  }
 }
 
 /** Accept every pending suggestion in one group; collisions are skipped. */

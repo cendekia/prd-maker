@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { Role } from "@prisma/client";
 
 import { env } from "@/env";
+import { listPageFeatures } from "@/lib/agent/features";
+import { listImpactAnalyses } from "@/lib/agent/impact";
 import type { PageAgileInitial } from "@/lib/agile";
 import { db } from "@/lib/db";
 import { issueCollabToken } from "@/lib/collab-token";
@@ -46,6 +48,12 @@ export default async function PageEditorRoute({ params }: PageProps) {
     },
   });
   if (!page || page.archivedAt) notFound();
+
+  // Feature connections + impact-run history for first paint (Step 52).
+  const [pageFeatures, impact] = await Promise.all([
+    listPageFeatures(pageId, workspace.id),
+    listImpactAnalyses(pageId, workspace.id),
+  ]);
 
   const editable = access.role !== Role.VIEWER;
 
@@ -92,6 +100,9 @@ export default async function PageEditorRoute({ params }: PageProps) {
       publicSlug={page.publicSlug}
       publicBaseUrl={env.NEXT_PUBLIC_APP_URL}
       agile={agile}
+      initialPageFeatures={pageFeatures}
+      initialImpactAnalyses={impact.analyses}
+      initialImpactFeatureMeta={impact.featureMeta}
     />
   );
 }

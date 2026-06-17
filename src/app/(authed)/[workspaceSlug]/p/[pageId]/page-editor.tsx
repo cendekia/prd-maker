@@ -8,6 +8,13 @@ import { History as HistoryIcon, MessageSquare } from "lucide-react";
 import { CommentsRail, type PendingAnchor } from "@/components/comments/comments-rail";
 import { Editor, type CollabSyncState } from "@/components/editor/editor";
 import { AgilePropertiesBar } from "@/components/page/agile-properties-bar";
+import { FeatureLinksField } from "@/components/page/feature-links-field";
+import { ImpactCard } from "@/components/agent/impact-card";
+import type {
+  ImpactAnalysisItem,
+  ImpactFeatureMeta,
+  PageFeatureItem,
+} from "@/lib/agent/types";
 import { ExportMenu } from "@/components/page/export-menu";
 import { Button } from "@/components/ui/button";
 import { HistoryDrawer } from "@/components/version-history/history-drawer";
@@ -46,6 +53,9 @@ interface Props {
   publicSlug: string | null;
   publicBaseUrl: string;
   agile: PageAgileInitial;
+  initialPageFeatures: PageFeatureItem[];
+  initialImpactAnalyses: ImpactAnalysisItem[];
+  initialImpactFeatureMeta: Record<string, ImpactFeatureMeta>;
 }
 
 export function PageEditor({
@@ -62,9 +72,13 @@ export function PageEditor({
   publicSlug,
   publicBaseUrl,
   agile,
+  initialPageFeatures,
+  initialImpactAnalyses,
+  initialImpactFeatureMeta,
 }: Props) {
   const [titleDraft, setTitleDraft] = useState(title);
   const [renaming, setRenaming] = useState(false);
+  const [pageFeatures, setPageFeatures] = useState(initialPageFeatures);
   const [syncState, setSyncState] = useState<CollabSyncState>("connecting");
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -271,6 +285,24 @@ export function PageEditor({
             workspaceId={workspaceId}
             editable={effectiveEditable}
             initial={agile}
+            trailing={
+              <FeatureLinksField
+                pageId={pageId}
+                workspaceId={workspaceId}
+                editable={effectiveEditable}
+                value={pageFeatures}
+                onChange={setPageFeatures}
+              />
+            }
+          />
+
+          <ImpactCard
+            pageId={pageId}
+            workspaceSlug={workspaceSlug}
+            editable={effectiveEditable}
+            initialAnalyses={initialImpactAnalyses}
+            initialFeatureMeta={initialImpactFeatureMeta}
+            hasModifies={pageFeatures.some((f) => f.role === "MODIFIES")}
           />
 
           <Editor

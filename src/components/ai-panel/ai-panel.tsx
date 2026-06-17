@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Radar, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAiChat } from "@/hooks/use-ai-chat";
@@ -129,6 +130,8 @@ export function AIPanel({ pageId, workspace, onClose }: Props) {
           </div>
         ) : null}
       </div>
+
+      {isWorkspace && pageId ? <ImpactQuickAction pageId={pageId} /> : null}
 
       {!isWorkspace && !pageId ? (
         <EmptyState
@@ -281,6 +284,62 @@ function ModeTab({
     >
       {label}
     </button>
+  );
+}
+
+/**
+ * Workspace-mode quick action (Step 52): run a structured impact analysis
+ * for the PRD that's open behind the panel; the report lands on its card.
+ */
+function ImpactQuickAction({ pageId }: { pageId: string }) {
+  const router = useRouter();
+  const [state, setState] = useState<"idle" | "running" | "done">("idle");
+  const [note, setNote] = useState<string | null>(null);
+
+  async function run() {
+    setState("running");
+    setNote(null);
+    try {
+      const res = await fetch("/api/agent/impact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pageId, action: "run" }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          d.error === "quota_exceeded"
+            ? "Out of managed AI credits — add a personal key to keep analyzing."
+            : (d.message ?? d.error ?? "The analysis failed."),
+        );
+      }
+      setState("done");
+      setNote("Report added to the page — see the impact card above the editor.");
+      router.refresh();
+    } catch (e) {
+      setState("idle");
+      setNote((e as Error).message);
+    }
+  }
+
+  return (
+    <div className="shrink-0 border-b bg-background px-3 py-2">
+      <button
+        type="button"
+        onClick={run}
+        disabled={state === "running"}
+        className={cn(
+          "flex w-full items-center gap-2 rounded-[var(--radius-md)] border px-2.5 py-1.5 text-left text-[12px] text-fg-2",
+          "hover:bg-bg-hover hover:text-fg-1 disabled:opacity-60",
+        )}
+      >
+        <Radar className="size-3.5 shrink-0 text-brand-500" />
+        {state === "running"
+          ? "Analyzing this PRD's impact…"
+          : "Analyze this PRD's impact"}
+      </button>
+      {note ? <p className="mt-1 px-1 text-[11px] text-fg-3">{note}</p> : null}
+    </div>
   );
 }
 

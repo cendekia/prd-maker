@@ -48,9 +48,17 @@ interface Props {
   workspaceId: string;
   editable: boolean;
   initial: PageAgileInitial;
+  /** Extra fields appended to the bar (Step 52 mounts the Features field). */
+  trailing?: ReactNode;
 }
 
-export function AgilePropertiesBar({ pageId, workspaceId, editable, initial }: Props) {
+export function AgilePropertiesBar({
+  pageId,
+  workspaceId,
+  editable,
+  initial,
+  trailing,
+}: Props) {
   const [meta, setMeta] = useState<PageAgileInitial>(initial);
 
   async function patch(changes: AgilePatch, optimistic: Partial<PageAgileInitial>) {
@@ -292,6 +300,8 @@ export function AgilePropertiesBar({ pageId, workspaceId, editable, initial }: P
           />
         )}
       </Popover>
+
+      {trailing}
     </div>
   );
 }
