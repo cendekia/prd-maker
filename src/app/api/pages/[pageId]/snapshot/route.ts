@@ -56,6 +56,7 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({
       versionId: result.version.id,
       created: result.created,
+      guarded: result.guarded,
       createdAt: result.version.createdAt.toISOString(),
       kind: result.version.kind,
     });
