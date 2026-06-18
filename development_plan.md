@@ -562,6 +562,34 @@ Total: ~38 steps across 11 sections.
   - **Step Dependencies**: Step 10
   - **User Instructions**: none
 
+## Roles & Bulk Import — Feature Catalog
+
+> Added after the AI Workspace Agent plan (`ai_development_plan.md`, Steps 44–54). Numbered **55–56** to continue the shared step-number space (1–38 core, 39–43 beta, 44–54 agent) so existing cross-references stay stable. Intended order: **Step 55 before 56** — the bulk import is gated to the new Dev Lead role. Both build on the workspace feature graph from `ai_development_plan.md` Steps 44–46.
+
+- [ ] Step 55: Dev Lead role
+  - **Task**: Add a `DEV_LEAD` value to the `Role` enum — an elevated editor that owns the application's feature catalog (and is the gate for bulk import in Step 56), ranked between EDITOR and OWNER. Update `ROLE_RANK` in `src/lib/config.ts` to `VIEWER:1, EDITOR:2, DEV_LEAD:3, OWNER:4`, add `DEV_LEAD` to the `ROLES` tuple, and add a "Dev Lead" label wherever roles render. Because `requireRole` is rank-based (`ROLE_RANK[role] < ROLE_RANK[min]`), every existing check stays correct with no logic change: each `requireRole(EDITOR)` path now also admits Dev Leads, each `requireRole(OWNER)` path still excludes them, and a **new `requireRole(DEV_LEAD)` tier admits exactly OWNER + DEV_LEAD** (used by Step 56). Extend the members role picker and the invite role selector (Step 6) to offer Dev Lead, with the rule that **only an OWNER may assign DEV_LEAD or OWNER** while a DEV_LEAD may manage EDITOR/VIEWER (prevents privilege escalation). A Dev Lead is a billable seat exactly like an Editor — Step 24 seat sync counts all members, so it needs no change. Audit role-label rendering (member list, presence, role chips) for the new value.
+  - **Files**:
+    - `prisma/schema.prisma`: add `DEV_LEAD` to the `Role` enum
+    - `src/lib/config.ts`: `ROLES` tuple + `ROLE_RANK` (insert `DEV_LEAD` at rank 3) + role-label map
+    - `src/app/(authed)/[workspaceSlug]/settings/members/page.tsx` + `actions.ts`: offer Dev Lead in the role picker; restrict assigning `DEV_LEAD`/`OWNER` to owners
+    - `src/app/(authed)/[workspaceSlug]/settings/invites/page.tsx` + `actions.ts`: Dev Lead as an invitable role (owner-gated)
+    - `src/lib/workspace.ts`, `src/lib/permissions.ts`: confirm rank-based `requireRole` covers the new tier (no logic change expected)
+  - **Step Dependencies**: Step 3, Step 6
+  - **User Instructions**: Run `npx prisma migrate dev --name dev_lead_role`. (Postgres adds an enum value in its own statement; if `migrate dev` flags altering an enum inside a transaction, accept the generated split migration.)
+
+- [ ] Step 56: Import feature catalog from JSON (OWNER + Dev Lead)
+  - **Task**: Add a bulk **import** path that populates the workspace feature graph (`ai_development_plan.md` Steps 44–46) from a single JSON document mapping features onto each stack — a deliberate, human-curated alternative to agent extraction (Step 49). Gated to **OWNER + DEV_LEAD** via `requireRole(DEV_LEAD)` (Step 55): imported rows are written **canonical** (features `ACTIVE`/`MANUAL`, links `CONFIRMED`/`MANUAL`) and therefore **bypass the Step 50 review queue**, so the bulk write is restricted to the roles trusted to own the catalog. **JSON shape**: a top-level `stacks[]` — each with `name`, `type` (∈ `StackType`), optional `description`, and `features[]` of `{ name, summary }` — plus a top-level `links[]` of `{ from, to, kind (∈ `FeatureLinkKind`), rationale? }` referencing features by name, with optional `fromStack`/`toStack` qualifiers to disambiguate names shared across stacks. **Behavior**: auto-create missing stacks (matched by name, case-insensitive; created with the given `type`); **idempotent** — features reuse the existing per-stack normalized-name match (`normalizeFeatureName`) instead of duplicating, and links promote-in-place / skip existing `(from,to,kind)` triples; the whole apply runs in one transaction so a validation failure changes nothing. Validate with a zod contract that returns precise errors (unknown stack type, bad link kind, dangling/ambiguous link target). Return a summary `{ stacksCreated, featuresCreated, featuresReused, linksCreated, linksSkipped, errors[] }`. **UI**: an "Import" button on the Features surface (List tab), shown only when `canImport` (server-passed, `ROLE_RANK[role] >= ROLE_RANK[DEV_LEAD]`), opening a dialog to paste JSON or upload a `.json` file and then showing the summary; refresh the graph on success. Optional companion **"Export to JSON"** in the same shape (same role gate) for round-trip/backup.
+  - **Files**:
+    - `src/lib/agent/import.ts`: zod payload contract + `importFeatureGraph({ workspaceId, actorRole, payload })` (validate → auto-create stacks → transactional canonical upserts of features + name-resolved links → summary)
+    - `src/lib/agent/types.ts`: `FeatureImportPayload` + `FeatureImportSummary` types
+    - `src/app/api/workspaces/[workspaceId]/features/import/route.ts`: POST — `requireRole(DEV_LEAD)` + `assertWorkspaceAgent`, body = payload, returns the summary
+    - `src/components/agent/import-dialog.tsx`: paste/upload + validation-error + summary UI
+    - `src/components/agent/features-surface.tsx`: "Import" button gated by `canImport`
+    - `src/app/(authed)/[workspaceSlug]/features/page.tsx`: compute + pass `canImport`
+    - (optional) `src/app/api/workspaces/[workspaceId]/features/export/route.ts` + export button
+  - **Step Dependencies**: Step 55; `ai_development_plan.md` Step 45 (stacks) + Step 46 (feature graph services)
+  - **User Instructions**: none
+
 ## Testing
 
 - [ ] Step 35: Unit + integration tests with Vitest
