@@ -98,6 +98,10 @@ model VerificationToken {
 
 enum Role {
   OWNER
+  // Elevated editor that owns the application's feature catalog — the gate
+  // for bulk feature import (development_plan.md Step 56). Ranked between
+  // EDITOR and OWNER in src/lib/config.ts ROLE_RANK.
+  DEV_LEAD
   EDITOR
   VIEWER
 }

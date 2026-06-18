@@ -6,6 +6,7 @@ import { Role } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ASSIGNABLE_ROLES, ROLE_LABELS } from "@/lib/roles";
 
 import { createInviteAction } from "../actions";
 
@@ -53,9 +54,11 @@ export function InviteForm({ workspaceSlug }: { workspaceSlug: string }) {
           onChange={(e) => setRole(e.target.value as Role)}
           className="h-9 rounded-md border bg-transparent px-2 text-sm"
         >
-          <option value="EDITOR">Editor</option>
-          <option value="VIEWER">Viewer</option>
-          <option value="OWNER">Owner</option>
+          {ASSIGNABLE_ROLES.map((r) => (
+            <option key={r} value={r}>
+              {ROLE_LABELS[r]}
+            </option>
+          ))}
         </select>
       </div>
       <Button type="submit" disabled={pending}>

@@ -4,10 +4,18 @@ import { useState, useTransition } from "react";
 import { Role } from "@prisma/client";
 
 import { Avatar, presenceColorFor } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ASSIGNABLE_ROLES, ROLE_LABELS } from "@/lib/roles";
 
 import { changeMemberRoleAction, removeMemberAction } from "../actions";
+
+const ROLE_BADGE_VARIANT: Record<Role, BadgeProps["variant"]> = {
+  OWNER: "solid",
+  DEV_LEAD: "accentSubtle",
+  EDITOR: "muted",
+  VIEWER: "subtle",
+};
 
 interface Member {
   id: string;
@@ -83,14 +91,14 @@ export function MemberRow({ workspaceSlug, member, currentUserId, viewerIsOwner 
             }}
             className="h-7 rounded-[var(--radius-sm)] border bg-background px-2 text-[12px] text-fg-1 shadow-[var(--shadow-xs)] focus:border-ring focus:outline-none focus-visible:shadow-[var(--shadow-focus)]"
           >
-            <option value="OWNER">Owner</option>
-            <option value="EDITOR">Editor</option>
-            <option value="VIEWER">Viewer</option>
+            {ASSIGNABLE_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABELS[r]}
+              </option>
+            ))}
           </select>
         ) : (
-          <Badge variant={role === Role.OWNER ? "solid" : role === Role.EDITOR ? "muted" : "subtle"}>
-            {role[0] + role.slice(1).toLowerCase()}
-          </Badge>
+          <Badge variant={ROLE_BADGE_VARIANT[role]}>{ROLE_LABELS[role]}</Badge>
         )}
         {canRemove ? (
           <Button

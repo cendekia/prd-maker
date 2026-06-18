@@ -108,14 +108,20 @@ export const AI_MANAGED_MONTHLY_TOKEN_CAP: Record<Plan, number> = {
   BUSINESS: 5_000_000,
 };
 
-export const ROLES = ["OWNER", "EDITOR", "VIEWER"] as const;
+export const ROLES = ["OWNER", "DEV_LEAD", "EDITOR", "VIEWER"] as const;
 export type Role = (typeof ROLES)[number];
 
-/** Role rank — higher number = more permissions. */
+/**
+ * Role rank — higher number = more permissions. `requireRole` compares ranks,
+ * so DEV_LEAD (3) sits between EDITOR (2) and OWNER (4): every `EDITOR`+ check
+ * admits Dev Leads, every `OWNER`-only check still excludes them, and a
+ * `requireRole(DEV_LEAD)` gate admits exactly OWNER + DEV_LEAD (Step 56 import).
+ */
 export const ROLE_RANK: Record<Role, number> = {
   VIEWER: 1,
   EDITOR: 2,
-  OWNER: 3,
+  DEV_LEAD: 3,
+  OWNER: 4,
 };
 
 export const isProd = env.NODE_ENV === "production";
