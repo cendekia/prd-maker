@@ -35,6 +35,7 @@ export default async function FeaturesPage({ params, searchParams }: PageProps) 
       initialFeatureId={feature ?? null}
       canEdit={ROLE_RANK[member.role] >= ROLE_RANK[Role.EDITOR]}
       canDelete={member.role === Role.OWNER}
+      canImport={ROLE_RANK[member.role] >= ROLE_RANK[Role.DEV_LEAD]}
       agentEnabled={agentEnabled}
     />
   );

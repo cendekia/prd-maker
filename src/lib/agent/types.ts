@@ -332,6 +332,19 @@ export interface PageFeatureItem {
   origin: AgentOrigin;
 }
 
+/* ----------------------------- Bulk import ------------------------------ */
+
+/** Outcome of a JSON feature-catalog import (development_plan.md Step 56). */
+export interface FeatureImportSummary {
+  stacksCreated: number;
+  featuresCreated: number;
+  featuresReused: number;
+  linksCreated: number;
+  linksSkipped: number;
+  /** Non-fatal per-link problems (dangling/ambiguous targets, self-links). */
+  errors: string[];
+}
+
 /* -------------------------- Suggestion queue ---------------------------- */
 
 /** A suggested feature awaiting review (Step 50). */

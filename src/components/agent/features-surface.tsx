@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Network, Plus } from "lucide-react";
+import { Download, Network, Plus, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { AgentEmptyState } from "./agent-empty-state";
 import { FeatureDetail } from "./feature-detail";
+import { ImportDialog } from "./import-dialog";
 import { FeatureDialog, type FeatureDialogState } from "./feature-dialog";
 import { FeaturesList } from "./features-list";
 import { SuggestionsTab } from "./suggestions-tab";
@@ -55,6 +56,8 @@ interface Props {
   initialFeatureId: string | null;
   canEdit: boolean;
   canDelete: boolean;
+  /** OWNER + Dev Lead — bulk JSON import/export (Step 56). */
+  canImport: boolean;
   /** Plan gate (Step 53) — server-resolved, never read from config here. */
   agentEnabled: boolean;
 }
@@ -68,6 +71,7 @@ export function FeaturesSurface({
   initialFeatureId,
   canEdit,
   canDelete,
+  canImport,
   agentEnabled,
 }: Props) {
   const router = useRouter();
@@ -79,6 +83,7 @@ export function FeaturesSurface({
     parseTab(initialTab) === "map" ? null : initialFeatureId,
   );
   const [dialog, setDialog] = useState<FeatureDialogState>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   // Server actions / refreshes re-render the page; keep local graph in sync.
   useEffect(() => setGraph(initialGraph), [initialGraph]);
@@ -186,6 +191,28 @@ export function FeaturesSurface({
               </button>
             ))}
           </div>
+          {canImport ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setImportOpen(true)}
+                title="Import a feature catalog from JSON"
+              >
+                <Upload />
+                Import
+              </Button>
+              <Button asChild variant="ghost" size="sm" title="Export to JSON">
+                <a
+                  href={`/api/workspaces/${workspaceId}/features/import`}
+                  download
+                >
+                  <Download />
+                  Export
+                </a>
+              </Button>
+            </>
+          ) : null}
           {canEdit ? (
             <>
               {hasStacks ? <SyncButton workspaceId={workspaceId} /> : null}
@@ -258,6 +285,14 @@ export function FeaturesSurface({
           onChanged={() => router.refresh()}
           onArchived={upsertFeature}
           onDeleted={removeFeature}
+        />
+      ) : null}
+
+      {importOpen ? (
+        <ImportDialog
+          workspaceId={workspaceId}
+          onClose={() => setImportOpen(false)}
+          onImported={() => router.refresh()}
         />
       ) : null}
     </div>
