@@ -24,6 +24,14 @@ export const PLAN_LIMITS: Record<
     sso: boolean;
     auditLog: boolean;
     aiPanel: boolean;
+    /**
+     * Workspace agent — the feature mind map, agent chat, sync, and impact
+     * analysis (ai_development_plan.md). True for every plan at launch:
+     * usage is already bounded by the AI token quotas, so there's no reason
+     * to gate it yet. Flipping FREE to false later gates the whole surface
+     * via `assertWorkspaceAgent` (src/lib/plan-gate.ts) with no other change.
+     */
+    workspaceAgent: boolean;
   }
 > = {
   FREE: {
@@ -37,6 +45,7 @@ export const PLAN_LIMITS: Record<
     sso: false,
     auditLog: false,
     aiPanel: true,
+    workspaceAgent: true,
   },
   PRO: {
     maxWorkspacesPerOwner: Infinity,
@@ -49,6 +58,7 @@ export const PLAN_LIMITS: Record<
     sso: false,
     auditLog: false,
     aiPanel: true,
+    workspaceAgent: true,
   },
   BUSINESS: {
     maxWorkspacesPerOwner: Infinity,
@@ -61,6 +71,7 @@ export const PLAN_LIMITS: Record<
     sso: true,
     auditLog: true,
     aiPanel: true,
+    workspaceAgent: true,
   },
 };
 

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Network, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -13,6 +14,7 @@ import type {
 } from "@/lib/agent/types";
 import { cn } from "@/lib/utils";
 
+import { AgentEmptyState } from "./agent-empty-state";
 import { FeatureDetail } from "./feature-detail";
 import { FeatureDialog, type FeatureDialogState } from "./feature-dialog";
 import { FeaturesList } from "./features-list";
@@ -53,6 +55,8 @@ interface Props {
   initialFeatureId: string | null;
   canEdit: boolean;
   canDelete: boolean;
+  /** Plan gate (Step 53) — server-resolved, never read from config here. */
+  agentEnabled: boolean;
 }
 
 export function FeaturesSurface({
@@ -64,6 +68,7 @@ export function FeaturesSurface({
   initialFeatureId,
   canEdit,
   canDelete,
+  agentEnabled,
 }: Props) {
   const router = useRouter();
   const [graph, setGraph] = useState(initialGraph);
@@ -113,6 +118,41 @@ export function FeaturesSurface({
     initialQueue.features.length +
     initialQueue.links.length +
     initialQueue.pageLinks.length;
+
+  // Plan gate (Step 53) — always allowed at launch; flips off if a future
+  // plan disables the workspace agent.
+  if (!agentEnabled) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+        <Network className="mb-3 size-8 text-fg-4" />
+        <h1 className="t-h2">Workspace agent</h1>
+        <p className="mt-2 max-w-md text-[13px] leading-[20px] text-fg-3">
+          The feature mind map and impact analysis aren’t available on your
+          current plan.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/pricing">See plans</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Onboarding (Step 53): no stacks yet — explain the model before the tabs.
+  if (!hasStacks) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="shrink-0 border-b px-6 py-3">
+          <h1 className="text-[15px] font-semibold text-fg-1">Features</h1>
+          <p className="text-[12px] text-fg-3">
+            The application’s feature mind map, grouped by stack.
+          </p>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <AgentEmptyState workspaceSlug={workspaceSlug} canEdit={canEdit} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">

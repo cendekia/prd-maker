@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { AiUnavailableError, resolveAiClient } from "@/lib/ai";
 import { buildPageSystemPrompt } from "@/lib/ai-context";
+import { buildCompactWorkspaceContext } from "@/lib/agent/context";
 import { buildGuidedSystemPrompt, isGuidedStage } from "@/lib/ai-prompts";
 import {
   AiQuotaExceededError,
@@ -180,8 +181,14 @@ export async function POST(req: Request) {
     title: page?.title ?? "Untitled",
     text: page?.contentText ?? "",
   };
+  // Guided stages get a compact application-map so the flow is agent-aware
+  // (Step 53): which stacks the idea touches, existing features by name,
+  // cross-stack contracts. Empty string when the workspace has no map yet.
+  const workspaceContext = stage
+    ? await buildCompactWorkspaceContext(workspaceId)
+    : "";
   const system = stage
-    ? buildGuidedSystemPrompt(stage, pageCtx)
+    ? buildGuidedSystemPrompt(stage, pageCtx, workspaceContext)
     : buildPageSystemPrompt(pageCtx);
 
   const encoder = new TextEncoder();

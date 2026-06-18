@@ -106,6 +106,16 @@ export function PageEditor({
     return () => document.removeEventListener("prdmaker:comment-start", onStart);
   }, []);
 
+  // Snapshot orchestration. We hold a ref to the live editor so the periodic
+  // auto-snapshot can read the freshest JSON (works in both solo + collab
+  // modes — `onEditor` fires once the editor mounts in either path).
+  const editorRef = useRef<TipTapEditor | null>(null);
+  const { markDirty, snapshotNow } = useAutoSnapshot({
+    pageId,
+    enabled: effectiveEditable,
+    getContentJson: () => editorRef.current?.getJSON() ?? null,
+  });
+
   // AI panel "Apply to page" -> snapshot-then-apply into this editor (Step 21).
   // The panel lives in a sibling subtree, so it dispatches an event and we run
   // the orchestration here where the live editor instance is in scope.
@@ -130,24 +140,20 @@ export function PageEditor({
         markdown: detail.markdown,
         editor: editorRef.current,
       })
-        .then((r) => respond(r.ok, r.error))
+        .then((r) => {
+          // On success, snapshot the freshly applied content (MANUAL): persists
+          // it to contentJson/contentText and, via the Step 49 hook, queues a
+          // re-extraction so the agent maps the new content (Step 53).
+          if (r.ok) void snapshotNow("MANUAL");
+          respond(r.ok, r.error);
+        })
         .catch((err) =>
           respond(false, err instanceof Error ? err.message : "Apply failed."),
         );
     }
     document.addEventListener("prdmaker:ai-apply", onApply);
     return () => document.removeEventListener("prdmaker:ai-apply", onApply);
-  }, [pageId, effectiveEditable]);
-
-  // Snapshot orchestration. We hold a ref to the live editor so the periodic
-  // auto-snapshot can read the freshest JSON (works in both solo + collab
-  // modes — `onEditor` fires once the editor mounts in either path).
-  const editorRef = useRef<TipTapEditor | null>(null);
-  const { markDirty } = useAutoSnapshot({
-    pageId,
-    enabled: effectiveEditable,
-    getContentJson: () => editorRef.current?.getJSON() ?? null,
-  });
+  }, [pageId, effectiveEditable, snapshotNow]);
 
   const handleEditorInstance = useCallback(
     (editor: TipTapEditor | null) => {

@@ -14,6 +14,7 @@ import {
 } from "@/lib/agent/context";
 import { runAgentLoop } from "@/lib/agent/loop";
 import { db } from "@/lib/db";
+import { assertWorkspaceAgent, PlanGateError } from "@/lib/plan-gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,6 +100,18 @@ export async function POST(req: Request) {
 
   const ctx = await getApiContext(workspaceId);
   if (isResponse(ctx)) return ctx;
+
+  try {
+    await assertWorkspaceAgent(ctx.workspace.id);
+  } catch (err) {
+    if (err instanceof PlanGateError) {
+      return NextResponse.json(
+        { error: "agent_unavailable", message: err.message },
+        { status: 403 },
+      );
+    }
+    throw err;
+  }
 
   // Resolve the client: BYO key + Sonnet, or managed server key + Haiku.
   let resolved;

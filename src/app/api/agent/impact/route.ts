@@ -10,6 +10,7 @@ import {
   runImpactAnalysis,
 } from "@/lib/agent/impact";
 import { jsonError } from "@/lib/api";
+import { assertWorkspaceAgent, PlanGateError } from "@/lib/plan-gate";
 import { requirePageAccess } from "@/lib/permissions";
 
 /**
@@ -62,6 +63,13 @@ export async function POST(req: Request) {
   const result = await pageAccess(pageId, Role.EDITOR);
   if ("error" in result) return result.error;
   const { access, userId } = result;
+
+  try {
+    await assertWorkspaceAgent(access.workspaceId);
+  } catch (e) {
+    if (e instanceof PlanGateError) return jsonError(e.message, 403);
+    throw e;
+  }
 
   if (body.action === "apply") {
     if (typeof body.analysisId !== "string" || !body.analysisId) {

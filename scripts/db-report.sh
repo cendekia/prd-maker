@@ -164,6 +164,56 @@ HAVING count(DISTINCT t.id) > 0 OR u."anthropicKeyCipher" IS NOT NULL
 ORDER BY sent DESC NULLS LAST, u.email;
 
 \\echo
+\\echo ── Agent feature map by workspace ──────────────────────────────────
+SELECT
+  w.slug                                                                       AS workspace,
+  (SELECT count(*) FROM "Stack" s WHERE s."workspaceId" = w.id)                AS stacks,
+  (SELECT count(*) FROM "Feature" f
+     WHERE f."workspaceId" = w.id AND f."archivedAt" IS NULL
+       AND f.status = 'ACTIVE')                                                AS feat_active,
+  (SELECT count(*) FROM "Feature" f
+     WHERE f."workspaceId" = w.id AND f."archivedAt" IS NULL
+       AND f.status = 'SUGGESTED')                                            AS feat_sugg,
+  (SELECT count(*) FROM "FeatureLink" l
+     WHERE l."workspaceId" = w.id AND l.status = 'CONFIRMED')                  AS links_ok,
+  (SELECT count(*) FROM "FeatureLink" l
+     WHERE l."workspaceId" = w.id AND l.status = 'SUGGESTED')                  AS links_sugg,
+  (SELECT count(*) FROM "ImpactAnalysis" ia WHERE ia."workspaceId" = w.id)     AS impact_runs
+FROM "Workspace" w
+${WS_FILTER}
+ORDER BY w."createdAt";
+
+\\echo
+\\echo ── Pending agent suggestions (review queue) ────────────────────────
+SELECT
+  w.slug                                                                       AS workspace,
+  (SELECT count(*) FROM "Feature" f
+     WHERE f."workspaceId" = w.id AND f."archivedAt" IS NULL
+       AND f.status = 'SUGGESTED')                                            AS features,
+  (SELECT count(*) FROM "FeatureLink" l
+     WHERE l."workspaceId" = w.id AND l.status = 'SUGGESTED')                  AS links,
+  (SELECT count(*) FROM "PageFeature" pf
+     JOIN "Feature" f ON f.id = pf."featureId"
+     WHERE f."workspaceId" = w.id AND pf.status = 'SUGGESTED')                 AS prd_links
+FROM "Workspace" w
+${WS_FILTER}
+ORDER BY w."createdAt";
+
+\\echo
+\\echo ── Agent jobs by workspace, type & status ──────────────────────────
+SELECT
+  w.slug        AS workspace,
+  j.type        AS type,
+  j.status      AS status,
+  count(*)      AS n,
+  max(j."updatedAt")::date AS last
+FROM "AgentJob" j
+JOIN "Workspace" w ON w.id = j."workspaceId"
+${WS_FILTER}
+GROUP BY w.slug, j.type, j.status
+ORDER BY w.slug, j.type, j.status;
+
+\\echo
 \\echo ── Totals ──────────────────────────────────────────────────────────
 SELECT
   (SELECT count(*) FROM "User")                                     AS users,
@@ -185,4 +235,16 @@ SELECT
   (SELECT count(*) FROM "User" WHERE "anthropicKeyCipher" IS NOT NULL)    AS byo_users,
   (SELECT COALESCE(sum("requestCount"), 0) FROM "AiUsage")                AS ai_requests,
   (SELECT COALESCE(sum("inputTokens" + "outputTokens"), 0) FROM "AiUsage") AS ai_tokens;
+
+\\echo
+\\echo ── Agent totals ────────────────────────────────────────────────────
+SELECT
+  (SELECT count(*) FROM "Stack")                                              AS stacks,
+  (SELECT count(*) FROM "Feature" WHERE "archivedAt" IS NULL)                 AS features,
+  (SELECT count(*) FROM "FeatureLink")                                        AS links,
+  (SELECT count(*) FROM "PageFeature")                                        AS prd_links,
+  (SELECT count(*) FROM "ImpactAnalysis")                                     AS impact_runs,
+  (SELECT count(*) FROM "AgentJob" WHERE status IN ('QUEUED', 'RUNNING'))     AS jobs_open,
+  (SELECT count(*) FROM "AgentThread")                                        AS agent_threads,
+  (SELECT count(*) FROM "AgentMessage")                                       AS agent_messages;
 SQL

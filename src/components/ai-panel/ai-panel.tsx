@@ -140,8 +140,12 @@ export function AIPanel({ pageId, workspace, onClose }: Props) {
         />
       ) : (
         <>
-          {guided ? (
-            <GuidedMode activeStage={stage} onStageChange={setStage} />
+          {guided && pageId ? (
+            <GuidedMode
+              pageId={pageId}
+              activeStage={stage}
+              onStageChange={setStage}
+            />
           ) : null}
 
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-3">

@@ -7,6 +7,7 @@ import {
   enqueueWorkspaceScan,
   getAgentSyncStatus,
 } from "@/lib/agent/jobs";
+import { assertWorkspaceAgent, PlanGateError } from "@/lib/plan-gate";
 import { requireRole } from "@/lib/workspace";
 
 /**
@@ -41,6 +42,12 @@ export async function POST(_req: Request, { params }: Params) {
     requireRole(ctx.member.role, Role.EDITOR);
   } catch (e) {
     return jsonError((e as Error).message, 403);
+  }
+  try {
+    await assertWorkspaceAgent(ctx.workspace.id);
+  } catch (e) {
+    if (e instanceof PlanGateError) return jsonError(e.message, 403);
+    throw e;
   }
 
   await enqueueWorkspaceScan({

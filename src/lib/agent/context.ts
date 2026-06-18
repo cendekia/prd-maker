@@ -166,6 +166,53 @@ export async function buildWorkspaceContext(
 }
 
 /**
+ * Compact application-map context for the guided Request→Plan→Spec flow
+ * (Step 53). Terser than the full agent map — stacks with their feature names
+ * (no ids, no links, no recent PRDs) since the guided flow is plain chat, not
+ * a tool loop. Returns "" for a workspace with no stacks/features so the
+ * guided flow is unchanged until the agent has something to ground in.
+ */
+export async function buildCompactWorkspaceContext(
+  workspaceId: string,
+  budgetChars = 2_500,
+): Promise<string> {
+  const [stacks, features] = await Promise.all([
+    listStacks(workspaceId),
+    db.feature.findMany({
+      where: {
+        workspaceId,
+        archivedAt: null,
+        status: { not: FeatureStatus.DEPRECATED },
+      },
+      orderBy: [{ status: "asc" }, { name: "asc" }],
+      select: { stackId: true, name: true, status: true },
+    }),
+  ]);
+  if (stacks.length === 0 && features.length === 0) return "";
+
+  const lines: string[] = [
+    "This workspace is one application built from these stacks; existing features are listed under each. Use them to ground your answer — reference real features by name and respect how stacks connect.",
+  ];
+  for (const stack of stacks) {
+    const own = features.filter((f) => f.stackId === stack.id);
+    if (own.length === 0) {
+      lines.push(`- ${stack.name} (${STACK_TYPE_LABELS[stack.type]}): —`);
+      continue;
+    }
+    const names = own.map(
+      (f) => `${f.name}${f.status === FeatureStatus.SUGGESTED ? " (unconfirmed)" : ""}`,
+    );
+    lines.push(`- ${stack.name} (${STACK_TYPE_LABELS[stack.type]}): ${names.join(", ")}`);
+  }
+
+  let out = lines.join("\n");
+  if (out.length > budgetChars) {
+    out = `${out.slice(0, budgetChars)}\n…(truncated)`;
+  }
+  return out;
+}
+
+/**
  * System prompt for the workspace agent chat (Step 48). Mirrors the Step 20
  * page-assistant voice, grounded in the application map instead of one PRD.
  */

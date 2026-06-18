@@ -102,22 +102,46 @@ const STAGE_INSTRUCTIONS: Record<GuidedStage, string> = {
 };
 
 /**
- * Build the system prompt for a guided stage, grounded in the current page.
- * Prior-stage deliverables live in the conversation history, so the model sees
- * them without re-injection here.
+ * Per-stage nudges added only when the workspace has an application map
+ * (Step 53). They make the guided flow agent-aware: think across stacks, name
+ * existing features, and surface cross-stack contracts.
+ */
+const STAGE_AGENT_HINTS: Record<GuidedStage, string> = {
+  request:
+    "Because this workspace is one application built from multiple stacks, ask which of the existing stacks this idea touches and whether it extends or changes features already in the map.",
+  plan:
+    "Where the plan touches functionality that already exists in the application map, reference those features by their exact names and note the stack each lives in, so the work connects to what's already there.",
+  spec:
+    "Call out cross-stack contracts the change implies — e.g. an API request/response shape that a frontend consumer and an email template must both absorb — and flag existing features in the map that this PRD would impact.",
+};
+
+/**
+ * Build the system prompt for a guided stage, grounded in the current page —
+ * and, when provided, the workspace's application map (Step 53). Prior-stage
+ * deliverables live in the conversation history, so the model sees them
+ * without re-injection here. `workspaceContext` is built server-side
+ * (src/lib/agent/context.ts) and threaded in by the chat route, keeping this
+ * module free of server-only imports.
  */
 export function buildGuidedSystemPrompt(
   stage: GuidedStage,
   { title, text }: { title: string; text: string },
+  workspaceContext?: string,
 ): string {
   const clean = text.trim();
   const doc =
     clean.length > 12_000 ? `${clean.slice(0, 12_000)}\n…[truncated]` : clean;
 
+  const hasMap = !!workspaceContext && workspaceContext.trim().length > 0;
+
   return [
     PREAMBLE,
     "",
     STAGE_INSTRUCTIONS[stage],
+    ...(hasMap ? ["", STAGE_AGENT_HINTS[stage]] : []),
+    ...(hasMap
+      ? ["", "The application this PRD belongs to:", "<application_map>", workspaceContext!, "</application_map>"]
+      : []),
     "",
     `The user is working on a PRD titled "${title}". Current document content:`,
     "<document>",
