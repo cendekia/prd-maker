@@ -134,6 +134,48 @@ export async function listImpactAnalyses(
   return { analyses, featureMeta: await buildFeatureMeta(workspaceId, ids) };
 }
 
+export interface ImpactCandidateFeature {
+  id: string;
+  name: string;
+  summary: string;
+  stack: { name: string };
+}
+
+/**
+ * Deterministic candidate assembly for an impact run (Step 52): the PRD's
+ * connected features plus their ≤`depth`-hop graph neighborhood. Pure read —
+ * no model call — so the Step 54 test can assert the candidate set directly.
+ */
+export async function assembleImpactCandidates(
+  workspaceId: string,
+  pageId: string,
+  depth: number = NEIGHBORHOOD_DEPTH,
+): Promise<{
+  joins: { role: PageFeatureRole; featureId: string }[];
+  linkedIds: string[];
+  candidateIds: string[];
+  hood: Awaited<ReturnType<typeof subgraph>>;
+  candidates: ImpactCandidateFeature[];
+}> {
+  const joins = await db.pageFeature.findMany({
+    where: {
+      pageId,
+      status: { not: SuggestionStatus.REJECTED },
+      feature: { archivedAt: null },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { role: true, featureId: true },
+  });
+  const linkedIds = [...new Set(joins.map((j) => j.featureId))];
+  const hood = await subgraph(workspaceId, linkedIds, depth);
+  const candidateIds = [...new Set([...linkedIds, ...hood.featureIds])];
+  const candidates = await db.feature.findMany({
+    where: { id: { in: candidateIds }, workspaceId },
+    select: { id: true, name: true, summary: true, stack: { select: { name: true } } },
+  });
+  return { joins, linkedIds, candidateIds, hood, candidates };
+}
+
 export async function runImpactAnalysis(opts: {
   workspaceId: string;
   pageId: string;
@@ -169,22 +211,10 @@ export async function runImpactAnalysis(opts: {
   });
   if (!byo) await assertWithinQuota(opts.workspaceId);
 
-  // Deterministic candidate assembly: connected features + ≤2-hop neighborhood.
-  const joins = await db.pageFeature.findMany({
-    where: {
-      pageId: opts.pageId,
-      status: { not: SuggestionStatus.REJECTED },
-      feature: { archivedAt: null },
-    },
-    select: { role: true, featureId: true },
-  });
-  const linkedIds = [...new Set(joins.map((j) => j.featureId))];
-  const hood = await subgraph(opts.workspaceId, linkedIds, NEIGHBORHOOD_DEPTH);
-  const candidateIds = [...new Set([...linkedIds, ...hood.featureIds])];
-  const candidates = await db.feature.findMany({
-    where: { id: { in: candidateIds }, workspaceId: opts.workspaceId },
-    select: { id: true, name: true, summary: true, stack: { select: { name: true } } },
-  });
+  const { joins, hood, candidates } = await assembleImpactCandidates(
+    opts.workspaceId,
+    opts.pageId,
+  );
   const byId = new Map(candidates.map((c) => [c.id, c]));
 
   const candidateLines: string[] = [];

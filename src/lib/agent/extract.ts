@@ -151,8 +151,11 @@ export async function extractPage(opts: {
  * (explicit id, then normalized-name match), create the rest as SUGGESTED,
  * and skip any page-join or link whose exact row already exists in ANY
  * status — CONFIRMED stays untouched, REJECTED is never resurrected.
+ *
+ * Exported for the Step 54 idempotency test, which exercises the apply phase
+ * directly without a model call.
  */
-async function applyExtraction(
+export async function applyExtraction(
   workspaceId: string,
   pageId: string,
   pageTitle: string,
