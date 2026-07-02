@@ -53,6 +53,7 @@ model User {
   featuresCreated        Feature[]               @relation("FeatureCreatedBy")
   impactAnalyses         ImpactAnalysis[]        @relation("ImpactAnalysisCreatedBy")
   agentJobsRequested     AgentJob[]              @relation("AgentJobRequestedBy")
+  guideChecksCreated     GuideCheck[]            @relation("GuideCheckCreatedBy")
 }
 
 model Account {
@@ -125,6 +126,7 @@ model Workspace {
   impactAnalyses ImpactAnalysis[]
   agentJobs      AgentJob[]
   agentThreads   AgentThread[]
+  guideChecks    GuideCheck[]
 }
 
 model WorkspaceMember {
@@ -178,6 +180,10 @@ model Page {
   yDocState   Bytes?
   isPublished Boolean   @default(false)
   publicSlug  String?   @unique
+  /// Template this page was created from (Step 57) — the completeness
+  /// checklist's target. Null for blank pages and pages predating the field;
+  /// SetNull on template delete (pages never depend on a template's fate).
+  templateId  String?
   createdById String
   archivedAt  DateTime?
   createdAt   DateTime  @default(now())
@@ -198,17 +204,20 @@ model Page {
   createdBy      User             @relation("PageCreatedBy", fields: [createdById], references: [id])
   epic           Epic?            @relation(fields: [epicId], references: [id], onDelete: SetNull)
   assignee       User?            @relation("PageAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  template       Template?        @relation(fields: [templateId], references: [id], onDelete: SetNull)
   versions       PageVersion[]
   comments       Comment[]
   permissions    PagePermission[]
   aiThreads      AiThread[]
   featureLinks   PageFeature[]
   impactAnalyses ImpactAnalysis[]
+  guideCheck     GuideCheck?
 
   @@index([workspaceId, parentId])
   @@index([workspaceId, archivedAt])
   @@index([parentId, position])
   @@index([workspaceId, epicId])
+  @@index([templateId])
 }
 
 enum VersionKind {
@@ -267,6 +276,7 @@ model Template {
   updatedAt   DateTime @updatedAt
 
   workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  pages     Page[]
 
   @@index([workspaceId])
 }
@@ -677,4 +687,42 @@ model AgentJob {
 
   @@index([status, createdAt])
   @@index([workspaceId, type, pageId])
+}
+
+// ---------- PRD guide — completeness checklist (development_plan.md Step 57) ----------
+//
+// The AI-judged completeness rail: a page's checklist target comes from its
+// source template's headings (fallback: the doc's own outline), and GuideCheck
+// stores the latest evaluation — one row per page, upserted per run. Current
+// state, not history (unlike ImpactAnalysis).
+
+/// Lifecycle of a completeness check run — mirrors ImpactRunStatus semantics.
+enum GuideCheckStatus {
+  RUNNING
+  READY
+  FAILED
+}
+
+/// Latest completeness check for a page. `report` follows the
+/// GuideCheckReport contract in src/lib/guide/types.ts and is only
+/// overwritten on READY, so a FAILED run keeps the last good report.
+model GuideCheck {
+  id          String           @id @default(cuid())
+  workspaceId String
+  pageId      String           @unique
+  status      GuideCheckStatus @default(RUNNING)
+  report      Json?
+  /// Model id that produced the report (BYO Sonnet vs managed Haiku).
+  /// Nullable so FAILED rows persist even when client resolution fails.
+  model       String?
+  error       String?
+  createdById String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdBy User      @relation("GuideCheckCreatedBy", fields: [createdById], references: [id])
+
+  @@index([workspaceId])
 }

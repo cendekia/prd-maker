@@ -117,18 +117,30 @@ export async function createPage(input: CreatePageInput) {
   }
 
   let contentJson = null as unknown;
+  let templateMissing = false;
+  let resolvedTemplateId: string | null = null;
   if (input.templateId) {
     const template = await db.template.findUnique({
       where: { id: input.templateId },
       select: { workspaceId: true, contentJson: true },
     });
-    if (
-      !template ||
-      (template.workspaceId !== null && template.workspaceId !== input.workspaceId)
+    if (!template) {
+      // The picked template vanished between the picker listing and the click
+      // (deleted by an owner, or a stale client). Degrade to a blank page and
+      // let the caller surface a notice instead of failing the creation.
+      templateMissing = true;
+    } else if (
+      template.workspaceId !== null &&
+      template.workspaceId !== input.workspaceId
     ) {
+      // Another workspace's template id — tenancy is never a fallback case.
       throw new Error("Template not found.");
+    } else {
+      contentJson = template.contentJson;
+      // Remember the source template — it's the page's completeness-checklist
+      // target (Step 57).
+      resolvedTemplateId = input.templateId;
     }
-    contentJson = template.contentJson;
   }
 
   const position = await nextEndPosition(input.workspaceId, input.parentId ?? null);
@@ -140,12 +152,13 @@ export async function createPage(input: CreatePageInput) {
       title: input.title?.trim() || "Untitled",
       position,
       contentJson: contentJson as never,
+      templateId: resolvedTemplateId,
       createdById: input.actorId,
     },
     select: { id: true, title: true, parentId: true, position: true, workspaceId: true },
   });
 
-  return page;
+  return { page, templateMissing };
 }
 
 interface RenamePageInput {

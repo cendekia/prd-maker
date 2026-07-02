@@ -13,13 +13,26 @@ interface TemplateItem {
 
 interface Props {
   workspaceId: string;
+  /**
+   * "create" (default): pick a template — or blank — for a new page.
+   * "apply" (Step 62): pour a template into the current empty page. The
+   * Blank option is hidden because there's nothing to create.
+   */
+  mode?: "create" | "apply";
   /** Create a page from the chosen template (null = blank). Resolves once the
-   * parent has navigated; rejects with an error message to show inline. */
+   * parent has navigated (or the template is applied); rejects with an error
+   * message to show inline. */
   onSelect: (templateId: string | null, title: string) => Promise<void> | void;
   onClose: () => void;
 }
 
-export function TemplatePicker({ workspaceId, onSelect, onClose }: Props) {
+export function TemplatePicker({
+  workspaceId,
+  mode = "create",
+  onSelect,
+  onClose,
+}: Props) {
+  const isApply = mode === "apply";
   const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -74,11 +87,11 @@ export function TemplatePicker({ workspaceId, onSelect, onClose }: Props) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="New page"
+        aria-label={isApply ? "Apply a template" : "New page"}
         className="pm-pop-in relative w-full max-w-lg rounded-[var(--radius-xl)] border bg-background p-5 shadow-[var(--shadow-xl)]"
       >
         <div className="flex items-center justify-between">
-          <h2 className="t-h3">New page</h2>
+          <h2 className="t-h3">{isApply ? "Apply a template" : "New page"}</h2>
           <button
             type="button"
             aria-label="Close"
@@ -89,20 +102,22 @@ export function TemplatePicker({ workspaceId, onSelect, onClose }: Props) {
           </button>
         </div>
 
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => choose(null, "Untitled")}
-          className="mt-4 flex w-full items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-border-strong p-3 text-left transition-colors hover:bg-bg-hover disabled:opacity-50"
-        >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-bg-subtle text-fg-3">
-            <FilePlus className="size-4" />
-          </span>
-          <span>
-            <span className="block text-[14px] font-medium text-fg-1">Blank page</span>
-            <span className="block text-[12px] text-fg-3">Start from scratch</span>
-          </span>
-        </button>
+        {!isApply ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => choose(null, "Untitled")}
+            className="mt-4 flex w-full items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-border-strong p-3 text-left transition-colors hover:bg-bg-hover disabled:opacity-50"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-bg-subtle text-fg-3">
+              <FilePlus className="size-4" />
+            </span>
+            <span>
+              <span className="block text-[14px] font-medium text-fg-1">Blank page</span>
+              <span className="block text-[12px] text-fg-3">Start from scratch</span>
+            </span>
+          </button>
+        ) : null}
 
         {error ? <p className="mt-3 text-[12px] text-destructive">{error}</p> : null}
 
@@ -142,7 +157,11 @@ export function TemplatePicker({ workspaceId, onSelect, onClose }: Props) {
           </>
         ) : null}
 
-        {busy ? <p className="mt-4 text-[12px] text-fg-3">Creating page…</p> : null}
+        {busy ? (
+          <p className="mt-4 text-[12px] text-fg-3">
+            {isApply ? "Applying template…" : "Creating page…"}
+          </p>
+        ) : null}
       </div>
     </div>,
     document.body,

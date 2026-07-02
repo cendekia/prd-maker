@@ -16,6 +16,7 @@ import type {
   PageFeatureItem,
 } from "@/lib/agent/types";
 import { ExportMenu } from "@/components/page/export-menu";
+import { StartFromTemplate } from "@/components/page/start-from-template";
 import { Button } from "@/components/ui/button";
 import { HistoryDrawer } from "@/components/version-history/history-drawer";
 import { useAutoSnapshot } from "@/hooks/use-auto-snapshot";
@@ -155,9 +156,16 @@ export function PageEditor({
     return () => document.removeEventListener("prdmaker:ai-apply", onApply);
   }, [pageId, effectiveEditable, snapshotNow]);
 
+  // Also held as state so children that react to the live doc (the
+  // start-from-template affordance) re-render once the editor exists.
+  const [editorInstance, setEditorInstance] = useState<TipTapEditor | null>(
+    null,
+  );
+
   const handleEditorInstance = useCallback(
     (editor: TipTapEditor | null) => {
       editorRef.current = editor;
+      setEditorInstance(editor);
       if (!editor) return;
       const onUpdate = () => markDirty();
       editor.on("update", onUpdate);
@@ -309,6 +317,20 @@ export function PageEditor({
             initialAnalyses={initialImpactAnalyses}
             initialFeatureMeta={initialImpactFeatureMeta}
             hasModifies={pageFeatures.some((f) => f.role === "MODIFIES")}
+          />
+
+          <StartFromTemplate
+            pageId={pageId}
+            workspaceId={workspaceId}
+            editor={editorInstance}
+            editable={effectiveEditable}
+            // A blank page (no saved content) is trustworthy immediately; a
+            // collab page with saved content only after the Y.Doc has synced
+            // and been seeded — before that the live doc is transiently empty.
+            ready={
+              initialContent == null || !collab || syncState === "connected"
+            }
+            onApplied={() => void snapshotNow("MANUAL")}
           />
 
           <Editor

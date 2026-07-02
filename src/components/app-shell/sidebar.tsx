@@ -37,6 +37,11 @@ export function Sidebar({
   async function handleCreateRootPage(templateId: string | null, title: string) {
     try {
       const page = await createPage({ title, templateId });
+      if (page.templateMissing) {
+        // Rare: the template was deleted between opening the picker and
+        // clicking. The page was still created — just blank (Step 61).
+        alert("That template no longer exists — created a blank page instead.");
+      }
       router.push(`/${workspace.slug}/p/${page.id}`);
     } catch (err) {
       alert((err as Error).message);

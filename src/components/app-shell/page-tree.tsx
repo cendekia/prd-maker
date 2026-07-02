@@ -20,6 +20,8 @@ import type { PageTreeNode } from "@/lib/types";
 import { usePageTree } from "@/hooks/use-page-tree";
 import { cn } from "@/lib/utils";
 
+import { TemplatePicker } from "@/components/templates/template-picker";
+
 import { PageTreeNode as TreeNode, type FlatTreeRow } from "./page-tree-node";
 
 interface Props {
@@ -82,14 +84,23 @@ export function PageTree({ workspaceId, workspaceSlug, initialTree, filter }: Pr
     }
   }
 
-  async function handleCreateChild(parentId: string) {
-    try {
-      const created = await createPage({ parentId, title: "Untitled" });
-      setExpanded((e) => ({ ...e, [parentId]: true }));
-      router.push(`/${workspaceSlug}/p/${created.id}`);
-    } catch (err) {
-      alert((err as Error).message);
+  // Child creation goes through the same template picker as the root "+"
+  // (Step 62). Non-null = the parent the picker is creating under.
+  const [pendingParentId, setPendingParentId] = useState<string | null>(null);
+
+  async function handleCreateChild(templateId: string | null, title: string) {
+    const parentId = pendingParentId;
+    if (!parentId) return;
+    // Errors propagate to the picker, which renders them inline.
+    const created = await createPage({ parentId, title, templateId });
+    setExpanded((e) => ({ ...e, [parentId]: true }));
+    setPendingParentId(null);
+    if (created.templateMissing) {
+      // Rare: the template was deleted between opening the picker and
+      // clicking. The page was still created — just blank (Step 61).
+      alert("That template no longer exists — created a blank page instead.");
     }
+    router.push(`/${workspaceSlug}/p/${created.id}`);
   }
 
   async function handleRename(id: string, title: string) {
@@ -135,27 +146,36 @@ export function PageTree({ workspaceId, workspaceSlug, initialTree, filter }: Pr
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={flat.map((r) => r.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        <div className="flex flex-col gap-px">
-          {flat.map((row) => (
-            <TreeNode
-              key={row.id}
-              workspaceSlug={workspaceSlug}
-              row={row}
-              isActive={activePageId === row.id}
-              onToggleExpand={toggleExpand}
-              onCreateChild={handleCreateChild}
-              onRename={handleRename}
-              onArchive={handleArchive}
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={flat.map((r) => r.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-px">
+            {flat.map((row) => (
+              <TreeNode
+                key={row.id}
+                workspaceSlug={workspaceSlug}
+                row={row}
+                isActive={activePageId === row.id}
+                onToggleExpand={toggleExpand}
+                onCreateChild={setPendingParentId}
+                onRename={handleRename}
+                onArchive={handleArchive}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+      {pendingParentId ? (
+        <TemplatePicker
+          workspaceId={workspaceId}
+          onClose={() => setPendingParentId(null)}
+          onSelect={handleCreateChild}
+        />
+      ) : null}
+    </>
   );
 }
 

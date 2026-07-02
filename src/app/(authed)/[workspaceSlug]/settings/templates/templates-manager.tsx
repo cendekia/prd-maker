@@ -100,6 +100,10 @@ export function TemplatesManager({ workspaceSlug, pages, templates }: Props) {
                     </option>
                   ))}
                 </select>
+                <p className="text-[12px] text-fg-3">
+                  Templates copy the page’s current content — editing or
+                  deleting the page later won’t change the template.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tpl-name">Template name</Label>

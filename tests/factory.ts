@@ -150,8 +150,52 @@ export async function createPageFeature(
   });
 }
 
+/** A minimal TipTap doc with one H2 heading and one paragraph (Step 63). */
+export function docWithText(heading: string, body = "Body text.") {
+  return {
+    type: "doc",
+    content: [
+      {
+        type: "heading",
+        attrs: { level: 2 },
+        content: [{ type: "text", text: heading }],
+      },
+      { type: "paragraph", content: [{ type: "text", text: body }] },
+    ],
+  };
+}
+
+/** An empty-but-non-null TipTap doc (whitespace-only content). */
+export const EMPTY_DOC = {
+  type: "doc",
+  content: [{ type: "paragraph" }],
+};
+
+const createdTemplates: string[] = [];
+
+/** `workspaceId: null` creates a system template — tracked for cleanup since
+ * it isn't covered by the workspace cascade. */
+export async function createTemplate(
+  workspaceId: string | null,
+  over?: { name?: string; contentJson?: object },
+) {
+  const tpl = await db.template.create({
+    data: {
+      workspaceId,
+      name: over?.name ?? uid("tpl"),
+      contentJson: over?.contentJson ?? docWithText("Overview"),
+    },
+  });
+  createdTemplates.push(tpl.id);
+  return tpl;
+}
+
 /** Delete everything this test file created. Call in afterAll. */
 export async function cleanupAll() {
+  if (createdTemplates.length > 0) {
+    await db.template.deleteMany({ where: { id: { in: createdTemplates } } });
+    createdTemplates.length = 0;
+  }
   if (createdWorkspaces.length > 0) {
     await db.workspace.deleteMany({ where: { id: { in: createdWorkspaces } } });
     createdWorkspaces.length = 0;

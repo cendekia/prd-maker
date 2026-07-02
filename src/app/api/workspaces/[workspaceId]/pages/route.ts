@@ -29,7 +29,7 @@ export async function POST(req: Request, { params }: Params) {
   }
 
   try {
-    const page = await createPage({
+    const { page, templateMissing } = await createPage({
       workspaceId: ctx.workspace.id,
       actorId: ctx.user.id,
       actorRole: ctx.member.role,
@@ -37,7 +37,7 @@ export async function POST(req: Request, { params }: Params) {
       title: body.title,
       templateId: body.templateId ?? null,
     });
-    return NextResponse.json({ page }, { status: 201 });
+    return NextResponse.json({ page, templateMissing }, { status: 201 });
   } catch (e) {
     return jsonError((e as Error).message, 400);
   }

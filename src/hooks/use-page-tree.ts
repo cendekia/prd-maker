@@ -33,7 +33,9 @@ export function usePageTree(workspaceId: string, initialTree: PageTreeNode[]) {
     revalidateOnFocus: false,
   });
 
-  async function createPage(input: CreatePageInput = {}): Promise<{ id: string }> {
+  async function createPage(
+    input: CreatePageInput = {},
+  ): Promise<{ id: string; templateMissing: boolean }> {
     const res = await fetch(key, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,9 +45,13 @@ export function usePageTree(workspaceId: string, initialTree: PageTreeNode[]) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.error ?? `Create failed: ${res.status}`);
     }
-    const data = (await res.json()) as { page: { id: string } };
+    const data = (await res.json()) as {
+      page: { id: string };
+      /** True when the picked template vanished and a blank page was created. */
+      templateMissing?: boolean;
+    };
     await swr.mutate();
-    return data.page;
+    return { id: data.page.id, templateMissing: !!data.templateMissing };
   }
 
   async function renamePage(pageId: string, title: string): Promise<void> {

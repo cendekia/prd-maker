@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma, Role } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { extractText } from "@/lib/editor-text";
 import { requireWorkspace } from "@/lib/workspace";
 
 interface ActionResult {
@@ -11,8 +12,6 @@ interface ActionResult {
   error?: string;
   fieldErrors?: Record<string, string>;
 }
-
-const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
 
 /** Publish an existing page's content as a reusable workspace template. */
 export async function publishTemplateAction(
@@ -39,7 +38,19 @@ export async function publishTemplateAction(
   if (!page || page.workspaceId !== workspace.id) {
     return { ok: false, fieldErrors: { pageId: "Page not found." } };
   }
-  const contentJson = (page.contentJson ?? EMPTY_DOC) as Prisma.InputJsonValue;
+  // A template is a point-in-time copy of the page. Publishing a page whose
+  // content was never saved (contentJson still null, or an empty doc) would
+  // silently bake a blank template that only surfaces at create time — refuse.
+  if (!page.contentJson || extractText(page.contentJson).length === 0) {
+    return {
+      ok: false,
+      fieldErrors: {
+        pageId:
+          "That page has no saved content yet — open it, add some content, and try again.",
+      },
+    };
+  }
+  const contentJson = page.contentJson as Prisma.InputJsonValue;
   await db.template.create({
     data: {
       workspaceId: workspace.id,
