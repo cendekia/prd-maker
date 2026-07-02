@@ -118,6 +118,46 @@ describe("POST /api/pages/[pageId]/apply-template (Step 62)", () => {
     expect(row.templateId).toBeNull();
   });
 
+  it("trusts the live doc over stale saved content (collab lag)", async () => {
+    // In collab mode Page.contentJson lags the live doc (Hocuspocus persists
+    // only yDocState; autosave is solo-only). A user who deleted everything
+    // has an empty live doc while the saved projection still holds the old
+    // content — the client's currentJson is the authority, like /api/ai/apply.
+    const { user, page, template } = await setup();
+    await db.page.update({
+      where: { id: page.id },
+      data: { contentJson: docWithText("Stale saved content") },
+    });
+    signIn(user.id);
+    const res = await post(page.id, {
+      templateId: template.id,
+      currentJson: { type: "doc", content: [{ type: "paragraph" }] },
+    });
+    expect(res.status).toBe(200);
+    const row = await db.page.findUniqueOrThrow({
+      where: { id: page.id },
+      select: { templateId: true, contentJson: true },
+    });
+    expect(row.templateId).toBe(template.id);
+    // Server still writes no page content.
+    expect(JSON.stringify(row.contentJson)).toContain("Stale saved content");
+  });
+
+  it("409 when the live doc is non-empty, even if saved content is empty", async () => {
+    const { user, page, template } = await setup();
+    signIn(user.id);
+    const res = await post(page.id, {
+      templateId: template.id,
+      currentJson: docWithText("Live content"),
+    });
+    expect(res.status).toBe(409);
+    const row = await db.page.findUniqueOrThrow({
+      where: { id: page.id },
+      select: { templateId: true },
+    });
+    expect(row.templateId).toBeNull();
+  });
+
   it("404 for a missing or cross-workspace template", async () => {
     const { user, page } = await setup();
     signIn(user.id);

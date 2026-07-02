@@ -63,7 +63,10 @@ export function StartFromTemplate({
     const res = await fetch(`/api/pages/${pageId}/apply-template`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ templateId }),
+      // currentJson = the live doc, the emptiness authority server-side: in
+      // collab mode the saved contentJson lags edits (it only updates on
+      // snapshots), so a just-cleared doc would otherwise 409 forever.
+      body: JSON.stringify({ templateId, currentJson: editor.getJSON() }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {

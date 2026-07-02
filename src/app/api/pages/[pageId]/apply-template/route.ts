@@ -35,7 +35,7 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: { templateId?: unknown } = {};
+  let body: { templateId?: unknown; currentJson?: unknown } = {};
   try {
     body = await req.json();
   } catch {
@@ -53,9 +53,18 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Page not found" }, { status: 404 });
   }
   // Only ever pour into an empty page — applying over content is destructive
-  // and stays out of scope (the affordance hides itself once content exists,
-  // but the saved state is the authority).
-  if (page.contentJson && extractText(page.contentJson).length > 0) {
+  // and stays out of scope. Emptiness is judged on the CLIENT's live doc when
+  // provided (the /api/ai/apply trust model): in collab mode the saved
+  // contentJson is only an eventually-consistent projection — Hocuspocus
+  // persists yDocState alone and the solo autosave is off — so a doc whose
+  // content was just deleted stays "non-empty" server-side indefinitely.
+  // Saved content remains the fallback authority for clients that send none.
+  const liveDoc =
+    body.currentJson && typeof body.currentJson === "object"
+      ? body.currentJson
+      : null;
+  const gateDoc = liveDoc ?? page.contentJson;
+  if (gateDoc && extractText(gateDoc).length > 0) {
     return NextResponse.json(
       { error: "This page already has content." },
       { status: 409 },
